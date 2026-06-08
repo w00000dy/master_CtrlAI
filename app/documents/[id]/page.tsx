@@ -1,18 +1,19 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { getDocumentById, deleteDocument, updateDocumentTitle } from "../../actions/documentActions";
 import { ParsedDocument } from "../../actions/parsePdf";
 import { ParagraphRenderer } from "../../components/ParagraphRenderer";
-import { LoaderIcon, ArrowLeftIcon, XIcon, FilePenLineIcon, CalendarCheckIcon } from "lucide-animated";
+import { LoaderIcon, ArrowLeftIcon, XIcon, FilePenLineIcon, CalendarCheckIcon, BookTextIcon } from "lucide-animated";
+import { useRef } from "react";
 
 export default function DocumentViewPage() {
   const params = useParams();
   const router = useRouter();
   const id = params.id as string;
-  
+
   const [document, setDocument] = useState<ParsedDocument | null>(null);
   const [savedAt, setSavedAt] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -21,13 +22,14 @@ export default function DocumentViewPage() {
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [editTitle, setEditTitle] = useState("");
   const [isSavingTitle, setIsSavingTitle] = useState(false);
-  
+
   const [isDeleting, setIsDeleting] = useState(false);
   const [showJson, setShowJson] = useState(false);
+  const iconRef = useRef<any>(null);
 
   useEffect(() => {
     if (!id) return;
-    
+
     getDocumentById(id).then(res => {
       if (res.success && res.data) {
         setDocument(res.data.document);
@@ -95,80 +97,94 @@ export default function DocumentViewPage() {
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 p-8">
       <div className="max-w-4xl mx-auto space-y-8">
-        
+
         {/* Navigation & Actions Header */}
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <Link href="/documents" className="text-sm text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-300 transition-colors flex items-center gap-1 w-fit">
-              <ArrowLeftIcon size={16} />
-              Back to Documents
-            </Link>
-            
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => setShowJson(!showJson)}
-                className="text-sm px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
-              >
-                {showJson ? "Hide JSON" : "View JSON"}
-              </button>
-              <button
-                onClick={handleDelete}
-                disabled={isDeleting}
-                className="text-sm px-3 py-1.5 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors flex items-center gap-1 disabled:opacity-50"
-              >
-                {isDeleting ? "Deleting..." : "Delete Document"}
-              </button>
-            </div>
+        <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
+          <Link href="/documents" className="text-sm font-medium text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-300 transition-colors flex items-center gap-1.5 bg-white dark:bg-zinc-900 px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-800 shadow-sm hover:shadow-md w-fit">
+            <ArrowLeftIcon size={16} />
+            Back to Documents
+          </Link>
+
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setShowJson(!showJson)}
+              className="text-sm font-medium px-4 py-2 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all shadow-sm hover:shadow-md"
+            >
+              {showJson ? "Hide JSON" : "View JSON"}
+            </button>
+            <button
+              onClick={handleDelete}
+              disabled={isDeleting}
+              className="text-sm font-medium px-4 py-2 rounded-xl bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/40 transition-all shadow-sm hover:shadow-md flex items-center gap-1.5 disabled:opacity-50"
+            >
+              {isDeleting ? "Deleting..." : "Delete Document"}
+            </button>
           </div>
-          
-          <div className="border-b border-zinc-200 dark:border-zinc-800 pb-6">
-            {isEditingTitle ? (
-              <div className="flex items-center gap-3 mb-2">
-                <input 
-                  type="text" 
-                  value={editTitle}
-                  onChange={e => setEditTitle(e.target.value)}
-                  className="flex-1 text-2xl font-bold bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 rounded-lg px-3 py-2 text-zinc-900 dark:text-zinc-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  autoFocus
-                />
-                <button 
-                  onClick={handleUpdateTitle}
-                  disabled={isSavingTitle}
-                  className="px-4 py-2 bg-zinc-900 hover:bg-zinc-800 dark:bg-zinc-100 dark:hover:bg-zinc-200 text-white dark:text-zinc-900 text-sm font-medium rounded-lg transition-colors disabled:opacity-50"
-                >
-                  {isSavingTitle ? "Saving..." : "Save"}
-                </button>
-                <button 
-                  onClick={() => setIsEditingTitle(false)}
-                  disabled={isSavingTitle}
-                  className="px-4 py-2 bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 text-sm font-medium rounded-lg transition-colors disabled:opacity-50"
-                >
-                  Cancel
-                </button>
-              </div>
-            ) : (
-              <div className="flex items-center justify-between gap-4 mb-2 group">
-                <h1 className="text-3xl font-bold text-zinc-900 dark:text-zinc-50">
-                  {document.title || "Untitled Document"}
-                </h1>
-                <button 
-                  onClick={() => {
-                    setEditTitle(document.title || "");
-                    setIsEditingTitle(true);
-                  }}
-                  className="opacity-0 group-hover:opacity-100 p-2 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg transition-all"
-                  title="Edit Title"
-                >
-                  <FilePenLineIcon size={20} />
-                </button>
-              </div>
-            )}
-            {savedAt && (
-              <div className="text-sm text-zinc-500 dark:text-zinc-400 flex items-center gap-1">
-                <CalendarCheckIcon size={16} />
-                Imported on {new Date(savedAt).toLocaleDateString()} at {new Date(savedAt).toLocaleTimeString()}
-              </div>
-            )}
+        </div>
+
+        {/* Beautiful Header Card */}
+        <div
+          className="relative bg-gradient-to-br from-blue-50/50 via-white to-indigo-50/50 dark:from-blue-900/10 dark:via-zinc-900 dark:to-indigo-900/10 border border-blue-100/50 dark:border-blue-900/30 rounded-3xl p-8 shadow-sm overflow-hidden"
+          onMouseEnter={() => iconRef.current?.startAnimation?.()}
+          onMouseLeave={() => iconRef.current?.stopAnimation?.()}
+        >
+          {/* Decorative background glow */}
+          <div className="absolute -top-32 -right-32 w-96 h-96 bg-blue-500/10 dark:bg-blue-400/10 rounded-full blur-3xl pointer-events-none"></div>
+
+          <div className="relative flex flex-col md:flex-row md:items-start gap-6">
+            <div className="p-4 bg-white dark:bg-zinc-900 rounded-2xl shadow-sm border border-blue-100 dark:border-blue-800/50 text-blue-600 dark:text-blue-400 shrink-0 self-start">
+              <BookTextIcon ref={iconRef} size={40} animateOnHover={false} />
+            </div>
+
+            <div className="flex-1 w-full">
+              {isEditingTitle ? (
+                <div className="flex items-center gap-3 mb-4">
+                  <input
+                    type="text"
+                    value={editTitle}
+                    onChange={e => setEditTitle(e.target.value)}
+                    className="flex-1 text-2xl md:text-3xl font-extrabold bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 rounded-xl px-4 py-3 text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
+                    autoFocus
+                  />
+                  <button
+                    onClick={handleUpdateTitle}
+                    disabled={isSavingTitle}
+                    className="px-5 py-3 bg-zinc-900 hover:bg-zinc-800 dark:bg-zinc-100 dark:hover:bg-zinc-200 text-white dark:text-zinc-900 text-sm font-semibold rounded-xl transition-all shadow-sm disabled:opacity-50"
+                  >
+                    {isSavingTitle ? "Saving..." : "Save"}
+                  </button>
+                  <button
+                    onClick={() => setIsEditingTitle(false)}
+                    disabled={isSavingTitle}
+                    className="px-5 py-3 bg-white hover:bg-zinc-50 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700 text-sm font-semibold rounded-xl transition-all shadow-sm disabled:opacity-50"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              ) : (
+                <div className="flex items-start justify-between gap-4 group mb-4">
+                  <h1 className="text-3xl md:text-4xl font-extrabold text-zinc-900 dark:text-white tracking-tight leading-tight">
+                    {document.title || "Untitled Document"}
+                  </h1>
+                  <button
+                    onClick={() => {
+                      setEditTitle(document.title || "");
+                      setIsEditingTitle(true);
+                    }}
+                    className="opacity-0 group-hover:opacity-100 p-2.5 text-zinc-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-white dark:hover:bg-zinc-800 rounded-xl transition-all shadow-sm border border-transparent hover:border-blue-100 dark:hover:border-blue-900/30"
+                    title="Edit Title"
+                  >
+                    <FilePenLineIcon size={22} />
+                  </button>
+                </div>
+              )}
+              {savedAt && (
+                <div className="flex items-center gap-1.5 text-sm font-medium text-blue-600/80 dark:text-blue-400/80 bg-white/60 dark:bg-zinc-900/60 w-fit px-3 py-1.5 rounded-lg border border-blue-100/50 dark:border-blue-900/30 backdrop-blur-sm">
+                  <CalendarCheckIcon size={16} />
+                  <span>Imported on {new Date(savedAt).toLocaleDateString()} at {new Date(savedAt).toLocaleTimeString()}</span>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
@@ -191,15 +207,25 @@ export default function DocumentViewPage() {
 
         {/* Document Content */}
         {!showJson && (
-          <div className="space-y-6">
+          <div className="space-y-8 relative pt-4">
+            {/* Timeline structural line */}
+            <div className="absolute left-6 top-8 bottom-8 w-px bg-gradient-to-b from-blue-200 via-zinc-200 to-transparent dark:from-blue-900/50 dark:via-zinc-800 hidden md:block"></div>
+
             {document.sections?.map((section, idx) => (
-              <div key={idx} className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-hidden shadow-sm">
-                <div className="bg-zinc-50 dark:bg-zinc-900/50 px-6 py-4 border-b border-zinc-200 dark:border-zinc-800">
-                  <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+              <div
+                key={idx}
+                className="group relative bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800/80 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 md:ml-12"
+              >
+                {/* Timeline node */}
+                <div className="absolute -left-[54px] top-7 w-3.5 h-3.5 rounded-full bg-white dark:bg-zinc-950 border-2 border-blue-400 dark:border-blue-500 shadow-sm hidden md:block group-hover:scale-125 group-hover:bg-blue-50 dark:group-hover:bg-blue-900/30 transition-all duration-300"></div>
+
+                <div className="bg-zinc-50/50 dark:bg-zinc-900/30 px-8 py-5 border-b border-zinc-100 dark:border-zinc-800/50">
+                  <h3 className="text-xl font-bold text-zinc-900 dark:text-zinc-100 tracking-tight flex items-center gap-3">
+                    <span className="w-1.5 h-6 bg-blue-500/80 rounded-full inline-block"></span>
                     {section.title}
                   </h3>
                 </div>
-                <div className="p-6 space-y-6">
+                <div className="p-8 space-y-6">
                   {section.paragraphs && section.paragraphs.length > 0 ? (
                     <div className="space-y-6">
                       {section.paragraphs.map((p, pIdx) => (
