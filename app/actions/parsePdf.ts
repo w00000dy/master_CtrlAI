@@ -52,7 +52,7 @@ export async function extractPdfText(formData: FormData) {
 export async function structureTextWithLlm(rawText: string, model: string) {
   try {
     const systemPrompt = `You are a legal text structuring assistant. 
-Your task is to take the provided raw text from a legal document (like EU CRA Annex 1) and output a perfectly structured JSON object. 
+Your task is to take the provided raw text from a legal document (like EU Cyber Resilience Act) and output a perfectly structured JSON object. 
 Extract the overall title, sections, and paragraphs. Paragraphs can have sub-paragraphs, which can themselves have sub-paragraphs, nested to any depth necessary.
 For each paragraph, extract its number or letter (e.g., "1.", "a)", "I.") into the "marker" field if present.
 

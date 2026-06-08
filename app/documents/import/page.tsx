@@ -100,7 +100,7 @@ export default function ImportPage() {
             Import Legal Document
           </h1>
           <p className="text-zinc-500 dark:text-zinc-400">
-            Upload a PDF (e.g., EU CRA Annex 1) to extract and structure its paragraphs and guidelines using {selectedModel || "the selected LLM"}.
+            Upload a PDF to extract and structure its paragraphs and guidelines using {selectedModel || "the selected LLM"}.
           </p>
         </div>
 
