@@ -6,7 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 import { getDocumentById, deleteDocument, updateDocumentTitle } from "../../actions/documentActions";
 import { ParsedDocument } from "../../actions/parsePdf";
 import { ParagraphRenderer } from "../../components/ParagraphRenderer";
-import { LoaderIcon, ArrowLeftIcon, XIcon, FilePenLineIcon, CalendarCheckIcon, BookTextIcon } from "lucide-animated";
+import { LoaderIcon, ArrowLeftIcon, XIcon, FilePenLineIcon, CalendarCheckIcon, BookTextIcon, type BookTextIconHandle } from "lucide-animated";
 import { useRef } from "react";
 
 export default function DocumentViewPage() {
@@ -25,11 +25,7 @@ export default function DocumentViewPage() {
 
   const [isDeleting, setIsDeleting] = useState(false);
   const [showJson, setShowJson] = useState(false);
-  type AnimatedIconRef = {
-    startAnimation: () => void;
-    stopAnimation: () => void;
-  };
-  const iconRef = useRef<AnimatedIconRef | null>(null);
+  const iconRef = useRef<BookTextIconHandle | null>(null);
 
   useEffect(() => {
     if (!id) return;

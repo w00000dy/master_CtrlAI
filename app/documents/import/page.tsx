@@ -5,15 +5,14 @@ import { useModel } from "../../components/ModelContext";
 import { extractPdfText, structureTextWithLlm, ParsedDocument } from "../../actions/parsePdf";
 import { ParagraphRenderer } from "../../components/ParagraphRenderer";
 import { saveDocument } from "../../actions/documentActions";
-import { LoaderIcon, CheckIcon } from "lucide-animated";
+import { LoaderIcon, CheckIcon, type CheckIconHandle } from "lucide-animated";
 
 function AnimatedCheckIcon() {
-  type AnimatedIconRef = { startAnimation: () => void; stopAnimation: () => void };
-  const iconRef = React.useRef<AnimatedIconRef | null>(null);
+  const iconRef = React.useRef<CheckIconHandle | null>(null);
   React.useEffect(() => {
     iconRef.current?.startAnimation();
   }, []);
-  return <CheckIcon ref={iconRef as any} animateOnHover={false} size={20} />;
+  return <CheckIcon ref={iconRef} animateOnHover={false} size={20} />;
 }
 
 function AnimatedLoaderIcon() {

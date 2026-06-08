@@ -3,7 +3,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { getDocuments, deleteDocument } from "../actions/documentActions";
-import { BookTextIcon, XIcon, ClockIcon, LoaderIcon } from "lucide-animated";
+import { BookTextIcon, XIcon, ClockIcon, LoaderIcon, type BookTextIconHandle } from "lucide-animated";
 
 type DocumentMeta = {
   id: string;
@@ -12,11 +12,7 @@ type DocumentMeta = {
 };
 
 function DocumentCard({ doc, handleDelete }: { doc: DocumentMeta, handleDelete: (e: React.MouseEvent, id: string) => void }) {
-  type AnimatedIconRef = {
-    startAnimation: () => void;
-    stopAnimation: () => void;
-  };
-  const iconRef = useRef<AnimatedIconRef | null>(null);
+  const iconRef = useRef<BookTextIconHandle | null>(null);
 
   return (
     <Link 
