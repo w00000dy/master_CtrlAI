@@ -4,9 +4,8 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { getDocumentById, deleteDocument, updateDocumentTitle } from "../actions";
-import { ParsedDocument } from "../import/parsePdf";
 import { ParagraphRenderer } from "../../components/ParagraphRenderer";
-import { LoaderIcon, ArrowLeftIcon, XIcon, FilePenLineIcon, CalendarCheckIcon, BookTextIcon, type BookTextIconHandle } from "lucide-animated";
+import { LoaderIcon, ArrowLeftIcon, FilePenLineIcon, CalendarCheckIcon, BookTextIcon, type BookTextIconHandle } from "lucide-animated";
 import { useRef } from "react";
 
 export default function DocumentViewPage() {
@@ -14,7 +13,7 @@ export default function DocumentViewPage() {
   const router = useRouter();
   const id = params.id as string;
 
-  const [document, setDocument] = useState<ParsedDocument | null>(null);
+  const [document, setDocument] = useState<any | null>(null);
   const [savedAt, setSavedAt] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -24,7 +23,6 @@ export default function DocumentViewPage() {
   const [isSavingTitle, setIsSavingTitle] = useState(false);
 
   const [isDeleting, setIsDeleting] = useState(false);
-  const [showJson, setShowJson] = useState(false);
   const iconRef = useRef<BookTextIconHandle | null>(null);
 
   useEffect(() => {
@@ -47,7 +45,7 @@ export default function DocumentViewPage() {
     setIsSavingTitle(true);
     const res = await updateDocumentTitle(id, editTitle.trim());
     if (res.success) {
-      setDocument(prev => prev ? { ...prev, title: editTitle.trim() } : prev);
+      setDocument((prev: any) => prev ? { ...prev, title: editTitle.trim() } : prev);
       setIsEditingTitle(false);
     } else {
       alert("Failed to update title");
@@ -106,12 +104,6 @@ export default function DocumentViewPage() {
           </Link>
 
           <div className="flex items-center gap-3">
-            <button
-              onClick={() => setShowJson(!showJson)}
-              className="text-sm font-medium px-4 py-2 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all shadow-sm hover:shadow-md"
-            >
-              {showJson ? "Hide JSON" : "View JSON"}
-            </button>
             <button
               onClick={handleDelete}
               disabled={isDeleting}
@@ -188,30 +180,12 @@ export default function DocumentViewPage() {
           </div>
         </div>
 
-        {/* JSON View Toggle */}
-        {showJson && (
-          <div className="bg-zinc-900 rounded-xl overflow-hidden shadow-sm">
-            <div className="bg-zinc-950 px-6 py-3 border-b border-zinc-800 flex justify-between items-center">
-              <span className="text-sm font-medium text-zinc-400">Raw JSON Data</span>
-              <button onClick={() => setShowJson(false)} className="text-zinc-500 hover:text-zinc-300">
-                <XIcon size={20} />
-              </button>
-            </div>
-            <div className="p-6 overflow-x-auto">
-              <pre className="text-xs text-green-400 font-mono">
-                {JSON.stringify({ id, savedAt, document }, null, 2)}
-              </pre>
-            </div>
-          </div>
-        )}
-
         {/* Document Content */}
-        {!showJson && (
-          <div className="space-y-8 relative pt-4">
+        <div className="space-y-8 relative pt-4">
             {/* Timeline structural line */}
             <div className="absolute left-6 top-8 bottom-8 w-px bg-gradient-to-b from-blue-200 via-zinc-200 to-transparent dark:from-blue-900/50 dark:via-zinc-800 hidden md:block"></div>
 
-            {document.sections?.map((section, idx) => (
+            {document.sections?.map((section: any, idx: number) => (
               <div
                 key={idx}
                 className="group/section relative bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800/80 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 md:ml-12"
@@ -228,9 +202,16 @@ export default function DocumentViewPage() {
                 <div className="p-8 space-y-6">
                   {section.paragraphs && section.paragraphs.length > 0 ? (
                     <div className="space-y-6">
-                      {section.paragraphs.map((p, pIdx) => (
-                        <ParagraphRenderer key={pIdx} paragraph={p} />
-                      ))}
+                      {section.paragraphs.map((p: Record<string, unknown>, pIdx: number) => {
+                        let depth = 0;
+                        let curr: any = p;
+                        while (curr.parentParagraphId) {
+                          depth++;
+                          curr = section.paragraphs.find((x: any) => x.id === curr.parentParagraphId);
+                          if (!curr) break;
+                        }
+                        return <ParagraphRenderer key={pIdx} paragraph={p} depth={depth} />;
+                      })}
                     </div>
                   ) : (
                     <p className="text-zinc-400 italic">No paragraphs in this section.</p>
@@ -239,7 +220,6 @@ export default function DocumentViewPage() {
               </div>
             ))}
           </div>
-        )}
       </div>
     </div>
   );

@@ -92,57 +92,7 @@ export async function getDocumentById(id: string) {
       return { success: false, error: "Document not found." };
     }
 
-    const parsedDocument: ParsedDocument = {
-      title: document.title,
-      sections: document.sections.map(section => {
-        const paragraphs = section.paragraphs;
-        
-        // Create a map to quickly look up paragraphs by ID
-        const paraMap = new Map();
-        for (const p of paragraphs) {
-          paraMap.set(p.id, {
-            id: p.id,
-            marker: p.marker,
-            text: p.text,
-            subParagraphs: [],
-            parentParagraphId: p.parentParagraphId
-          });
-        }
-
-        const rootParagraphs: Paragraph[] = [];
-
-        // Build the tree
-        for (const p of paragraphs) {
-          const mappedP = paraMap.get(p.id);
-          if (mappedP.parentParagraphId) {
-            const parent = paraMap.get(mappedP.parentParagraphId);
-            if (parent) {
-              parent.subParagraphs.push(mappedP);
-            }
-          } else {
-            rootParagraphs.push(mappedP);
-          }
-        }
-        
-        // Clean up temporary internal properties from the final tree
-        const cleanParagraphs = (paras: any[]): Paragraph[] => {
-          return paras.map(p => {
-            const { id, parentParagraphId, ...rest } = p;
-            if (rest.subParagraphs) {
-              rest.subParagraphs = cleanParagraphs(rest.subParagraphs);
-            }
-            return rest as Paragraph;
-          });
-        };
-
-        return {
-          title: section.title,
-          paragraphs: cleanParagraphs(rootParagraphs)
-        };
-      })
-    };
-
-    return { success: true, data: { id: document.id, savedAt: document.savedAt.toISOString(), document: parsedDocument } };
+    return { success: true, data: { id: document.id, savedAt: document.savedAt.toISOString(), document } };
   } catch (error) {
     console.error(`Failed to fetch document ${id}:`, error);
     return { success: false, error: "Document not found." };

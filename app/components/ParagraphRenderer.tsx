@@ -1,8 +1,6 @@
-import { Paragraph } from "../documents/import/parsePdf";
-
-export const ParagraphRenderer = ({ paragraph, depth = 0 }: { paragraph: Paragraph; depth?: number }) => {
+export const ParagraphRenderer = ({ paragraph, depth = 0 }: { paragraph: any; depth?: number }) => {
   return (
-    <div className={depth > 0 ? "ml-6 mt-3 border-l-2 border-zinc-100 dark:border-zinc-800 pl-4" : "space-y-2"}>
+    <div className={depth > 0 ? `ml-${Math.min(depth * 6, 24)} mt-3 border-l-2 border-zinc-100 dark:border-zinc-800 pl-4` : "space-y-2"}>
       <div className="group flex items-start gap-3 w-fit">
         {depth > 0 && <span className="text-zinc-300 dark:text-zinc-600 mt-1.5 leading-none">↳</span>}
 
@@ -16,13 +14,6 @@ export const ParagraphRenderer = ({ paragraph, depth = 0 }: { paragraph: Paragra
           {paragraph.text}
         </p>
       </div>
-      {paragraph.subParagraphs && paragraph.subParagraphs.length > 0 && (
-        <div className="space-y-3 mt-3">
-          {paragraph.subParagraphs.map((subP, idx) => (
-            <ParagraphRenderer key={idx} paragraph={subP} depth={depth + 1} />
-          ))}
-        </div>
-      )}
     </div>
   );
 };
