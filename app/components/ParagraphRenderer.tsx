@@ -2,8 +2,8 @@ import { Paragraph } from "../actions/parsePdf";
 
 export const ParagraphRenderer = ({ paragraph, depth = 0 }: { paragraph: Paragraph; depth?: number }) => {
   return (
-    <div className={`group ${depth > 0 ? "ml-6 mt-3 border-l-2 border-zinc-100 dark:border-zinc-800 pl-4" : "space-y-2"}`}>
-      <div className="flex items-start gap-3">
+    <div className={depth > 0 ? "ml-6 mt-3 border-l-2 border-zinc-100 dark:border-zinc-800 pl-4" : "space-y-2"}>
+      <div className="group flex items-start gap-3 w-fit">
         {depth > 0 && <span className="text-zinc-300 dark:text-zinc-600 mt-1.5 leading-none">↳</span>}
 
         {paragraph.marker && (
