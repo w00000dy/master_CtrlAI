@@ -1,4 +1,6 @@
-export const ParagraphRenderer = ({ paragraph, depth = 0 }: { paragraph: any; depth?: number }) => {
+import type { Paragraph } from "../../generated/prisma/client";
+
+export const ParagraphRenderer = ({ paragraph, depth = 0 }: { paragraph: Paragraph; depth?: number }) => {
   return (
     <div className={depth > 0 ? `ml-${Math.min(depth * 6, 24)} mt-3 border-l-2 border-zinc-100 dark:border-zinc-800 pl-4` : "space-y-2"}>
       <div className="group flex items-start gap-3 w-fit">
