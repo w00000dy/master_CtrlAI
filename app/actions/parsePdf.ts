@@ -3,6 +3,10 @@
 import { PDFParse } from 'pdf-parse';
 import { Ollama } from "ollama";
 
+// Disable fetch timeout for long-running LLM calls
+import { Agent, setGlobalDispatcher } from 'undici';
+setGlobalDispatcher(new Agent({ headersTimeout: 0 }));
+
 const ollama = new Ollama({
   host: process.env.OLLAMA_HOST || "http://127.0.0.1:11434"
 });
