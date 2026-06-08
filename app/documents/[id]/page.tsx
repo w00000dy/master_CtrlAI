@@ -199,7 +199,7 @@ export default function DocumentViewPage() {
             </div>
             <div className="p-6 overflow-x-auto">
               <pre className="text-xs text-green-400 font-mono">
-                {JSON.stringify(document, null, 2)}
+                {JSON.stringify({ id, savedAt, document }, null, 2)}
               </pre>
             </div>
           </div>
