@@ -7,8 +7,28 @@ datasource db {
   provider = "mysql"
 }
 
-model User {
-  id    Int     @id @default(autoincrement())
-  email String  @unique
-  name  String?
+model Document {
+  id       String    @id @default(cuid(2))
+  title    String
+  savedAt  DateTime  @default(now())
+  sections Section[]
+}
+
+model Section {
+  id         String      @id @default(cuid(2))
+  title      String
+  documentId String
+  document   Document    @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  paragraphs Paragraph[]
+}
+
+model Paragraph {
+  id                String      @id @default(cuid(2))
+  marker            String?
+  text              String      @db.Text
+  sectionId         String
+  section           Section     @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  parentParagraphId String?
+  parentParagraph   Paragraph?  @relation("SubParagraphs", fields: [parentParagraphId], references: [id], onDelete: Cascade)
+  subParagraphs     Paragraph[] @relation("SubParagraphs")
 }

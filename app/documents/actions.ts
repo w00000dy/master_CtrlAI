@@ -1,42 +1,51 @@
 "use server";
 
-import fs from "fs/promises";
-import path from "path";
-import { ParsedDocument } from "../documents/import/parsePdf";
-
-const DATA_DIR = path.join(process.cwd(), "data", "documents");
-
-// Helper to ensure the data directory exists
-async function ensureDataDir() {
-  try {
-    await fs.access(DATA_DIR);
-  } catch {
-    await fs.mkdir(DATA_DIR, { recursive: true });
-  }
-}
-
-function sanitizeFilename(name: string) {
-  return name.replace(/[^a-z0-9]/gi, '_').toLowerCase();
-}
+import { prisma } from "@/lib/prisma";
+import { ParsedDocument, Paragraph } from "../documents/import/parsePdf";
 
 export async function saveDocument(document: ParsedDocument) {
   try {
-    await ensureDataDir();
+    return await prisma.$transaction(async (tx) => {
+      const doc = await tx.document.create({
+        data: {
+          title: document.title,
+        }
+      });
 
-    // Generate a unique ID / filename based on the title and timestamp
-    const baseName = document.title ? sanitizeFilename(document.title) : "document";
-    const id = `${baseName}_${Date.now()}`;
-    const filePath = path.join(DATA_DIR, `${id}.json`);
+      for (const section of document.sections) {
+        const sec = await tx.section.create({
+          data: {
+            title: section.title,
+            documentId: doc.id
+          }
+        });
 
-    const fileContent = JSON.stringify({
-      id,
-      savedAt: new Date().toISOString(),
-      document
-    }, null, 2);
+        // Recursive function to insert paragraphs sequentially
+        async function insertParagraphs(paragraphs: Paragraph[], sectionId: string, parentParagraphId: string | null = null) {
+          for (const p of paragraphs) {
+            const createdP = await tx.paragraph.create({
+              data: {
+                marker: p.marker || null,
+                text: p.text,
+                sectionId: sectionId,
+                parentParagraphId: parentParagraphId
+              }
+            });
 
-    await fs.writeFile(filePath, fileContent, "utf-8");
+            if (p.subParagraphs && p.subParagraphs.length > 0) {
+              await insertParagraphs(p.subParagraphs, sectionId, createdP.id);
+            }
+          }
+        }
+        
+        if (section.paragraphs) {
+          await insertParagraphs(section.paragraphs, sec.id);
+        }
+      }
 
-    return { success: true, id };
+      return { success: true, id: doc.id };
+    });
+
   } catch (error) {
     console.error("Failed to save document:", error);
     return { success: false, error: "Failed to save the document." };
@@ -45,31 +54,21 @@ export async function saveDocument(document: ParsedDocument) {
 
 export async function getDocuments() {
   try {
-    await ensureDataDir();
-    const files = await fs.readdir(DATA_DIR);
-    const jsonFiles = files.filter(f => f.endsWith(".json"));
-
-    const documents = [];
-    for (const file of jsonFiles) {
-      const filePath = path.join(DATA_DIR, file);
-      const content = await fs.readFile(filePath, "utf-8");
-      try {
-        const parsed = JSON.parse(content);
-        // We just return metadata for the list view, not the full massive document
-        documents.push({
-          id: parsed.id,
-          title: parsed.document.title,
-          savedAt: parsed.savedAt
-        });
-      } catch (error) {
-        console.error("Invalid JSON file:", file, error);
+    const documents = await prisma.document.findMany({
+      orderBy: {
+        savedAt: 'desc'
+      },
+      select: {
+        id: true,
+        title: true,
+        savedAt: true
       }
-    }
+    });
 
-    // Sort by newest first
-    documents.sort((a, b) => new Date(b.savedAt).getTime() - new Date(a.savedAt).getTime());
-
-    return { success: true, documents };
+    return { success: true, documents: documents.map(d => ({
+      ...d,
+      savedAt: d.savedAt.toISOString()
+    })) };
   } catch (error) {
     console.error("Failed to fetch documents:", error);
     return { success: false, error: "Failed to load documents.", documents: [] };
@@ -78,11 +77,72 @@ export async function getDocuments() {
 
 export async function getDocumentById(id: string) {
   try {
-    const filePath = path.join(DATA_DIR, `${id}.json`);
-    const content = await fs.readFile(filePath, "utf-8");
-    const parsed = JSON.parse(content);
+    const document = await prisma.document.findUnique({
+      where: { id },
+      include: {
+        sections: {
+          include: {
+            paragraphs: true
+          }
+        }
+      }
+    });
 
-    return { success: true, data: parsed };
+    if (!document) {
+      return { success: false, error: "Document not found." };
+    }
+
+    const parsedDocument: ParsedDocument = {
+      title: document.title,
+      sections: document.sections.map(section => {
+        const paragraphs = section.paragraphs;
+        
+        // Create a map to quickly look up paragraphs by ID
+        const paraMap = new Map();
+        for (const p of paragraphs) {
+          paraMap.set(p.id, {
+            id: p.id,
+            marker: p.marker,
+            text: p.text,
+            subParagraphs: [],
+            parentParagraphId: p.parentParagraphId
+          });
+        }
+
+        const rootParagraphs: Paragraph[] = [];
+
+        // Build the tree
+        for (const p of paragraphs) {
+          const mappedP = paraMap.get(p.id);
+          if (mappedP.parentParagraphId) {
+            const parent = paraMap.get(mappedP.parentParagraphId);
+            if (parent) {
+              parent.subParagraphs.push(mappedP);
+            }
+          } else {
+            rootParagraphs.push(mappedP);
+          }
+        }
+        
+        // Clean up temporary internal properties from the final tree
+        const cleanParagraphs = (paras: any[]): Paragraph[] => {
+          return paras.map(p => {
+            const { id, parentParagraphId, ...rest } = p;
+            if (rest.subParagraphs) {
+              rest.subParagraphs = cleanParagraphs(rest.subParagraphs);
+            }
+            return rest as Paragraph;
+          });
+        };
+
+        return {
+          title: section.title,
+          paragraphs: cleanParagraphs(rootParagraphs)
+        };
+      })
+    };
+
+    return { success: true, data: { id: document.id, savedAt: document.savedAt.toISOString(), document: parsedDocument } };
   } catch (error) {
     console.error(`Failed to fetch document ${id}:`, error);
     return { success: false, error: "Document not found." };
@@ -91,8 +151,9 @@ export async function getDocumentById(id: string) {
 
 export async function deleteDocument(id: string) {
   try {
-    const filePath = path.join(DATA_DIR, `${id}.json`);
-    await fs.unlink(filePath);
+    await prisma.document.delete({
+      where: { id }
+    });
     return { success: true };
   } catch (error) {
     console.error(`Failed to delete document ${id}:`, error);
@@ -102,13 +163,10 @@ export async function deleteDocument(id: string) {
 
 export async function updateDocumentTitle(id: string, newTitle: string) {
   try {
-    const filePath = path.join(DATA_DIR, `${id}.json`);
-    const content = await fs.readFile(filePath, "utf-8");
-    const parsed = JSON.parse(content);
-
-    parsed.document.title = newTitle;
-
-    await fs.writeFile(filePath, JSON.stringify(parsed, null, 2), "utf-8");
+    await prisma.document.update({
+      where: { id },
+      data: { title: newTitle }
+    });
     return { success: true };
   } catch (error) {
     console.error(`Failed to update document title for ${id}:`, error);
