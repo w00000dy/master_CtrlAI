@@ -88,3 +88,30 @@ export async function getDocumentById(id: string) {
     return { success: false, error: "Document not found." };
   }
 }
+
+export async function deleteDocument(id: string) {
+  try {
+    const filePath = path.join(DATA_DIR, `${id}.json`);
+    await fs.unlink(filePath);
+    return { success: true };
+  } catch (error) {
+    console.error(`Failed to delete document ${id}:`, error);
+    return { success: false, error: "Failed to delete document." };
+  }
+}
+
+export async function updateDocumentTitle(id: string, newTitle: string) {
+  try {
+    const filePath = path.join(DATA_DIR, `${id}.json`);
+    const content = await fs.readFile(filePath, "utf-8");
+    const parsed = JSON.parse(content);
+    
+    parsed.document.title = newTitle;
+    
+    await fs.writeFile(filePath, JSON.stringify(parsed, null, 2), "utf-8");
+    return { success: true };
+  } catch (error) {
+    console.error(`Failed to update document title for ${id}:`, error);
+    return { success: false, error: "Failed to update document title." };
+  }
+}

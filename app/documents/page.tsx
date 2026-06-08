@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { getDocuments } from "../actions/documentActions";
+import { getDocuments, deleteDocument } from "../actions/documentActions";
 
 type DocumentMeta = {
   id: string;
@@ -14,6 +14,18 @@ export default function DocumentsPage() {
   const [documents, setDocuments] = useState<DocumentMeta[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const handleDelete = async (e: React.MouseEvent, id: string) => {
+    e.preventDefault();
+    if (!confirm("Are you sure you want to delete this document?")) return;
+    
+    const res = await deleteDocument(id);
+    if (res.success) {
+      setDocuments(prev => prev.filter(doc => doc.id !== id));
+    } else {
+      alert("Failed to delete document.");
+    }
+  };
 
   useEffect(() => {
     getDocuments().then(res => {
@@ -77,6 +89,15 @@ export default function DocumentsPage() {
                           <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
                       </div>
+                      <button 
+                        onClick={(e) => handleDelete(e, doc.id)}
+                        className="opacity-0 group-hover:opacity-100 p-2 text-zinc-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all"
+                        title="Delete Document"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                      </button>
                     </div>
                     <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-2">
                       {doc.title || "Untitled Document"}
