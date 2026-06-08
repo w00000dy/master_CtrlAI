@@ -202,16 +202,16 @@ export default function DocumentViewPage() {
                 <div className="p-8 space-y-6">
                   {section.paragraphs && section.paragraphs.length > 0 ? (
                     <div className="space-y-6">
-                      {section.paragraphs.map((p: Record<string, unknown>, pIdx: number) => {
-                        let depth = 0;
-                        let curr: any = p;
-                        while (curr.parentParagraphId) {
-                          depth++;
-                          curr = section.paragraphs.find((x: any) => x.id === curr.parentParagraphId);
-                          if (!curr) break;
-                        }
-                        return <ParagraphRenderer key={pIdx} paragraph={p} depth={depth} />;
-                      })}
+                      {(() => {
+                        const renderTree = (parentId: string | null = null, depth = 0): any[] => 
+                          section.paragraphs
+                            .filter((p: any) => (p.parentParagraphId || null) === parentId)
+                            .flatMap((p: any) => [
+                              <ParagraphRenderer key={p.id} paragraph={p} depth={depth} />,
+                              ...renderTree(p.id, depth + 1)
+                            ]);
+                        return renderTree();
+                      })()}
                     </div>
                   ) : (
                     <p className="text-zinc-400 italic">No paragraphs in this section.</p>

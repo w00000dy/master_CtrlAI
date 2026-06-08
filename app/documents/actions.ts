@@ -82,7 +82,9 @@ export async function getDocumentById(id: string) {
       include: {
         sections: {
           include: {
-            paragraphs: true
+            paragraphs: {
+              orderBy: { marker: 'asc' }
+            }
           }
         }
       }
