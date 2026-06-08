@@ -19,7 +19,7 @@ export async function getModels() {
 export async function generateChatResponse(messages: { role: string; content: string }[], model: string) {
   try {
     const response = await ollama.chat({
-      model: model || "qwen3:8b",
+      model: model,
       messages: messages.map((msg) => ({
         role: msg.role === "bot" ? "assistant" : msg.role,
         content: msg.content

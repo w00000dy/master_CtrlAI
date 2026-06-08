@@ -1,31 +1,5 @@
 "use server";
 
-// Disable fetch timeout for long-running LLM calls
-try {
-  const { Agent, setGlobalDispatcher } = require("undici");
-  setGlobalDispatcher(new Agent({ headersTimeout: 0 }));
-} catch (e) {
-  console.warn("Could not set undici global dispatcher:", e);
-}
-
-if (typeof global !== "undefined") {
-  if (!global.DOMMatrix) {
-    global.DOMMatrix = class DOMMatrix {
-      constructor() { }
-    } as any;
-  }
-  if (!global.ImageData) {
-    global.ImageData = class ImageData {
-      constructor() { }
-    } as any;
-  }
-  if (!global.Path2D) {
-    global.Path2D = class Path2D {
-      constructor() { }
-    } as any;
-  }
-}
-
 const pdfParseModule = require("pdf-parse");
 const pdfParse = pdfParseModule.PDFParse || pdfParseModule.default || pdfParseModule;
 import { Ollama } from "ollama";
@@ -111,7 +85,7 @@ The output MUST strictly match this JSON schema and contain no markdown blocks o
 Ensure all text is captured accurately and organized logically based on the document's recursive structure.`;
 
     const response = await ollama.chat({
-      model: model || "qwen3:8b",
+      model: model,
       messages: [
         { role: "system", content: systemPrompt },
         { role: "user", content: rawText }
