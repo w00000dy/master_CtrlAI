@@ -23,13 +23,23 @@ export function ModelProvider({ children }: { children: React.ReactNode }) {
     getModels().then((res) => {
       if (res.success && res.models?.length) {
         setModels(res.models);
-        setSelectedModel(res.models[0]);
+        const storedModel = localStorage.getItem("selectedModel");
+        if (storedModel && res.models.includes(storedModel)) {
+          setSelectedModel(storedModel);
+        } else {
+          setSelectedModel(res.models[0]);
+        }
       }
     });
   }, []);
 
+  const handleSetSelectedModel = (model: string) => {
+    setSelectedModel(model);
+    localStorage.setItem("selectedModel", model);
+  };
+
   return (
-    <ModelContext.Provider value={{ models, selectedModel, setSelectedModel }}>
+    <ModelContext.Provider value={{ models, selectedModel, setSelectedModel: handleSetSelectedModel }}>
       {children}
     </ModelContext.Provider>
   );
