@@ -7,6 +7,7 @@ import { getDocumentById, deleteDocument, updateDocumentTitle } from "../actions
 import { ParagraphRenderer } from "../../components/ParagraphRenderer";
 import { LoaderIcon, ArrowLeftIcon, FilePenLineIcon, CalendarCheckIcon, BookTextIcon, type BookTextIconHandle } from "lucide-animated";
 import { useRef } from "react";
+import type { Paragraph } from "../../../generated/prisma/client";
 
 export default function DocumentViewPage() {
   const params = useParams();
@@ -203,10 +204,10 @@ export default function DocumentViewPage() {
                   {section.paragraphs && section.paragraphs.length > 0 ? (
                     <div className="space-y-6">
                       {(() => {
-                        const renderTree = (parentId: string | null = null, depth = 0): any[] => 
+                        const renderTree = (parentId: string | null = null, depth = 0): React.ReactNode[] => 
                           section.paragraphs
-                            .filter((p: any) => (p.parentParagraphId || null) === parentId)
-                            .flatMap((p: any) => [
+                            .filter((p: Paragraph) => (p.parentParagraphId || null) === parentId)
+                            .flatMap((p: Paragraph) => [
                               <ParagraphRenderer key={p.id} paragraph={p} depth={depth} />,
                               ...renderTree(p.id, depth + 1)
                             ]);
