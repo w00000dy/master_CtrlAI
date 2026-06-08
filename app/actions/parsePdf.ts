@@ -1,7 +1,6 @@
 "use server";
 
-const pdfParseModule = require("pdf-parse");
-const pdfParse = pdfParseModule.PDFParse || pdfParseModule.default || pdfParseModule;
+import { PDFParse } from 'pdf-parse';
 import { Ollama } from "ollama";
 
 const ollama = new Ollama({
@@ -29,14 +28,12 @@ export async function extractPdfText(formData: FormData) {
       return { success: false, error: "No file provided" };
     }
 
-    // Convert file to buffer
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
-    // Extract text using pdf-parse
     let pdfData;
     try {
-      const parser = new pdfParse({ data: buffer });
+      const parser = new PDFParse({ data: buffer });
       pdfData = await parser.getText();
       await parser.destroy();
     } catch (err) {
@@ -90,7 +87,7 @@ Ensure all text is captured accurately and organized logically based on the docu
         { role: "system", content: systemPrompt },
         { role: "user", content: rawText }
       ],
-      format: "json", // Force JSON output
+      format: "json",
     });
 
     const resultText = response.message.content;
