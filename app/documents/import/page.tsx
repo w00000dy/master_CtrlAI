@@ -5,6 +5,20 @@ import { useModel } from "../../components/ModelContext";
 import { extractPdfText, structureTextWithLlm, ParsedDocument } from "../../actions/parsePdf";
 import { ParagraphRenderer } from "../../components/ParagraphRenderer";
 import { saveDocument } from "../../actions/documentActions";
+import { LoaderIcon, CheckIcon } from "lucide-animated";
+
+function AnimatedCheckIcon() {
+  type AnimatedIconRef = { startAnimation: () => void; stopAnimation: () => void };
+  const iconRef = React.useRef<AnimatedIconRef | null>(null);
+  React.useEffect(() => {
+    iconRef.current?.startAnimation();
+  }, []);
+  return <CheckIcon ref={iconRef as any} animateOnHover={false} size={20} />;
+}
+
+function AnimatedLoaderIcon() {
+  return <LoaderIcon animateOnHover={false} size={20} className="animate-spin text-blue-500" />;
+}
 
 export default function ImportPage() {
   const { selectedModel } = useModel();
@@ -148,35 +162,57 @@ export default function ImportPage() {
         </div>
 
         {/* Steps Section */}
-        {(rawText || rawJson) && (
+        {(processingState || rawText || rawJson) && (
           <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <h2 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50 border-b border-zinc-200 dark:border-zinc-800 pb-2">
               Processing Steps
             </h2>
-            {rawText && (
-              <details className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-hidden shadow-sm">
-                <summary className="bg-zinc-50 dark:bg-zinc-900/50 px-6 py-4 font-semibold text-zinc-900 dark:text-zinc-100 cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-800 transition">
-                  Step 1: Extracted Raw Text from PDF
-                </summary>
+            
+            {/* Step 1: PDF Extraction */}
+            <details 
+              className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-hidden shadow-sm"
+            >
+              <summary className="flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/50 px-6 py-4 font-semibold text-zinc-900 dark:text-zinc-100 cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-800 transition">
+                {processingState === "extracting" ? (
+                  <AnimatedLoaderIcon />
+                ) : rawText ? (
+                  <div className="text-green-500"><AnimatedCheckIcon /></div>
+                ) : (
+                  <div className="w-5 h-5 rounded-full border-2 border-zinc-300 dark:border-zinc-700" />
+                )}
+                Step 1: Extracting Raw Text from PDF
+              </summary>
+              {rawText && (
                 <div className="p-6">
                   <pre className="text-sm text-zinc-700 dark:text-zinc-300 whitespace-pre-wrap max-h-96 overflow-y-auto bg-zinc-50 dark:bg-zinc-950 p-4 rounded-lg border border-zinc-200 dark:border-zinc-800">
                     {rawText}
                   </pre>
                 </div>
-              </details>
-            )}
-            {rawJson && (
-              <details className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-hidden shadow-sm">
-                <summary className="bg-zinc-50 dark:bg-zinc-900/50 px-6 py-4 font-semibold text-zinc-900 dark:text-zinc-100 cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-800 transition">
-                  Step 2: Raw JSON from LLM
-                </summary>
+              )}
+            </details>
+
+            {/* Step 2: LLM Structuring */}
+            <details 
+              className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-hidden shadow-sm"
+            >
+              <summary className="flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/50 px-6 py-4 font-semibold text-zinc-900 dark:text-zinc-100 cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-800 transition">
+                {processingState === "structuring" ? (
+                  <AnimatedLoaderIcon />
+                ) : rawJson ? (
+                  <div className="text-green-500"><AnimatedCheckIcon /></div>
+                ) : (
+                  <div className="w-5 h-5 rounded-full border-2 border-zinc-300 dark:border-zinc-700" />
+                )}
+                Step 2: Structuring Document with LLM
+              </summary>
+              {rawJson && (
                 <div className="p-6">
                   <pre className="text-sm text-zinc-700 dark:text-zinc-300 whitespace-pre-wrap max-h-96 overflow-y-auto bg-zinc-50 dark:bg-zinc-950 p-4 rounded-lg border border-zinc-200 dark:border-zinc-800">
                     {rawJson}
                   </pre>
                 </div>
-              </details>
-            )}
+              )}
+            </details>
           </div>
         )}
 
