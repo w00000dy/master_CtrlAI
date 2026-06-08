@@ -1,10 +1,10 @@
 "use client";
 
 import React, { useState } from "react";
-import { useModel } from "../components/ModelContext";
-import { extractPdfText, structureTextWithLlm, ParsedDocument } from "../actions/parsePdf";
-import { ParagraphRenderer } from "../components/ParagraphRenderer";
-import { saveDocument } from "../actions/documentActions";
+import { useModel } from "../../components/ModelContext";
+import { extractPdfText, structureTextWithLlm, ParsedDocument } from "../../actions/parsePdf";
+import { ParagraphRenderer } from "../../components/ParagraphRenderer";
+import { saveDocument } from "../../actions/documentActions";
 
 export default function ImportPage() {
   const { selectedModel } = useModel();

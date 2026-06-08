@@ -84,13 +84,21 @@ export default function DocumentsPage() {
     <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 p-8">
       <div className="max-w-5xl mx-auto space-y-8">
         
-        <div className="space-y-2">
-          <h1 className="text-3xl font-bold text-zinc-900 dark:text-zinc-50">
-            Legal Documents
-          </h1>
-          <p className="text-zinc-500 dark:text-zinc-400">
-            View all parsed and saved legal texts.
-          </p>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="space-y-2">
+            <h1 className="text-3xl font-bold text-zinc-900 dark:text-zinc-50">
+              Legal Documents
+            </h1>
+            <p className="text-zinc-500 dark:text-zinc-400">
+              View all parsed and saved legal texts.
+            </p>
+          </div>
+          <Link 
+            href="/documents/import"
+            className="inline-flex items-center justify-center px-5 py-2.5 bg-zinc-900 hover:bg-zinc-800 dark:bg-zinc-100 dark:hover:bg-zinc-200 text-white dark:text-zinc-900 text-sm font-medium rounded-xl transition-all shadow-sm"
+          >
+            Import Document
+          </Link>
         </div>
 
         {isLoading ? (
@@ -106,7 +114,7 @@ export default function DocumentsPage() {
             <h3 className="text-lg font-medium text-zinc-900 dark:text-zinc-100 mb-2">No documents found</h3>
             <p className="text-zinc-500 dark:text-zinc-400 mb-6">You haven&apos;t saved any legal texts yet.</p>
             <Link 
-              href="/import"
+              href="/documents/import"
               className="inline-flex items-center justify-center px-4 py-2 bg-zinc-900 hover:bg-zinc-800 dark:bg-zinc-100 dark:hover:bg-zinc-200 text-white dark:text-zinc-900 font-medium rounded-lg transition-colors"
             >
               Import a Document

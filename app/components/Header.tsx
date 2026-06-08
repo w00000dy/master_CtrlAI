@@ -25,12 +25,7 @@ export default function Header() {
           >
             Chat
           </Link>
-          <Link
-            href="/import"
-            className="text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
-          >
-            Import
-          </Link>
+
           <Link
             href="/documents"
             className="text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
