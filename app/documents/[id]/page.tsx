@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { getDocumentById, deleteDocument, updateDocumentTitle } from "../../actions/documentActions";
+import { getDocumentById, deleteDocument, updateDocumentTitle } from "../actions";
 import { ParsedDocument } from "../import/parsePdf";
 import { ParagraphRenderer } from "../../components/ParagraphRenderer";
 import { LoaderIcon, ArrowLeftIcon, XIcon, FilePenLineIcon, CalendarCheckIcon, BookTextIcon, type BookTextIconHandle } from "lucide-animated";

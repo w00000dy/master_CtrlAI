@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, useRef } from "react";
 import Link from "next/link";
-import { getDocuments, deleteDocument } from "../actions/documentActions";
+import { getDocuments, deleteDocument } from "./actions";
 import { BookTextIcon, XIcon, ClockIcon, LoaderIcon, type BookTextIconHandle } from "lucide-animated";
 
 type DocumentMeta = {

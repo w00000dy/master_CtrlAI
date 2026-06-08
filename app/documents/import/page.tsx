@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { useModel } from "../../components/ModelContext";
 import { extractPdfText, structureTextWithLlm, ParsedDocument } from "./parsePdf";
 import { ParagraphRenderer } from "../../components/ParagraphRenderer";
-import { saveDocument } from "../../actions/documentActions";
+import { saveDocument } from "../actions";
 import { LoaderIcon, CheckIcon, type CheckIconHandle } from "lucide-animated";
 
 function AnimatedCheckIcon() {
