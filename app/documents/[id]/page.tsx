@@ -164,10 +164,10 @@ export default function DocumentViewPage() {
               </div>
             )}
             {savedAt && (
-              <p className="text-sm text-zinc-500 dark:text-zinc-400 flex items-center gap-1">
+              <div className="text-sm text-zinc-500 dark:text-zinc-400 flex items-center gap-1">
                 <CalendarCheckIcon size={16} />
                 Imported on {new Date(savedAt).toLocaleDateString()} at {new Date(savedAt).toLocaleTimeString()}
-              </p>
+              </div>
             )}
           </div>
         </div>
