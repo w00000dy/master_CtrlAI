@@ -1,4 +1,4 @@
-import { Paragraph } from "../actions/parsePdf";
+import { Paragraph } from "../documents/import/parsePdf";
 
 export const ParagraphRenderer = ({ paragraph, depth = 0 }: { paragraph: Paragraph; depth?: number }) => {
   return (

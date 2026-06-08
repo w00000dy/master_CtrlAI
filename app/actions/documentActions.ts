@@ -2,7 +2,7 @@
 
 import fs from "fs/promises";
 import path from "path";
-import { ParsedDocument } from "./parsePdf";
+import { ParsedDocument } from "../documents/import/parsePdf";
 
 const DATA_DIR = path.join(process.cwd(), "data", "documents");
 

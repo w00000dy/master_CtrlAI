@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useModel } from "../../components/ModelContext";
-import { extractPdfText, structureTextWithLlm, ParsedDocument } from "../../actions/parsePdf";
+import { extractPdfText, structureTextWithLlm, ParsedDocument } from "./parsePdf";
 import { ParagraphRenderer } from "../../components/ParagraphRenderer";
 import { saveDocument } from "../../actions/documentActions";
 import { LoaderIcon, CheckIcon, type CheckIconHandle } from "lucide-animated";
