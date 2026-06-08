@@ -124,8 +124,8 @@ Ensure all text is captured accurately and organized logically based on the docu
 
     try {
       parsedJson = JSON.parse(resultText);
-    } catch (e) {
-      console.error("Failed to parse JSON from LLM:", resultText);
+    } catch (error) {
+      console.error("Failed to parse JSON from LLM:", resultText, error);
       return { success: false, error: "LLM returned invalid JSON.", rawJson: resultText };
     }
 

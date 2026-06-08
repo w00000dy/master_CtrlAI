@@ -22,20 +22,20 @@ function sanitizeFilename(name: string) {
 export async function saveDocument(document: ParsedDocument) {
   try {
     await ensureDataDir();
-    
+
     // Generate a unique ID / filename based on the title and timestamp
     const baseName = document.title ? sanitizeFilename(document.title) : "document";
     const id = `${baseName}_${Date.now()}`;
     const filePath = path.join(DATA_DIR, `${id}.json`);
-    
+
     const fileContent = JSON.stringify({
       id,
       savedAt: new Date().toISOString(),
       document
     }, null, 2);
-    
+
     await fs.writeFile(filePath, fileContent, "utf-8");
-    
+
     return { success: true, id };
   } catch (error) {
     console.error("Failed to save document:", error);
@@ -48,7 +48,7 @@ export async function getDocuments() {
     await ensureDataDir();
     const files = await fs.readdir(DATA_DIR);
     const jsonFiles = files.filter(f => f.endsWith(".json"));
-    
+
     const documents = [];
     for (const file of jsonFiles) {
       const filePath = path.join(DATA_DIR, file);
@@ -61,14 +61,14 @@ export async function getDocuments() {
           title: parsed.document.title,
           savedAt: parsed.savedAt
         });
-      } catch (e) {
-        console.error("Invalid JSON file:", file);
+      } catch (error) {
+        console.error("Invalid JSON file:", file, error);
       }
     }
-    
+
     // Sort by newest first
     documents.sort((a, b) => new Date(b.savedAt).getTime() - new Date(a.savedAt).getTime());
-    
+
     return { success: true, documents };
   } catch (error) {
     console.error("Failed to fetch documents:", error);
@@ -81,7 +81,7 @@ export async function getDocumentById(id: string) {
     const filePath = path.join(DATA_DIR, `${id}.json`);
     const content = await fs.readFile(filePath, "utf-8");
     const parsed = JSON.parse(content);
-    
+
     return { success: true, data: parsed };
   } catch (error) {
     console.error(`Failed to fetch document ${id}:`, error);
@@ -105,9 +105,9 @@ export async function updateDocumentTitle(id: string, newTitle: string) {
     const filePath = path.join(DATA_DIR, `${id}.json`);
     const content = await fs.readFile(filePath, "utf-8");
     const parsed = JSON.parse(content);
-    
+
     parsed.document.title = newTitle;
-    
+
     await fs.writeFile(filePath, JSON.stringify(parsed, null, 2), "utf-8");
     return { success: true };
   } catch (error) {
