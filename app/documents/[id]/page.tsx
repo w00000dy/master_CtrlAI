@@ -7,14 +7,20 @@ import { getDocumentById, deleteDocument, updateDocumentTitle } from "../actions
 import { ParagraphRenderer } from "../../components/ParagraphRenderer";
 import { LoaderIcon, ArrowLeftIcon, FilePenLineIcon, CalendarCheckIcon, BookTextIcon, type BookTextIconHandle } from "lucide-animated";
 import { useRef } from "react";
-import type { Paragraph } from "../../../generated/prisma/client";
+import type { Paragraph, Document, Section } from "../../../generated/prisma/client";
+
+type DocumentData = Document & {
+  sections: (Section & {
+    paragraphs: Paragraph[];
+  })[];
+};
 
 export default function DocumentViewPage() {
   const params = useParams();
   const router = useRouter();
   const id = params.id as string;
 
-  const [document, setDocument] = useState<any | null>(null);
+  const [document, setDocument] = useState<DocumentData | null>(null);
   const [savedAt, setSavedAt] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -46,7 +52,7 @@ export default function DocumentViewPage() {
     setIsSavingTitle(true);
     const res = await updateDocumentTitle(id, editTitle.trim());
     if (res.success) {
-      setDocument((prev: any) => prev ? { ...prev, title: editTitle.trim() } : prev);
+      setDocument(prev => prev ? { ...prev, title: editTitle.trim() } : prev);
       setIsEditingTitle(false);
     } else {
       alert("Failed to update title");
@@ -186,7 +192,7 @@ export default function DocumentViewPage() {
             {/* Timeline structural line */}
             <div className="absolute left-6 top-8 bottom-8 w-px bg-gradient-to-b from-blue-200 via-zinc-200 to-transparent dark:from-blue-900/50 dark:via-zinc-800 hidden md:block"></div>
 
-            {document.sections?.map((section: any, idx: number) => (
+            {document.sections?.map((section, idx) => (
               <div
                 key={idx}
                 className="group/section relative bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800/80 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 md:ml-12"
