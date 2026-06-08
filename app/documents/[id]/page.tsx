@@ -25,7 +25,11 @@ export default function DocumentViewPage() {
 
   const [isDeleting, setIsDeleting] = useState(false);
   const [showJson, setShowJson] = useState(false);
-  const iconRef = useRef<any>(null);
+  type AnimatedIconRef = {
+    startAnimation: () => void;
+    stopAnimation: () => void;
+  };
+  const iconRef = useRef<AnimatedIconRef | null>(null);
 
   useEffect(() => {
     if (!id) return;

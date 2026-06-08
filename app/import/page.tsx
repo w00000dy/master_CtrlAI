@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useModel } from "../components/ModelContext";
-import { extractPdfText, structureTextWithLlm, ParsedDocument, Paragraph } from "../actions/parsePdf";
+import { extractPdfText, structureTextWithLlm, ParsedDocument } from "../actions/parsePdf";
 import { ParagraphRenderer } from "../components/ParagraphRenderer";
 import { saveDocument } from "../actions/documentActions";
 
@@ -37,7 +37,7 @@ export default function ImportPage() {
         setRawJson(text);
         setProcessingState(null);
         return;
-      } catch (e) {
+      } catch {
         setError("Failed to parse the JSON file. Ensure it is formatted correctly.");
         setProcessingState(null);
         return;

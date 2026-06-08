@@ -12,7 +12,11 @@ type DocumentMeta = {
 };
 
 function DocumentCard({ doc, handleDelete }: { doc: DocumentMeta, handleDelete: (e: React.MouseEvent, id: string) => void }) {
-  const iconRef = useRef<any>(null);
+  type AnimatedIconRef = {
+    startAnimation: () => void;
+    stopAnimation: () => void;
+  };
+  const iconRef = useRef<AnimatedIconRef | null>(null);
 
   return (
     <Link 
@@ -100,7 +104,7 @@ export default function DocumentsPage() {
         ) : documents.length === 0 ? (
           <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-12 text-center shadow-sm">
             <h3 className="text-lg font-medium text-zinc-900 dark:text-zinc-100 mb-2">No documents found</h3>
-            <p className="text-zinc-500 dark:text-zinc-400 mb-6">You haven't saved any legal texts yet.</p>
+            <p className="text-zinc-500 dark:text-zinc-400 mb-6">You haven&apos;t saved any legal texts yet.</p>
             <Link 
               href="/import"
               className="inline-flex items-center justify-center px-4 py-2 bg-zinc-900 hover:bg-zinc-800 dark:bg-zinc-100 dark:hover:bg-zinc-200 text-white dark:text-zinc-900 font-medium rounded-lg transition-colors"
