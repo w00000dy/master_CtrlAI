@@ -3,7 +3,6 @@
 import {
 	ArrowLeftIcon,
 	BookTextIcon,
-	type BookTextIconHandle,
 	BotIcon,
 	CalendarCheckIcon,
 	FilePenLineIcon,
@@ -12,7 +11,7 @@ import {
 } from "lucide-animated";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import type {
 	Document,
 	Paragraph,
@@ -70,8 +69,6 @@ export default function DocumentViewPage() {
 	const [controls, setControls] = useState<Control[]>([]);
 	const [isLoadingControls, setIsLoadingControls] = useState(false);
 	const [isGenerating, setIsGenerating] = useState(false);
-
-	const iconRef = useRef<BookTextIconHandle | null>(null);
 
 	useEffect(() => {
 		if (!id) return;
@@ -198,6 +195,7 @@ export default function DocumentViewPage() {
 
 						<div className="flex items-center gap-3">
 							<button
+								type="button"
 								onClick={handleDelete}
 								disabled={isDeleting}
 								className="text-sm font-medium px-4 py-2 rounded-xl bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/40 transition-all shadow-sm hover:shadow-md flex items-center gap-1.5 disabled:opacity-50"
@@ -208,16 +206,12 @@ export default function DocumentViewPage() {
 					</div>
 
 					{/* Beautiful Header Card */}
-					<div
-						className="relative bg-gradient-to-br from-blue-50/50 via-white to-indigo-50/50 dark:from-blue-900/10 dark:via-zinc-900 dark:to-indigo-900/10 border border-blue-100/50 dark:border-blue-900/30 rounded-3xl p-8 shadow-sm overflow-hidden"
-						onMouseEnter={() => iconRef.current?.startAnimation?.()}
-						onMouseLeave={() => iconRef.current?.stopAnimation?.()}
-					>
+					<div className="relative bg-gradient-to-br from-blue-50/50 via-white to-indigo-50/50 dark:from-blue-900/10 dark:via-zinc-900 dark:to-indigo-900/10 border border-blue-100/50 dark:border-blue-900/30 rounded-3xl p-8 shadow-sm overflow-hidden">
 						<div className="absolute -top-32 -right-32 w-96 h-96 bg-blue-500/10 dark:bg-blue-400/10 rounded-full blur-3xl pointer-events-none"></div>
 
 						<div className="relative flex flex-col md:flex-row md:items-start gap-6">
 							<div className="p-4 bg-white dark:bg-zinc-900 rounded-2xl shadow-sm border border-blue-100 dark:border-blue-800/50 text-blue-600 dark:text-blue-400 shrink-0 self-start">
-								<BookTextIcon ref={iconRef} size={40} animateOnHover={false} />
+								<BookTextIcon size={40} />
 							</div>
 
 							<div className="flex-1 w-full">
@@ -231,6 +225,7 @@ export default function DocumentViewPage() {
 											autoFocus
 										/>
 										<button
+											type="button"
 											onClick={handleUpdateTitle}
 											disabled={isSavingTitle}
 											className="px-5 py-3 bg-zinc-900 hover:bg-zinc-800 dark:bg-zinc-100 dark:hover:bg-zinc-200 text-white dark:text-zinc-900 text-sm font-semibold rounded-xl transition-all shadow-sm disabled:opacity-50"
@@ -238,6 +233,7 @@ export default function DocumentViewPage() {
 											{isSavingTitle ? "Saving..." : "Save"}
 										</button>
 										<button
+											type="button"
 											onClick={() => setIsEditingTitle(false)}
 											disabled={isSavingTitle}
 											className="px-5 py-3 bg-white hover:bg-zinc-50 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700 text-sm font-semibold rounded-xl transition-all shadow-sm disabled:opacity-50"
@@ -251,6 +247,7 @@ export default function DocumentViewPage() {
 											{document.title || "Untitled Document"}
 										</h1>
 										<button
+											type="button"
 											onClick={() => {
 												setEditTitle(document.title || "");
 												setIsEditingTitle(true);
@@ -279,9 +276,9 @@ export default function DocumentViewPage() {
 					<div className="space-y-8 relative pt-4">
 						<div className="absolute left-6 top-8 bottom-8 w-px bg-gradient-to-b from-blue-200 via-zinc-200 to-transparent dark:from-blue-900/50 dark:via-zinc-800 hidden md:block"></div>
 
-						{document.sections?.map((section, idx) => (
+						{document.sections?.map((section) => (
 							<div
-								key={idx}
+								key={section.id}
 								className="group/section relative bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800/80 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 md:ml-12"
 							>
 								<div className="absolute -left-[54px] top-7 w-3.5 h-3.5 rounded-full bg-white dark:bg-zinc-950 border-2 border-blue-400 dark:border-blue-500 shadow-sm hidden md:block group-hover/section:scale-125 group-hover/section:bg-blue-50 dark:group-hover/section:bg-blue-900/30 transition-all duration-300"></div>
@@ -345,6 +342,7 @@ export default function DocumentViewPage() {
 								Paragraph Details
 							</h2>
 							<button
+								type="button"
 								onClick={() => setSelectedParagraph(null)}
 								className="p-2 -mr-2 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors rounded-lg hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50"
 							>
