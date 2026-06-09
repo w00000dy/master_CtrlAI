@@ -3,9 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { MappedParagraphCard, ParagraphWithContext } from '../components/MappedParagraphCard';
 import { getControls, createControl, getParagraphsForSelection, deleteControl, updateControl } from "./actions";
-
-// types
-
+import { Document, Section, Paragraph } from "../../generated/prisma/client";
 
 type Control = {
   id: string;
@@ -14,11 +12,17 @@ type Control = {
   paragraphs: ParagraphWithContext[];
 };
 
+type DocumentWithParagraphs = Document & {
+  sections: (Section & {
+    paragraphs: Paragraph[];
+  })[];
+};
+
 export default function ControlsPage() {
   const [controls, setControls] = useState<Control[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [docsWithParagraphs, setDocsWithParagraphs] = useState<any[]>([]);
+  const [docsWithParagraphs, setDocsWithParagraphs] = useState<DocumentWithParagraphs[]>([]);
 
   // form state
   const [newTitle, setNewTitle] = useState("");
@@ -31,13 +35,23 @@ export default function ControlsPage() {
     setLoading(true);
     const res = await getControls();
     if (res.success && res.controls) {
-      setControls(res.controls as any);
+      setControls(res.controls as unknown as Control[]);
     }
     setLoading(false);
   };
 
   useEffect(() => {
-    fetchControls();
+    let active = true;
+    const init = async () => {
+      const res = await getControls();
+      if (!active) return;
+      if (res.success && res.controls) {
+        setControls(res.controls as unknown as Control[]);
+      }
+      setLoading(false);
+    };
+    init();
+    return () => { active = false; };
   }, []);
 
 
@@ -138,7 +152,7 @@ export default function ControlsPage() {
         ) : controls.length === 0 ? (
           <div className="text-center p-12 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-sm">
             <p className="text-zinc-500 dark:text-zinc-400 text-lg">No controls found.</p>
-            <p className="text-zinc-400 dark:text-zinc-500 text-sm mt-2">Click "Add Control" to create your first implementation instruction.</p>
+            <p className="text-zinc-400 dark:text-zinc-500 text-sm mt-2">Click &quot;Add Control&quot; to create your first implementation instruction.</p>
           </div>
         ) : (
           <div className="grid gap-6 lg:grid-cols-2">
@@ -224,14 +238,14 @@ export default function ControlsPage() {
                     {docsWithParagraphs.map(doc => (
                       <div key={doc.id} className="space-y-4">
                         <div className="font-bold text-zinc-900 dark:text-zinc-100 border-b border-zinc-200 dark:border-zinc-800 pb-1">{doc.title}</div>
-                        {doc.sections.map((sec: any) => (
+                        {doc.sections.map(sec => (
                           <div key={sec.id} className="pt-2">
                             <div className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 mb-3 uppercase tracking-wider flex items-start">
                               {sec.marker && <span className="inline-flex items-center justify-center bg-zinc-200 dark:bg-zinc-800 px-1.5 py-0.5 rounded text-[10px] font-mono text-zinc-600 dark:text-zinc-400 mr-2 border border-zinc-300 dark:border-zinc-700 whitespace-nowrap shrink-0 mt-0.5">{sec.marker}</span>}
                               <span className="leading-relaxed">{sec.title}</span>
                             </div>
                             <div className="pl-3 space-y-2">
-                              {sec.paragraphs.map((p: any) => (
+                              {sec.paragraphs.map(p => (
                                 <label key={p.id} className="flex items-start gap-3 cursor-pointer group p-2 -ml-2 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors">
                                   <input 
                                     type="checkbox" 
