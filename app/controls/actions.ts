@@ -1,6 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
+import { Paragraph } from "@prisma/client";
 import { Ollama } from "ollama";
 import { Agent, setGlobalDispatcher } from 'undici';
 
@@ -12,14 +13,17 @@ const ollama = new Ollama({
 });
 
 
-function enrichControlsWithAncestors(controls: any[], allParagraphs: any[]) {
+function enrichControlsWithAncestors<
+  C extends { paragraphs: P[] },
+  P extends { parentParagraphId: string | null }
+>(controls: C[], allParagraphs: Paragraph[]) {
   const paraMap = new Map(allParagraphs.map(p => [p.id, p]));
 
   return controls.map(control => {
     return {
       ...control,
-      paragraphs: control.paragraphs.map((p: any) => {
-        const ancestors = [];
+      paragraphs: control.paragraphs.map((p: P) => {
+        const ancestors: Paragraph[] = [];
         let currentId = p.parentParagraphId;
         while (currentId) {
           const parent = paraMap.get(currentId);
@@ -283,7 +287,7 @@ ${allParagraphsStr}
     const evalTokens = response.eval_count;
     console.log(`[LLM Usage] Prompt tokens (Context used): ${promptTokens}, Generated tokens: ${evalTokens}`);
     
-    let parsedJson: any;
+    let parsedJson;
 
     try {
       const rawJson = JSON.parse(resultText);
