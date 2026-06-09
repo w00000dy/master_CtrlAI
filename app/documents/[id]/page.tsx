@@ -203,6 +203,7 @@ export default function DocumentViewPage() {
                 <div className="bg-zinc-50/50 dark:bg-zinc-900/30 px-8 py-5 border-b border-zinc-100 dark:border-zinc-800/50">
                   <h3 className="text-xl font-bold text-zinc-900 dark:text-zinc-100 tracking-tight flex items-center gap-3">
                     <span className="w-1.5 h-6 bg-blue-500/80 rounded-full inline-block"></span>
+                    {section.marker && <span className="text-blue-600 dark:text-blue-400 font-medium">{section.marker}</span>}
                     {section.title}
                   </h3>
                 </div>

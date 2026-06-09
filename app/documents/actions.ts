@@ -15,6 +15,7 @@ export async function saveDocument(document: ParsedDocument): Promise<{ success:
       for (const section of document.sections) {
         const sec = await tx.section.create({
           data: {
+            marker: section.marker || null,
             title: section.title,
             documentId: doc.id
           }
@@ -81,6 +82,7 @@ export async function getDocumentById(id: string) {
       where: { id },
       include: {
         sections: {
+          orderBy: { marker: 'asc' },
           include: {
             paragraphs: {
               orderBy: { marker: 'asc' }

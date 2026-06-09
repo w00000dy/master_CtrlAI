@@ -16,6 +16,7 @@ model Document {
 
 model Section {
   id         String      @id @default(cuid(2))
+  marker     String?
   title      String
   documentId String
   document   Document    @relation(fields: [documentId], references: [id], onDelete: Cascade)

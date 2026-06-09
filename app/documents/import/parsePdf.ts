@@ -20,6 +20,7 @@ export type Paragraph = {
 export type ParsedDocument = {
   title: string;
   sections: {
+    marker?: string;
     title: string;
     paragraphs: Paragraph[];
   }[];
@@ -58,6 +59,7 @@ export async function structureTextWithLlm(rawText: string, model: string) {
     const systemPrompt = `You are a legal text structuring assistant. 
 Your task is to take the provided raw text from a legal document (like EU Cyber Resilience Act) and output a perfectly structured JSON object. 
 Extract the overall title, sections, and paragraphs. Paragraphs can have sub-paragraphs, which can themselves have sub-paragraphs, nested to any depth necessary.
+For each section, extract its number or identifier (e.g., "Part 1", "Section A", "Article 5") into the "marker" field if present.
 For each paragraph, extract its number or letter (e.g., "1.", "a)", "I.") into the "marker" field if present.
 
 The output MUST strictly match this JSON schema and contain no markdown blocks or other text outside the JSON:
@@ -65,6 +67,7 @@ The output MUST strictly match this JSON schema and contain no markdown blocks o
   "title": "Document Title",
   "sections": [
     {
+      "marker": "Part 1",
       "title": "Section or Annex Title",
       "paragraphs": [
         {

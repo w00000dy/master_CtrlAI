@@ -244,7 +244,8 @@ export default function ImportPage() {
               {parsedData.sections?.map((section, idx) => (
                 <div key={idx} className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-hidden shadow-sm">
                   <div className="bg-zinc-50 dark:bg-zinc-900/50 px-6 py-4 border-b border-zinc-200 dark:border-zinc-800">
-                    <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+                    <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
+                      {section.marker && <span className="text-blue-600 dark:text-blue-400 font-medium">{section.marker}</span>}
                       {section.title}
                     </h3>
                   </div>
