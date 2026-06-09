@@ -11,6 +11,31 @@ const ollama = new Ollama({
   host: process.env.OLLAMA_HOST || "http://127.0.0.1:11434"
 });
 
+
+function enrichControlsWithAncestors(controls: any[], allParagraphs: any[]) {
+  const paraMap = new Map(allParagraphs.map(p => [p.id, p]));
+
+  return controls.map(control => {
+    return {
+      ...control,
+      paragraphs: control.paragraphs.map((p: any) => {
+        const ancestors = [];
+        let currentId = p.parentParagraphId;
+        while (currentId) {
+          const parent = paraMap.get(currentId);
+          if (parent) {
+            ancestors.unshift(parent);
+            currentId = parent.parentParagraphId;
+          } else {
+            break;
+          }
+        }
+        return { ...p, ancestors };
+      })
+    };
+  });
+}
+
 export async function getControls() {
   try {
     const [controls, allParagraphs] = await Promise.all([
@@ -33,27 +58,7 @@ export async function getControls() {
       prisma.paragraph.findMany()
     ]);
 
-    const paraMap = new Map(allParagraphs.map(p => [p.id, p]));
-
-    const enrichedControls = controls.map(control => {
-      return {
-        ...control,
-        paragraphs: control.paragraphs.map(p => {
-          const ancestors = [];
-          let currentId = p.parentParagraphId;
-          while (currentId) {
-            const parent = paraMap.get(currentId);
-            if (parent) {
-              ancestors.unshift(parent);
-              currentId = parent.parentParagraphId;
-            } else {
-              break;
-            }
-          }
-          return { ...p, ancestors };
-        })
-      };
-    });
+    const enrichedControls = enrichControlsWithAncestors(controls, allParagraphs);
 
     return { success: true, controls: enrichedControls };
   } catch (error) {
@@ -123,27 +128,7 @@ export async function getControlsForParagraph(paragraphId: string) {
       prisma.paragraph.findMany()
     ]);
 
-    const paraMap = new Map(allParagraphs.map(p => [p.id, p]));
-
-    const enrichedControls = controls.map(control => {
-      return {
-        ...control,
-        paragraphs: control.paragraphs.map(p => {
-          const ancestors = [];
-          let currentId = p.parentParagraphId;
-          while (currentId) {
-            const parent = paraMap.get(currentId);
-            if (parent) {
-              ancestors.unshift(parent);
-              currentId = parent.parentParagraphId;
-            } else {
-              break;
-            }
-          }
-          return { ...p, ancestors };
-        })
-      };
-    });
+    const enrichedControls = enrichControlsWithAncestors(controls, allParagraphs);
 
     return { success: true, controls: enrichedControls };
   } catch (error) {
