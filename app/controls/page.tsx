@@ -126,7 +126,7 @@ export default function ControlsPage() {
 		if (!newTitle || !newText) return;
 
 		setIsSubmitting(true);
-		let res;
+		let res: { success: boolean; control?: unknown; error?: string };
 		if (editingControlId) {
 			res = await updateControl(editingControlId, {
 				title: newTitle,
@@ -252,6 +252,7 @@ export default function ControlsPage() {
 								{editingControlId ? "Edit Control" : "Add New Control"}
 							</h2>
 							<button
+								type="button"
 								onClick={closeModal}
 								className="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors"
 							>
@@ -266,10 +267,11 @@ export default function ControlsPage() {
 								className="space-y-6"
 							>
 								<div>
-									<label className="block text-sm font-semibold text-zinc-900 dark:text-zinc-100 mb-2">
+									<label htmlFor="control-title" className="block text-sm font-semibold text-zinc-900 dark:text-zinc-100 mb-2">
 										Control Title / ID
 									</label>
 									<input
+										id="control-title"
 										required
 										type="text"
 										value={newTitle}
@@ -279,10 +281,11 @@ export default function ControlsPage() {
 									/>
 								</div>
 								<div>
-									<label className="block text-sm font-semibold text-zinc-900 dark:text-zinc-100 mb-2">
+									<label htmlFor="control-text" className="block text-sm font-semibold text-zinc-900 dark:text-zinc-100 mb-2">
 										Implementation Instruction
 									</label>
 									<textarea
+										id="control-text"
 										required
 										rows={4}
 										value={newText}
@@ -293,9 +296,9 @@ export default function ControlsPage() {
 								</div>
 
 								<div>
-									<label className="block text-sm font-semibold text-zinc-900 dark:text-zinc-100 mb-2">
+									<div className="block text-sm font-semibold text-zinc-900 dark:text-zinc-100 mb-2">
 										Map to Paragraphs
-									</label>
+									</div>
 									<p className="text-xs text-zinc-500 dark:text-zinc-400 mb-3">
 										Select the paragraphs that this control fulfills.
 									</p>
