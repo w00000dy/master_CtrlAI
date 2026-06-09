@@ -13,7 +13,7 @@ const ollama = new Ollama({
 });
 
 export type Paragraph = {
-	marker?: string;
+	marker: string | null;
 	text: string;
 	subParagraphs?: Paragraph[];
 };
@@ -21,7 +21,7 @@ export type Paragraph = {
 export type ParsedDocument = {
 	title: string;
 	sections: {
-		marker?: string;
+		marker: string | null;
 		title: string;
 		paragraphs: Paragraph[];
 	}[];
@@ -63,8 +63,8 @@ export async function structureTextWithLlm(rawText: string, model: string) {
 		const systemPrompt = `You are a legal text structuring assistant. 
 Your task is to take the provided raw text from a legal document and output a perfectly structured JSON object. 
 Extract the overall title, sections, and paragraphs. Paragraphs can have sub-paragraphs, which can themselves have sub-paragraphs, nested to any depth necessary.
-For each section, extract its number or identifier (e.g., "Part 1", "Section A", "Article 5") into the "marker" field if present.
-For each paragraph, extract its number or letter (e.g., "1.", "a)", "I.") into the "marker" field if present.
+For each section, extract its number or identifier (e.g., "Part 1", "Section A", "Article 5") into the "marker" field if present, otherwise set the marker to null.
+For each paragraph, extract its number or letter (e.g., "1.", "a)", "I.") into the "marker" field if present, otherwise set the marker to null.
 Do NOT drop, skip, or summarize any text. Every single sentence from the raw text must be included somewhere (title, text, or paragraph).
 If there is introductory text before a list of paragraphs (e.g., "Manufacturers of products with digital elements shall:"), treat this introductory text as a paragraph itself, and all the following list items as its sub-paragraphs.
 
@@ -77,13 +77,19 @@ The output MUST strictly match this JSON schema and contain no markdown blocks o
       "title": "Section or Annex Title",
       "paragraphs": [
         {
-          "marker": "1.",
-          "text": "Paragraph 1 text",
+          "marker": null,
+          "text": "Unmarked text",
           "subParagraphs": [
             {
-              "marker": "a)",
-              "text": "Sub-paragraph 1 text",
-              "subParagraphs": []
+              "marker": "1.",
+              "text": "Paragraph 1 text",
+              "subParagraphs": [
+                {
+                  "marker": "a)",
+                  "text": "Sub-paragraph a text",
+                  "subParagraphs": []
+                }
+              ]
             }
           ]
         }
