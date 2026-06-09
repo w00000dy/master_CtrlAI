@@ -1,5 +1,3 @@
-import React from "react";
-
 export type ParagraphWithContext = {
 	id: string;
 	marker: string | null;

@@ -141,7 +141,7 @@ export default function DocumentViewPage() {
 				setControls(reloadRes.controls);
 			}
 		} else {
-			alert("Error generating controls: " + res.error);
+			alert(`Error generating controls: ${res.error}`);
 		}
 		setIsGenerating(false);
 	};

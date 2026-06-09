@@ -202,7 +202,7 @@ export async function generateControlsForParagraph(
 		const ancestorsStr =
 			ancestors.length > 0
 				? ancestors
-						.map((p) => `- ${p.marker ? p.marker + " " : ""}${p.text}`)
+						.map((p) => `- ${p.marker ? `${p.marker} ` : ""}${p.text}`)
 						.join("\n")
 				: "No ancestor paragraphs.";
 
@@ -242,8 +242,8 @@ export async function generateControlsForParagraph(
 				}
 
 				const printPara = (p: (typeof allParagraphs)[0], depth: number) => {
-					const indent = "    " + "  ".repeat(depth);
-					allParagraphsStr += `${indent}- [ID: ${p.id}] ${p.marker ? p.marker + " " : ""}${p.text}\n`;
+					const indent = `    ${"  ".repeat(depth)}`;
+					allParagraphsStr += `${indent}- [ID: ${p.id}] ${p.marker ? `${p.marker} ` : ""}${p.text}\n`;
 					const children = childrenMap.get(p.id) || [];
 					for (const child of children) {
 						printPara(child, depth + 1);
@@ -286,7 +286,7 @@ DOCUMENT: ${focusParagraph.section.document.title}
 SECTION: ${focusParagraph.section.title}
 ANCESTOR PARAGRAPHS (Context):
 ${ancestorsStr}
-FOCUS PARAGRAPH TEXT: ${focusParagraph.marker ? focusParagraph.marker + " " : ""}${focusParagraph.text}
+FOCUS PARAGRAPH TEXT: ${focusParagraph.marker ? `${focusParagraph.marker} ` : ""}${focusParagraph.text}
 
 EXISTING CONTROLS:
 ${existingControlsStr}
