@@ -39,7 +39,13 @@ export function ModelProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <ModelContext.Provider value={{ models, selectedModel, setSelectedModel: handleSetSelectedModel }}>
+    <ModelContext.Provider
+      value={{
+        models,
+        selectedModel,
+        setSelectedModel: handleSetSelectedModel,
+      }}
+    >
       {children}
     </ModelContext.Provider>
   );

@@ -3,13 +3,15 @@
 import { prisma } from "@/lib/prisma";
 import { ParsedDocument, Paragraph } from "../documents/import/parsePdf";
 
-export async function saveDocument(document: ParsedDocument): Promise<{ success: true; id: string } | { success: false; error: string }> {
+export async function saveDocument(
+  document: ParsedDocument,
+): Promise<{ success: true; id: string } | { success: false; error: string }> {
   try {
     return await prisma.$transaction(async (tx) => {
       const doc = await tx.document.create({
         data: {
           title: document.title,
-        }
+        },
       });
 
       for (const section of document.sections) {
@@ -17,20 +19,24 @@ export async function saveDocument(document: ParsedDocument): Promise<{ success:
           data: {
             marker: section.marker || null,
             title: section.title,
-            documentId: doc.id
-          }
+            documentId: doc.id,
+          },
         });
 
         // Recursive function to insert paragraphs sequentially
-        async function insertParagraphs(paragraphs: Paragraph[], sectionId: string, parentParagraphId: string | null = null) {
+        async function insertParagraphs(
+          paragraphs: Paragraph[],
+          sectionId: string,
+          parentParagraphId: string | null = null,
+        ) {
           for (const p of paragraphs) {
             const createdP = await tx.paragraph.create({
               data: {
                 marker: p.marker || null,
                 text: p.text,
                 sectionId: sectionId,
-                parentParagraphId: parentParagraphId
-              }
+                parentParagraphId: parentParagraphId,
+              },
             });
 
             if (p.subParagraphs && p.subParagraphs.length > 0) {
@@ -38,7 +44,7 @@ export async function saveDocument(document: ParsedDocument): Promise<{ success:
             }
           }
         }
-        
+
         if (section.paragraphs) {
           await insertParagraphs(section.paragraphs, sec.id);
         }
@@ -46,7 +52,6 @@ export async function saveDocument(document: ParsedDocument): Promise<{ success:
 
       return { success: true, id: doc.id };
     });
-
   } catch (error) {
     console.error("Failed to save document:", error);
     return { success: false, error: "Failed to save the document." };
@@ -57,22 +62,29 @@ export async function getDocuments() {
   try {
     const documents = await prisma.document.findMany({
       orderBy: {
-        savedAt: 'desc'
+        savedAt: "desc",
       },
       select: {
         id: true,
         title: true,
-        savedAt: true
-      }
+        savedAt: true,
+      },
     });
 
-    return { success: true, documents: documents.map(d => ({
-      ...d,
-      savedAt: d.savedAt.toISOString()
-    })) };
+    return {
+      success: true,
+      documents: documents.map((d) => ({
+        ...d,
+        savedAt: d.savedAt.toISOString(),
+      })),
+    };
   } catch (error) {
     console.error("Failed to fetch documents:", error);
-    return { success: false, error: "Failed to load documents.", documents: [] };
+    return {
+      success: false,
+      error: "Failed to load documents.",
+      documents: [],
+    };
   }
 }
 
@@ -82,21 +94,28 @@ export async function getDocumentById(id: string) {
       where: { id },
       include: {
         sections: {
-          orderBy: { marker: 'asc' },
+          orderBy: { marker: "asc" },
           include: {
             paragraphs: {
-              orderBy: { marker: 'asc' }
-            }
-          }
-        }
-      }
+              orderBy: { marker: "asc" },
+            },
+          },
+        },
+      },
     });
 
     if (!document) {
       return { success: false, error: "Document not found." };
     }
 
-    return { success: true, data: { id: document.id, savedAt: document.savedAt.toISOString(), document } };
+    return {
+      success: true,
+      data: {
+        id: document.id,
+        savedAt: document.savedAt.toISOString(),
+        document,
+      },
+    };
   } catch (error) {
     console.error(`Failed to fetch document ${id}:`, error);
     return { success: false, error: "Document not found." };
@@ -106,7 +125,7 @@ export async function getDocumentById(id: string) {
 export async function deleteDocument(id: string) {
   try {
     await prisma.document.delete({
-      where: { id }
+      where: { id },
     });
     return { success: true };
   } catch (error) {
@@ -119,7 +138,7 @@ export async function updateDocumentTitle(id: string, newTitle: string) {
   try {
     await prisma.document.update({
       where: { id },
-      data: { title: newTitle }
+      data: { title: newTitle },
     });
     return { success: true };
   } catch (error) {

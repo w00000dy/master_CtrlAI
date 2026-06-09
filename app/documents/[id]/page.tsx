@@ -3,13 +3,36 @@
 import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { getDocumentById, deleteDocument, updateDocumentTitle } from "../actions";
-import { MappedParagraphCard, ParagraphWithContext } from "../../components/MappedParagraphCard";
-import { LoaderIcon, ArrowLeftIcon, FilePenLineIcon, CalendarCheckIcon, BookTextIcon, XIcon, BotIcon, type BookTextIconHandle } from "lucide-animated";
+import {
+  getDocumentById,
+  deleteDocument,
+  updateDocumentTitle,
+} from "../actions";
+import {
+  MappedParagraphCard,
+  ParagraphWithContext,
+} from "../../components/MappedParagraphCard";
+import {
+  LoaderIcon,
+  ArrowLeftIcon,
+  FilePenLineIcon,
+  CalendarCheckIcon,
+  BookTextIcon,
+  XIcon,
+  BotIcon,
+  type BookTextIconHandle,
+} from "lucide-animated";
 import { useModel } from "../../components/ModelContext";
-import { getControlsForParagraph, generateControlsForParagraph } from "../../controls/actions";
+import {
+  getControlsForParagraph,
+  generateControlsForParagraph,
+} from "../../controls/actions";
 import { ParagraphRenderer } from "../../components/ParagraphRenderer";
-import type { Paragraph, Document, Section } from "../../../generated/prisma/client";
+import type {
+  Paragraph,
+  Document,
+  Section,
+} from "../../../generated/prisma/client";
 
 export type DocumentData = Document & {
   sections: (Section & {
@@ -39,9 +62,11 @@ export default function DocumentViewPage() {
   const [editTitle, setEditTitle] = useState("");
   const [isSavingTitle, setIsSavingTitle] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  
+
   // Side Panel State
-  const [selectedParagraph, setSelectedParagraph] = useState<Paragraph | null>(null);
+  const [selectedParagraph, setSelectedParagraph] = useState<Paragraph | null>(
+    null,
+  );
   const [controls, setControls] = useState<Control[]>([]);
   const [isLoadingControls, setIsLoadingControls] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -51,11 +76,13 @@ export default function DocumentViewPage() {
   useEffect(() => {
     if (!id) return;
 
-    getDocumentById(id).then(res => {
+    getDocumentById(id).then((res) => {
       if (res.success && res.data) {
         setDocument(res.data.document as DocumentData);
         setEditTitle(res.data.document.title || "");
-        setSavedAt(res.data.savedAt ? new Date(res.data.savedAt).toISOString() : null);
+        setSavedAt(
+          res.data.savedAt ? new Date(res.data.savedAt).toISOString() : null,
+        );
       } else {
         setError(res.error || "Failed to load the document.");
       }
@@ -68,7 +95,9 @@ export default function DocumentViewPage() {
     setIsSavingTitle(true);
     const res = await updateDocumentTitle(id, editTitle.trim());
     if (res.success) {
-      setDocument(prev => prev ? { ...prev, title: editTitle.trim() } : prev);
+      setDocument((prev) =>
+        prev ? { ...prev, title: editTitle.trim() } : prev,
+      );
       setIsEditingTitle(false);
     } else {
       alert("Failed to update title");
@@ -77,7 +106,8 @@ export default function DocumentViewPage() {
   };
 
   const handleDelete = async () => {
-    if (!window.confirm("Are you sure you want to delete this document?")) return;
+    if (!window.confirm("Are you sure you want to delete this document?"))
+      return;
     setIsDeleting(true);
     const res = await deleteDocument(id);
     if (res.success) {
@@ -104,7 +134,10 @@ export default function DocumentViewPage() {
       return;
     }
     setIsGenerating(true);
-    const res = await generateControlsForParagraph(selectedParagraph.id, selectedModel);
+    const res = await generateControlsForParagraph(
+      selectedParagraph.id,
+      selectedModel,
+    );
     if (res.success) {
       const reloadRes = await getControlsForParagraph(selectedParagraph.id);
       if (reloadRes.success && reloadRes.controls) {
@@ -131,7 +164,10 @@ export default function DocumentViewPage() {
     return (
       <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 p-8">
         <div className="max-w-4xl mx-auto space-y-6">
-          <Link href="/documents" className="text-sm text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1">
+          <Link
+            href="/documents"
+            className="text-sm text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1"
+          >
             <ArrowLeftIcon size={16} />
             Back to Documents
           </Link>
@@ -145,14 +181,17 @@ export default function DocumentViewPage() {
 
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 flex relative overflow-hidden">
-      
       {/* Main Document Content */}
-      <div className={`flex-1 p-8 overflow-y-auto transition-all duration-300 ${selectedParagraph ? 'mr-[450px]' : ''}`}>
+      <div
+        className={`flex-1 p-8 overflow-y-auto transition-all duration-300 ${selectedParagraph ? "mr-[450px]" : ""}`}
+      >
         <div className="max-w-4xl mx-auto space-y-8">
-
           {/* Navigation & Actions Header */}
           <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
-            <Link href="/documents" className="text-sm font-medium text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-300 transition-colors flex items-center gap-1.5 bg-white dark:bg-zinc-900 px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-800 shadow-sm hover:shadow-md w-fit">
+            <Link
+              href="/documents"
+              className="text-sm font-medium text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-300 transition-colors flex items-center gap-1.5 bg-white dark:bg-zinc-900 px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-800 shadow-sm hover:shadow-md w-fit"
+            >
               <ArrowLeftIcon size={16} />
               Back to Documents
             </Link>
@@ -187,7 +226,7 @@ export default function DocumentViewPage() {
                     <input
                       type="text"
                       value={editTitle}
-                      onChange={e => setEditTitle(e.target.value)}
+                      onChange={(e) => setEditTitle(e.target.value)}
                       className="flex-1 text-2xl md:text-3xl font-extrabold bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 rounded-xl px-4 py-3 text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
                       autoFocus
                     />
@@ -226,7 +265,10 @@ export default function DocumentViewPage() {
                 {savedAt && (
                   <div className="flex items-center gap-1.5 text-sm font-medium text-blue-600/80 dark:text-blue-400/80 bg-white/60 dark:bg-zinc-900/60 w-fit px-3 py-1.5 rounded-lg border border-blue-100/50 dark:border-blue-900/30 backdrop-blur-sm">
                     <CalendarCheckIcon size={16} />
-                    <span>Imported on {new Date(savedAt).toLocaleDateString()} at {new Date(savedAt).toLocaleTimeString()}</span>
+                    <span>
+                      Imported on {new Date(savedAt).toLocaleDateString()} at{" "}
+                      {new Date(savedAt).toLocaleTimeString()}
+                    </span>
                   </div>
                 )}
               </div>
@@ -235,49 +277,66 @@ export default function DocumentViewPage() {
 
           {/* Document Content */}
           <div className="space-y-8 relative pt-4">
-              <div className="absolute left-6 top-8 bottom-8 w-px bg-gradient-to-b from-blue-200 via-zinc-200 to-transparent dark:from-blue-900/50 dark:via-zinc-800 hidden md:block"></div>
+            <div className="absolute left-6 top-8 bottom-8 w-px bg-gradient-to-b from-blue-200 via-zinc-200 to-transparent dark:from-blue-900/50 dark:via-zinc-800 hidden md:block"></div>
 
-              {document.sections?.map((section, idx) => (
-                <div
-                  key={idx}
-                  className="group/section relative bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800/80 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 md:ml-12"
-                >
-                  <div className="absolute -left-[54px] top-7 w-3.5 h-3.5 rounded-full bg-white dark:bg-zinc-950 border-2 border-blue-400 dark:border-blue-500 shadow-sm hidden md:block group-hover/section:scale-125 group-hover/section:bg-blue-50 dark:group-hover/section:bg-blue-900/30 transition-all duration-300"></div>
+            {document.sections?.map((section, idx) => (
+              <div
+                key={idx}
+                className="group/section relative bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800/80 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 md:ml-12"
+              >
+                <div className="absolute -left-[54px] top-7 w-3.5 h-3.5 rounded-full bg-white dark:bg-zinc-950 border-2 border-blue-400 dark:border-blue-500 shadow-sm hidden md:block group-hover/section:scale-125 group-hover/section:bg-blue-50 dark:group-hover/section:bg-blue-900/30 transition-all duration-300"></div>
 
-                  <div className="bg-zinc-50/50 dark:bg-zinc-900/30 px-8 py-5 border-b border-zinc-100 dark:border-zinc-800/50">
-                    <h3 className="text-xl font-bold text-zinc-900 dark:text-zinc-100 tracking-tight flex items-start gap-3">
-                      <span className="w-1.5 h-6 bg-blue-500/80 rounded-full inline-block shrink-0 mt-0.5"></span>
-                      {section.marker && <span className="whitespace-nowrap shrink-0 text-blue-600 dark:text-blue-400 font-medium">{section.marker}</span>}
-                      <span>{section.title}</span>
-                    </h3>
-                  </div>
-                  <div className="p-8 space-y-6">
-                    {section.paragraphs && section.paragraphs.length > 0 ? (
-                      <div className="space-y-6">
-                        {(() => {
-                          const renderTree = (parentId: string | null = null, depth = 0): React.ReactNode[] => 
-                            section.paragraphs
-                              .filter((p: Paragraph) => (p.parentParagraphId || null) === parentId)
-                              .flatMap((p: Paragraph) => [
-                                <ParagraphRenderer key={p.id} paragraph={p} depth={depth} onClick={handleParagraphClick} />,
-                                ...renderTree(p.id, depth + 1)
-                              ]);
-                          return renderTree();
-                        })()}
-                      </div>
-                    ) : (
-                      <p className="text-zinc-400 italic">No paragraphs in this section.</p>
+                <div className="bg-zinc-50/50 dark:bg-zinc-900/30 px-8 py-5 border-b border-zinc-100 dark:border-zinc-800/50">
+                  <h3 className="text-xl font-bold text-zinc-900 dark:text-zinc-100 tracking-tight flex items-start gap-3">
+                    <span className="w-1.5 h-6 bg-blue-500/80 rounded-full inline-block shrink-0 mt-0.5"></span>
+                    {section.marker && (
+                      <span className="whitespace-nowrap shrink-0 text-blue-600 dark:text-blue-400 font-medium">
+                        {section.marker}
+                      </span>
                     )}
-                  </div>
+                    <span>{section.title}</span>
+                  </h3>
                 </div>
-              ))}
-            </div>
+                <div className="p-8 space-y-6">
+                  {section.paragraphs && section.paragraphs.length > 0 ? (
+                    <div className="space-y-6">
+                      {(() => {
+                        const renderTree = (
+                          parentId: string | null = null,
+                          depth = 0,
+                        ): React.ReactNode[] =>
+                          section.paragraphs
+                            .filter(
+                              (p: Paragraph) =>
+                                (p.parentParagraphId || null) === parentId,
+                            )
+                            .flatMap((p: Paragraph) => [
+                              <ParagraphRenderer
+                                key={p.id}
+                                paragraph={p}
+                                depth={depth}
+                                onClick={handleParagraphClick}
+                              />,
+                              ...renderTree(p.id, depth + 1),
+                            ]);
+                        return renderTree();
+                      })()}
+                    </div>
+                  ) : (
+                    <p className="text-zinc-400 italic">
+                      No paragraphs in this section.
+                    </p>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
       {/* Side Panel */}
-      <div 
-        className={`fixed top-[73px] right-0 bottom-0 w-[450px] bg-white dark:bg-zinc-900 border-l border-zinc-200 dark:border-zinc-800 shadow-2xl transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] z-40 flex flex-col ${selectedParagraph ? 'translate-x-0' : 'translate-x-full'}`}
+      <div
+        className={`fixed top-[73px] right-0 bottom-0 w-[450px] bg-white dark:bg-zinc-900 border-l border-zinc-200 dark:border-zinc-800 shadow-2xl transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] z-40 flex flex-col ${selectedParagraph ? "translate-x-0" : "translate-x-full"}`}
       >
         {selectedParagraph && (
           <>
@@ -285,23 +344,31 @@ export default function DocumentViewPage() {
               <h2 className="text-lg font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
                 Paragraph Details
               </h2>
-              <button onClick={() => setSelectedParagraph(null)} className="p-2 -mr-2 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors rounded-lg hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50">
+              <button
+                onClick={() => setSelectedParagraph(null)}
+                className="p-2 -mr-2 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors rounded-lg hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50"
+              >
                 <XIcon size={20} />
               </button>
             </div>
 
             <div className="flex-1 overflow-y-auto p-6 space-y-8">
-              
               <div>
-                <div className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest mb-3">Selected Text</div>
-                
+                <div className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest mb-3">
+                  Selected Text
+                </div>
+
                 {(() => {
                   const ancestors: Paragraph[] = [];
                   if (document) {
-                    const allParagraphs = document.sections.flatMap(s => s.paragraphs);
+                    const allParagraphs = document.sections.flatMap(
+                      (s) => s.paragraphs,
+                    );
                     let currentId = selectedParagraph.parentParagraphId;
                     while (currentId) {
-                      const parent = allParagraphs.find(p => p.id === currentId);
+                      const parent = allParagraphs.find(
+                        (p) => p.id === currentId,
+                      );
                       if (parent) {
                         ancestors.unshift(parent);
                         currentId = parent.parentParagraphId;
@@ -310,21 +377,38 @@ export default function DocumentViewPage() {
                       }
                     }
                   }
-                  
+
                   return (
                     <div className="space-y-2">
                       {ancestors.map((ancestor, i) => (
-                        <div key={ancestor.id} style={{ marginLeft: `${i * 1}rem` }} className="bg-zinc-100/50 dark:bg-zinc-800/30 border border-zinc-200/50 dark:border-zinc-700/50 rounded-xl p-3 text-zinc-500 dark:text-zinc-400 text-xs">
-                          {ancestor.marker && <span className="font-bold mr-2 text-zinc-600 dark:text-zinc-300">{ancestor.marker}</span>}
+                        <div
+                          key={ancestor.id}
+                          style={{ marginLeft: `${i * 1}rem` }}
+                          className="bg-zinc-100/50 dark:bg-zinc-800/30 border border-zinc-200/50 dark:border-zinc-700/50 rounded-xl p-3 text-zinc-500 dark:text-zinc-400 text-xs"
+                        >
+                          {ancestor.marker && (
+                            <span className="font-bold mr-2 text-zinc-600 dark:text-zinc-300">
+                              {ancestor.marker}
+                            </span>
+                          )}
                           {ancestor.text}
                         </div>
                       ))}
-                      
-                      <div style={{ marginLeft: `${ancestors.length * 1}rem` }} className="bg-blue-50/50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-900/30 rounded-xl p-4 text-zinc-800 dark:text-zinc-200 leading-relaxed text-sm relative">
+
+                      <div
+                        style={{ marginLeft: `${ancestors.length * 1}rem` }}
+                        className="bg-blue-50/50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-900/30 rounded-xl p-4 text-zinc-800 dark:text-zinc-200 leading-relaxed text-sm relative"
+                      >
                         {ancestors.length > 0 && (
-                          <div className="absolute -left-3 top-4 text-blue-300 dark:text-blue-700">↳</div>
+                          <div className="absolute -left-3 top-4 text-blue-300 dark:text-blue-700">
+                            ↳
+                          </div>
                         )}
-                        {selectedParagraph.marker && <span className="font-bold mr-2 text-blue-700 dark:text-blue-400">{selectedParagraph.marker}</span>}
+                        {selectedParagraph.marker && (
+                          <span className="font-bold mr-2 text-blue-700 dark:text-blue-400">
+                            {selectedParagraph.marker}
+                          </span>
+                        )}
                         {selectedParagraph.text}
                       </div>
                     </div>
@@ -334,8 +418,10 @@ export default function DocumentViewPage() {
 
               <div>
                 <div className="flex items-center justify-between mb-4">
-                  <div className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest">Controls</div>
-                  <button 
+                  <div className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest">
+                    Controls
+                  </div>
+                  <button
                     onClick={handleGenerateControls}
                     disabled={isGenerating || !selectedModel}
                     className="flex items-center gap-2 text-xs font-semibold px-3 py-1.5 bg-zinc-900 hover:bg-zinc-800 dark:bg-zinc-100 dark:hover:bg-white text-white dark:text-zinc-900 rounded-lg transition-all disabled:opacity-50 shadow-sm"
@@ -347,7 +433,8 @@ export default function DocumentViewPage() {
 
                 {!selectedModel && (
                   <p className="text-xs text-amber-600 dark:text-amber-400 mb-4 bg-amber-50 dark:bg-amber-900/20 p-2 rounded-lg border border-amber-200 dark:border-amber-900/30">
-                    Please select an LLM model in the top header to generate controls.
+                    Please select an LLM model in the top header to generate
+                    controls.
                   </p>
                 )}
 
@@ -357,23 +444,40 @@ export default function DocumentViewPage() {
                   </div>
                 ) : controls.length === 0 ? (
                   <div className="text-center p-8 bg-zinc-50 dark:bg-zinc-900/50 rounded-xl border border-zinc-100 dark:border-zinc-800 border-dashed">
-                    <p className="text-zinc-500 dark:text-zinc-400 text-sm">No controls mapped yet.</p>
+                    <p className="text-zinc-500 dark:text-zinc-400 text-sm">
+                      No controls mapped yet.
+                    </p>
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    {controls.map(ctrl => (
-                      <div key={ctrl.id} className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-4 shadow-sm relative group overflow-hidden">
+                    {controls.map((ctrl) => (
+                      <div
+                        key={ctrl.id}
+                        className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-4 shadow-sm relative group overflow-hidden"
+                      >
                         <div className="absolute top-0 left-0 w-1 h-full bg-green-500"></div>
-                        <h4 className="font-bold text-zinc-900 dark:text-zinc-100 text-sm mb-2 ml-2">{ctrl.title}</h4>
-                        <p className="text-sm text-zinc-600 dark:text-zinc-400 ml-2 whitespace-pre-wrap">{ctrl.text}</p>
-                        
+                        <h4 className="font-bold text-zinc-900 dark:text-zinc-100 text-sm mb-2 ml-2">
+                          {ctrl.title}
+                        </h4>
+                        <p className="text-sm text-zinc-600 dark:text-zinc-400 ml-2 whitespace-pre-wrap">
+                          {ctrl.text}
+                        </p>
+
                         {ctrl.paragraphs.length > 1 && (
                           <div className="mt-3 ml-2 pt-3 border-t border-zinc-100 dark:border-zinc-800/50">
-                            <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2">Also mapped to:</p>
+                            <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2">
+                              Also mapped to:
+                            </p>
                             <div className="space-y-2">
-                              {ctrl.paragraphs.filter(p => p.id !== selectedParagraph.id).map(p => (
-                                <MappedParagraphCard key={p.id} p={p} compact />
-                              ))}
+                              {ctrl.paragraphs
+                                .filter((p) => p.id !== selectedParagraph.id)
+                                .map((p) => (
+                                  <MappedParagraphCard
+                                    key={p.id}
+                                    p={p}
+                                    compact
+                                  />
+                                ))}
                             </div>
                           </div>
                         )}
@@ -386,7 +490,6 @@ export default function DocumentViewPage() {
           </>
         )}
       </div>
-
     </div>
   );
 }

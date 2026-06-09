@@ -1,14 +1,14 @@
 "use server";
 
-import { PDFParse } from 'pdf-parse';
+import { PDFParse } from "pdf-parse";
 import { Ollama } from "ollama";
 
 // Disable fetch timeout for long-running LLM calls
-import { Agent, setGlobalDispatcher } from 'undici';
+import { Agent, setGlobalDispatcher } from "undici";
 setGlobalDispatcher(new Agent({ headersTimeout: 0 }));
 
 const ollama = new Ollama({
-  host: process.env.OLLAMA_HOST || "http://127.0.0.1:11434"
+  host: process.env.OLLAMA_HOST || "http://127.0.0.1:11434",
 });
 
 export type Paragraph = {
@@ -50,7 +50,10 @@ export async function extractPdfText(formData: FormData) {
     return { success: true, rawText };
   } catch (error) {
     console.error("Error in extractPdfText:", error);
-    return { success: false, error: "An unexpected error occurred during PDF extraction." };
+    return {
+      success: false,
+      error: "An unexpected error occurred during PDF extraction.",
+    };
   }
 }
 
@@ -94,7 +97,7 @@ Ensure all text is captured accurately and organized logically based on the docu
       model: model,
       messages: [
         { role: "system", content: systemPrompt },
-        { role: "user", content: rawText }
+        { role: "user", content: rawText },
       ],
       format: "json",
     });
@@ -102,20 +105,29 @@ Ensure all text is captured accurately and organized logically based on the docu
     const resultText = response.message.content;
     const promptTokens = response.prompt_eval_count;
     const evalTokens = response.eval_count;
-    console.log(`[LLM Usage] Prompt tokens (Context used): ${promptTokens}, Generated tokens: ${evalTokens}`);
-    
+    console.log(
+      `[LLM Usage] Prompt tokens (Context used): ${promptTokens}, Generated tokens: ${evalTokens}`,
+    );
+
     let parsedJson: ParsedDocument;
 
     try {
       parsedJson = JSON.parse(resultText);
     } catch (error) {
       console.error("Failed to parse JSON from LLM:", resultText, error);
-      return { success: false, error: "LLM returned invalid JSON.", rawJson: resultText };
+      return {
+        success: false,
+        error: "LLM returned invalid JSON.",
+        rawJson: resultText,
+      };
     }
 
     return { success: true, data: parsedJson, rawJson: resultText };
   } catch (error) {
     console.error("Error in structureTextWithLlm:", error);
-    return { success: false, error: "An unexpected error occurred during LLM processing." };
+    return {
+      success: false,
+      error: "An unexpected error occurred during LLM processing.",
+    };
   }
 }

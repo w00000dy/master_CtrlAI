@@ -1,7 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { MessageSquareIcon, SettingsIcon, ChevronRightIcon } from "lucide-animated";
+import {
+  MessageSquareIcon,
+  SettingsIcon,
+  ChevronRightIcon,
+} from "lucide-animated";
 
 export default function Home() {
   return (
@@ -26,7 +30,10 @@ export default function Home() {
                 </span>
               </div>
             </div>
-            <ChevronRightIcon className="text-zinc-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" size={20} />
+            <ChevronRightIcon
+              className="text-zinc-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors"
+              size={20}
+            />
           </Link>
 
           <button

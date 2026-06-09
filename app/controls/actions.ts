@@ -3,23 +3,22 @@
 import { prisma } from "@/lib/prisma";
 import { Paragraph } from "../../generated/prisma/client";
 import { Ollama } from "ollama";
-import { Agent, setGlobalDispatcher } from 'undici';
+import { Agent, setGlobalDispatcher } from "undici";
 
 // Disable fetch timeout for long-running LLM calls
 setGlobalDispatcher(new Agent({ headersTimeout: 0 }));
 
 const ollama = new Ollama({
-  host: process.env.OLLAMA_HOST || "http://127.0.0.1:11434"
+  host: process.env.OLLAMA_HOST || "http://127.0.0.1:11434",
 });
-
 
 function enrichControlsWithAncestors<
   C extends { paragraphs: P[] },
-  P extends { parentParagraphId: string | null }
+  P extends { parentParagraphId: string | null },
 >(controls: C[], allParagraphs: Paragraph[]) {
-  const paraMap = new Map(allParagraphs.map(p => [p.id, p]));
+  const paraMap = new Map(allParagraphs.map((p) => [p.id, p]));
 
-  return controls.map(control => {
+  return controls.map((control) => {
     return {
       ...control,
       paragraphs: control.paragraphs.map((p: P) => {
@@ -35,7 +34,7 @@ function enrichControlsWithAncestors<
           }
         }
         return { ...p, ancestors };
-      })
+      }),
     };
   });
 }
@@ -49,20 +48,23 @@ export async function getControls() {
             include: {
               section: {
                 include: {
-                  document: true
-                }
-              }
-            }
-          }
+                  document: true,
+                },
+              },
+            },
+          },
         },
         orderBy: {
-          id: 'desc'
-        }
+          id: "desc",
+        },
       }),
-      prisma.paragraph.findMany()
+      prisma.paragraph.findMany(),
     ]);
 
-    const enrichedControls = enrichControlsWithAncestors(controls, allParagraphs);
+    const enrichedControls = enrichControlsWithAncestors(
+      controls,
+      allParagraphs,
+    );
 
     return { success: true, controls: enrichedControls };
   } catch (error) {
@@ -71,16 +73,20 @@ export async function getControls() {
   }
 }
 
-export async function createControl(data: { title: string; text: string; paragraphIds: string[] }) {
+export async function createControl(data: {
+  title: string;
+  text: string;
+  paragraphIds: string[];
+}) {
   try {
     const control = await prisma.control.create({
       data: {
         title: data.title,
         text: data.text,
         paragraphs: {
-          connect: data.paragraphIds.map(id => ({ id }))
-        }
-      }
+          connect: data.paragraphIds.map((id) => ({ id })),
+        },
+      },
     });
     return { success: true, control };
   } catch (error) {
@@ -96,18 +102,22 @@ export async function getParagraphsForSelection() {
         sections: {
           include: {
             paragraphs: {
-              orderBy: { marker: 'asc' }
-            }
+              orderBy: { marker: "asc" },
+            },
           },
-          orderBy: { title: 'asc' }
-        }
+          orderBy: { title: "asc" },
+        },
       },
-      orderBy: { title: 'asc' }
+      orderBy: { title: "asc" },
     });
     return { success: true, documents };
   } catch (error) {
     console.error("Failed to fetch paragraphs for selection:", error);
-    return { success: false, error: "Failed to load paragraphs.", documents: [] };
+    return {
+      success: false,
+      error: "Failed to load paragraphs.",
+      documents: [],
+    };
   }
 }
 
@@ -117,22 +127,25 @@ export async function getControlsForParagraph(paragraphId: string) {
       prisma.control.findMany({
         where: {
           paragraphs: {
-            some: { id: paragraphId }
-          }
+            some: { id: paragraphId },
+          },
         },
         include: {
           paragraphs: {
             include: {
-              section: { include: { document: true } }
-            }
-          }
+              section: { include: { document: true } },
+            },
+          },
         },
-        orderBy: { id: 'desc' }
+        orderBy: { id: "desc" },
       }),
-      prisma.paragraph.findMany()
+      prisma.paragraph.findMany(),
     ]);
 
-    const enrichedControls = enrichControlsWithAncestors(controls, allParagraphs);
+    const enrichedControls = enrichControlsWithAncestors(
+      controls,
+      allParagraphs,
+    );
 
     return { success: true, controls: enrichedControls };
   } catch (error) {
@@ -141,11 +154,14 @@ export async function getControlsForParagraph(paragraphId: string) {
   }
 }
 
-export async function generateControlsForParagraph(paragraphId: string, model: string) {
+export async function generateControlsForParagraph(
+  paragraphId: string,
+  model: string,
+) {
   try {
     const focusParagraph = await prisma.paragraph.findUnique({
       where: { id: paragraphId },
-      include: { section: { include: { document: true } } }
+      include: { section: { include: { document: true } } },
     });
 
     if (!focusParagraph) {
@@ -153,28 +169,29 @@ export async function generateControlsForParagraph(paragraphId: string, model: s
     }
 
     const existingControls = await prisma.control.findMany({
-      select: { title: true, text: true }
+      select: { title: true, text: true },
     });
 
     const allParagraphs = await prisma.paragraph.findMany({
       include: { section: { include: { document: true } } },
       orderBy: [
-        { section: { document: { title: 'asc' } } },
-        { section: { marker: 'asc' } },
-        { marker: 'asc' }
-      ]
+        { section: { document: { title: "asc" } } },
+        { section: { marker: "asc" } },
+        { marker: "asc" },
+      ],
     });
 
     // Formatting context for LLM
-    const existingControlsStr = existingControls.length > 0 
-      ? existingControls.map(c => `- ${c.title}: ${c.text}`).join("\n") 
-      : "No existing controls.";
+    const existingControlsStr =
+      existingControls.length > 0
+        ? existingControls.map((c) => `- ${c.title}: ${c.text}`).join("\n")
+        : "No existing controls.";
 
     // Find ancestors
     const ancestors = [];
     let currentId = focusParagraph.parentParagraphId;
     while (currentId) {
-      const parent = allParagraphs.find(p => p.id === currentId);
+      const parent = allParagraphs.find((p) => p.id === currentId);
       if (parent) {
         ancestors.unshift(parent);
         currentId = parent.parentParagraphId;
@@ -182,9 +199,12 @@ export async function generateControlsForParagraph(paragraphId: string, model: s
         break;
       }
     }
-    const ancestorsStr = ancestors.length > 0 
-      ? ancestors.map(p => `- ${p.marker ? p.marker + " " : ""}${p.text}`).join("\n")
-      : "No ancestor paragraphs.";
+    const ancestorsStr =
+      ancestors.length > 0
+        ? ancestors
+            .map((p) => `- ${p.marker ? p.marker + " " : ""}${p.text}`)
+            .join("\n")
+        : "No ancestor paragraphs.";
 
     // Group all paragraphs by Document -> Section
     const grouped: Record<string, Record<string, typeof allParagraphs>> = {};
@@ -197,26 +217,31 @@ export async function generateControlsForParagraph(paragraphId: string, model: s
     }
 
     let allParagraphsStr = "";
-    
+
     const docTitles = Object.keys(grouped);
     for (const docTitle of docTitles) {
       allParagraphsStr += `Document: ${docTitle}\n`;
       const secTitles = Object.keys(grouped[docTitle]);
       for (const secTitle of secTitles) {
         allParagraphsStr += `  Section: ${secTitle}\n`;
-        
+
         const secParas = grouped[docTitle][secTitle];
-        const roots = secParas.filter(p => !p.parentParagraphId || !secParas.some(sp => sp.id === p.parentParagraphId));
-        
+        const roots = secParas.filter(
+          (p) =>
+            !p.parentParagraphId ||
+            !secParas.some((sp) => sp.id === p.parentParagraphId),
+        );
+
         const childrenMap = new Map<string, typeof allParagraphs>();
         for (const p of secParas) {
           if (p.parentParagraphId) {
-            if (!childrenMap.has(p.parentParagraphId)) childrenMap.set(p.parentParagraphId, []);
+            if (!childrenMap.has(p.parentParagraphId))
+              childrenMap.set(p.parentParagraphId, []);
             childrenMap.get(p.parentParagraphId)!.push(p);
           }
         }
-        
-        const printPara = (p: typeof allParagraphs[0], depth: number) => {
+
+        const printPara = (p: (typeof allParagraphs)[0], depth: number) => {
           const indent = "    " + "  ".repeat(depth);
           allParagraphsStr += `${indent}- [ID: ${p.id}] ${p.marker ? p.marker + " " : ""}${p.text}\n`;
           const children = childrenMap.get(p.id) || [];
@@ -276,17 +301,19 @@ ${allParagraphsStr}
       model: model,
       messages: [
         { role: "system", content: systemPrompt },
-        { role: "user", content: userPrompt }
+        { role: "user", content: userPrompt },
       ],
       format: "json",
     });
 
     const resultText = response.message.content;
-    console.log(resultText)
+    console.log(resultText);
     const promptTokens = response.prompt_eval_count;
     const evalTokens = response.eval_count;
-    console.log(`[LLM Usage] Prompt tokens (Context used): ${promptTokens}, Generated tokens: ${evalTokens}`);
-    
+    console.log(
+      `[LLM Usage] Prompt tokens (Context used): ${promptTokens}, Generated tokens: ${evalTokens}`,
+    );
+
     let parsedJson;
 
     try {
@@ -297,7 +324,9 @@ ${allParagraphsStr}
         // Fallback in case it directly returned an array
         parsedJson = rawJson;
       } else {
-        throw new Error("Invalid format: Expected an object with a 'controls' array.");
+        throw new Error(
+          "Invalid format: Expected an object with a 'controls' array.",
+        );
       }
     } catch (error) {
       console.error("Failed to parse JSON from LLM:", resultText, error);
@@ -306,11 +335,15 @@ ${allParagraphsStr}
 
     const createdControls = [];
     for (const ctrl of parsedJson) {
-      const pIds = new Set<string>(Array.isArray(ctrl.mappedParagraphIds) ? ctrl.mappedParagraphIds : []);
+      const pIds = new Set<string>(
+        Array.isArray(ctrl.mappedParagraphIds) ? ctrl.mappedParagraphIds : [],
+      );
       pIds.add(focusParagraph.id); // Ensure the focus paragraph is included
 
       // Filter valid IDs
-      const validIds = Array.from(pIds).filter(id => allParagraphs.some(p => p.id === id));
+      const validIds = Array.from(pIds).filter((id) =>
+        allParagraphs.some((p) => p.id === id),
+      );
 
       if (validIds.length === 0) continue;
 
@@ -319,14 +352,14 @@ ${allParagraphsStr}
           title: ctrl.title || "Untitled Control",
           text: ctrl.text || "",
           paragraphs: {
-            connect: validIds.map(id => ({ id }))
-          }
+            connect: validIds.map((id) => ({ id })),
+          },
         },
         include: {
           paragraphs: {
-            include: { section: { include: { document: true } } }
-          }
-        }
+            include: { section: { include: { document: true } } },
+          },
+        },
       });
       createdControls.push(dbControl);
     }
@@ -334,11 +367,17 @@ ${allParagraphsStr}
     return { success: true, controls: createdControls };
   } catch (error) {
     console.error("Failed to generate controls:", error);
-    return { success: false, error: "An unexpected error occurred during LLM processing." };
+    return {
+      success: false,
+      error: "An unexpected error occurred during LLM processing.",
+    };
   }
 }
 
-export async function updateControl(id: string, data: { title: string; text: string; paragraphIds?: string[] }) {
+export async function updateControl(
+  id: string,
+  data: { title: string; text: string; paragraphIds?: string[] },
+) {
   try {
     const control = await prisma.control.update({
       where: { id },
@@ -348,10 +387,10 @@ export async function updateControl(id: string, data: { title: string; text: str
         ...(data.paragraphIds && {
           paragraphs: {
             set: [], // clear existing
-            connect: data.paragraphIds.map(pid => ({ id: pid }))
-          }
-        })
-      }
+            connect: data.paragraphIds.map((pid) => ({ id: pid })),
+          },
+        }),
+      },
     });
     return { success: true, control };
   } catch (error) {
@@ -363,7 +402,7 @@ export async function updateControl(id: string, data: { title: string; text: str
 export async function deleteControl(id: string) {
   try {
     await prisma.control.delete({
-      where: { id }
+      where: { id },
     });
     return { success: true };
   } catch (error) {
