@@ -162,6 +162,7 @@ export default function ControlsPage() {
 						</p>
 					</div>
 					<button
+						type="button"
 						onClick={openModal}
 						className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors shadow-sm"
 					>
@@ -198,6 +199,7 @@ export default function ControlsPage() {
 										</h2>
 										<div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
 											<button
+												type="button"
 												onClick={() => openEditModal(control)}
 												className="p-1.5 text-zinc-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-md transition-colors"
 												title="Edit"
@@ -217,6 +219,7 @@ export default function ControlsPage() {
 												</svg>
 											</button>
 											<button
+												type="button"
 												onClick={() => handleDeleteControl(control.id)}
 												className="p-1.5 text-zinc-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-md transition-colors"
 												title="Delete"
