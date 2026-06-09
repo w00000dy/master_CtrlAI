@@ -138,16 +138,18 @@ You will be given:
 Instructions:
 - Write 1 to 3 specific, actionable controls that fulfill the requirements of the FOCUS PARAGRAPH.
 - For each control, determine if it also helps fulfill any OTHER paragraphs from the ALL PARAGRAPHS list.
-- Return a JSON array of objects. Each object must strictly follow this structure:
-[
-  {
-    "title": "Short title of the control (e.g. Password Policy)",
-    "text": "Detailed, actionable implementation instruction.",
-    "mappedParagraphIds": ["id1", "id2"] // MUST include the FOCUS PARAGRAPH ID, plus any other relevant paragraph IDs from the ALL PARAGRAPHS list.
-  }
-]
+- Return a JSON object containing a single key "controls" that holds an array of control objects. Each object must strictly follow this structure:
+{
+  "controls": [
+    {
+      "title": "Short title of the control (e.g. Password Policy)",
+      "text": "Detailed, actionable implementation instruction.",
+      "mappedParagraphIds": ["id1", "id2"] // MUST include the FOCUS PARAGRAPH ID, plus any other relevant paragraph IDs from the ALL PARAGRAPHS list.
+    }
+  ]
+}
 
-Output ONLY valid JSON. No markdown formatting, no explanations outside the JSON array.`;
+Output ONLY valid JSON. No markdown formatting, no explanations outside the JSON.`;
 
     const userPrompt = `
 FOCUS PARAGRAPH (ID: ${focusParagraph.id}):
@@ -173,22 +175,17 @@ ${allParagraphsStr}
 
     const resultText = response.message.content;
     
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let parsedJson: any;
 
     try {
-      parsedJson = JSON.parse(resultText);
-      if (!Array.isArray(parsedJson)) {
-        if (parsedJson && typeof parsedJson === 'object') {
-           const keys = Object.keys(parsedJson);
-           if (keys.length === 1 && Array.isArray(parsedJson[keys[0]])) {
-             parsedJson = parsedJson[keys[0]];
-           } else {
-             throw new Error("Not an array");
-           }
-        } else {
-          throw new Error("Not an array");
-        }
+      const rawJson = JSON.parse(resultText);
+      if (rawJson && Array.isArray(rawJson.controls)) {
+        parsedJson = rawJson.controls;
+      } else if (Array.isArray(rawJson)) {
+        // Fallback in case it directly returned an array
+        parsedJson = rawJson;
+      } else {
+        throw new Error("Invalid format: Expected an object with a 'controls' array.");
       }
     } catch (error) {
       console.error("Failed to parse JSON from LLM:", resultText, error);
