@@ -6,13 +6,13 @@ import { generateChatResponse } from "../actions";
 import { useModel } from "../components/ModelContext";
 
 const MessageBubble = ({
-	role,
+	sender,
 	content,
 }: {
-	role: string;
+	sender: string;
 	content: string;
 }) => {
-	const isUser = role === "user";
+	const isUser = sender === "user";
 	return (
 		<div className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
 			<div
@@ -71,9 +71,9 @@ export default function ChatPage() {
 		<div className="flex flex-col flex-1 overflow-hidden">
 			<main className="flex-1 overflow-y-auto p-4 w-full max-w-3xl mx-auto flex flex-col gap-4">
 				{messages.map((msg, idx) => (
-					<MessageBubble key={idx} {...msg} />
+					<MessageBubble key={idx} sender={msg.role} content={msg.content} />
 				))}
-				{isLoading && <MessageBubble role="bot" content="..." />}
+				{isLoading && <MessageBubble sender="bot" content="..." />}
 			</main>
 
 			<footer className="p-4 border-t border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 flex-shrink-0 mt-auto">
