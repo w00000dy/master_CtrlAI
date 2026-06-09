@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useModel } from "../../components/ModelContext";
-import { extractPdfText, structureTextWithLlm, ParsedDocument } from "./parsePdf";
+import { extractPdfText, structureTextWithLlm, ParsedDocument, Paragraph } from "./parsePdf";
 import { ParagraphRenderer } from "../../components/ParagraphRenderer";
 import { saveDocument } from "../actions";
 import { LoaderIcon, CheckIcon, type CheckIconHandle } from "lucide-animated";
@@ -251,9 +251,17 @@ export default function ImportPage() {
                   <div className="p-6 space-y-6">
                     {section.paragraphs && section.paragraphs.length > 0 && (
                       <div className="space-y-6">
-                        {section.paragraphs.map((p, pIdx) => (
-                          <ParagraphRenderer key={pIdx} paragraph={p} />
-                        ))}
+                        {(() => {
+                          const renderTree = (paragraphs: Paragraph[], pathPrefix = "", depth = 0): React.ReactNode[] => 
+                            paragraphs.flatMap((p, pIdx) => {
+                              const currentPath = pathPrefix ? `${pathPrefix}-${pIdx}` : `${pIdx}`;
+                              return [
+                                <ParagraphRenderer key={currentPath} paragraph={p as unknown as import("../../../generated/prisma/client").Paragraph} depth={depth} />,
+                                ...(p.subParagraphs ? renderTree(p.subParagraphs, currentPath, depth + 1) : [])
+                              ];
+                            });
+                          return renderTree(section.paragraphs);
+                        })()}
                       </div>
                     )}
                   </div>
