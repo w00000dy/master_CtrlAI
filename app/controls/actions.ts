@@ -13,23 +13,49 @@ const ollama = new Ollama({
 
 export async function getControls() {
   try {
-    const controls = await prisma.control.findMany({
-      include: {
-        paragraphs: {
-          include: {
-            section: {
-              include: {
-                document: true
+    const [controls, allParagraphs] = await Promise.all([
+      prisma.control.findMany({
+        include: {
+          paragraphs: {
+            include: {
+              section: {
+                include: {
+                  document: true
+                }
               }
             }
           }
+        },
+        orderBy: {
+          id: 'desc'
         }
-      },
-      orderBy: {
-        id: 'desc'
-      }
+      }),
+      prisma.paragraph.findMany()
+    ]);
+
+    const paraMap = new Map(allParagraphs.map(p => [p.id, p]));
+
+    const enrichedControls = controls.map(control => {
+      return {
+        ...control,
+        paragraphs: control.paragraphs.map(p => {
+          const ancestors = [];
+          let currentId = p.parentParagraphId;
+          while (currentId) {
+            const parent = paraMap.get(currentId);
+            if (parent) {
+              ancestors.unshift(parent);
+              currentId = parent.parentParagraphId;
+            } else {
+              break;
+            }
+          }
+          return { ...p, ancestors };
+        })
+      };
     });
-    return { success: true, controls };
+
+    return { success: true, controls: enrichedControls };
   } catch (error) {
     console.error("Failed to fetch controls:", error);
     return { success: false, error: "Failed to load controls.", controls: [] };

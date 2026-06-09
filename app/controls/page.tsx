@@ -14,6 +14,11 @@ type ParagraphWithContext = {
       title: string;
     };
   };
+  ancestors?: {
+    id: string;
+    marker: string | null;
+    text: string;
+  }[];
 };
 
 type Control = {
@@ -187,10 +192,24 @@ export default function ControlsPage() {
                               {p.section.title}
                             </span>
                           </div>
-                          <p className="text-sm text-zinc-800 dark:text-zinc-200 leading-relaxed pl-3 border-l-2 border-zinc-200 dark:border-zinc-700">
+                          
+                          {p.ancestors && p.ancestors.length > 0 && (
+                            <div className="mb-2 space-y-1.5">
+                              {p.ancestors.map((anc, i) => (
+                                <div key={anc.id} style={{ marginLeft: `${i * 0.75}rem` }} className="text-xs text-zinc-500 dark:text-zinc-400 border-l-2 border-zinc-200 dark:border-zinc-800 pl-3 py-0.5">
+                                  {anc.marker && <span className="font-bold mr-1 text-zinc-600 dark:text-zinc-300">{anc.marker}</span>}
+                                  {anc.text}
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                          <div style={{ marginLeft: p.ancestors && p.ancestors.length > 0 ? `${p.ancestors.length * 0.75}rem` : '0' }} className="text-sm text-zinc-800 dark:text-zinc-200 leading-relaxed pl-3 border-l-2 border-blue-400 dark:border-blue-700 relative py-1">
+                            {p.ancestors && p.ancestors.length > 0 && (
+                              <div className="absolute -left-2.5 top-0 text-blue-400 dark:text-blue-700 text-xs">↳</div>
+                            )}
                             {p.marker && <span className="font-bold text-zinc-900 dark:text-zinc-100 mr-2">{p.marker}</span>}
                             {p.text}
-                          </p>
+                          </div>
                         </div>
                       ))}
                     </div>
