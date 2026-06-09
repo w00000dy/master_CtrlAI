@@ -164,6 +164,8 @@ ALL PARAGRAPHS IN DATABASE:
 ${allParagraphsStr}
 `;
 
+    console.log(userPrompt);
+
     const response = await ollama.chat({
       model: model,
       messages: [
@@ -174,6 +176,10 @@ ${allParagraphsStr}
     });
 
     const resultText = response.message.content;
+
+    const promptTokens = response.prompt_eval_count;
+    const evalTokens = response.eval_count;
+    console.log(`[LLM Usage] Prompt tokens (Context used): ${promptTokens}, Generated tokens: ${evalTokens}`);
     
     let parsedJson: any;
 
