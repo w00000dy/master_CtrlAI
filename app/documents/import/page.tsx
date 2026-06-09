@@ -1,6 +1,11 @@
 "use client";
 
-import { CheckIcon, type CheckIconHandle, LoaderIcon, CloudUploadIcon } from "lucide-animated";
+import {
+	CheckIcon,
+	type CheckIconHandle,
+	CloudUploadIcon,
+	LoaderIcon,
+} from "lucide-animated";
 import React, { useState } from "react";
 import { useModel } from "../../components/ModelContext";
 import { ParagraphRenderer } from "../../components/ParagraphRenderer";
@@ -130,7 +135,10 @@ export default function ImportPage() {
 								className="flex justify-center w-full h-32 px-4 transition bg-white dark:bg-zinc-900 border-2 border-zinc-300 dark:border-zinc-700 border-dashed rounded-md appearance-none cursor-pointer hover:border-zinc-400 dark:hover:border-zinc-600 focus:outline-none"
 							>
 								<span className="flex items-center space-x-2">
-									<CloudUploadIcon className="text-zinc-600 dark:text-zinc-400" size={24} />
+									<CloudUploadIcon
+										className="text-zinc-600 dark:text-zinc-400"
+										size={24}
+									/>
 									<span className="font-medium text-zinc-600 dark:text-zinc-400">
 										{file ? file.name : "Drop PDF to Attach, or browse"}
 									</span>
@@ -154,7 +162,10 @@ export default function ImportPage() {
 						>
 							{processingState ? (
 								<>
-									<LoaderIcon className="animate-spin -ml-1 mr-2 text-current" size={20} />
+									<LoaderIcon
+										className="animate-spin -ml-1 mr-2 text-current"
+										size={20}
+									/>
 									{processingState === "extracting"
 										? "Extracting Text..."
 										: "Structuring..."}
