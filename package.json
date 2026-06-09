@@ -1,42 +1,42 @@
 {
-  "name": "compliance-llm",
-  "version": "0.1.0",
-  "type": "module",
-  "private": true,
-  "scripts": {
-    "dev": "npm run migrate:dev && next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "eslint",
-    "migrate:dev": "prisma migrate dev",
-    "migrate:deploy": "prisma migrate deploy",
-    "migrate:reset": "prisma migrate reset",
-    "studio": "prisma studio"
-  },
-  "dependencies": {
-    "@prisma/adapter-mariadb": "^7.8.0",
-    "@prisma/client": "^7.8.0",
-    "lucide-animated": "^1.0.4",
-    "next": "16.2.7",
-    "ollama": "^0.6.3",
-    "pdf-parse": "^2.4.5",
-    "react": "19.2.7",
-    "react-dom": "19.2.7",
-    "undici": "^8.4.1"
-  },
-  "devDependencies": {
-    "@biomejs/biome": "2.4.16",
-    "@tailwindcss/postcss": "^4",
-    "@types/node": "^25.9.2",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "dotenv": "^17.4.2",
-    "eslint": "^9",
-    "eslint-config-next": "16.2.7",
-    "eslint-config-prettier": "^10.1.8",
-    "prettier": "3.8.4",
-    "prisma": "^7.8.0",
-    "tailwindcss": "^4",
-    "typescript": "^6"
-  }
+	"name": "compliance-llm",
+	"version": "0.1.0",
+	"type": "module",
+	"private": true,
+	"scripts": {
+		"dev": "npm run migrate:dev && next dev",
+		"build": "next build",
+		"start": "next start",
+		"lint": "eslint",
+		"migrate:dev": "prisma migrate dev",
+		"migrate:deploy": "prisma migrate deploy",
+		"migrate:reset": "prisma migrate reset",
+		"studio": "prisma studio"
+	},
+	"dependencies": {
+		"@prisma/adapter-mariadb": "^7.8.0",
+		"@prisma/client": "^7.8.0",
+		"lucide-animated": "^1.0.4",
+		"next": "16.2.7",
+		"ollama": "^0.6.3",
+		"pdf-parse": "^2.4.5",
+		"react": "19.2.7",
+		"react-dom": "19.2.7",
+		"undici": "^8.4.1"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "2.4.16",
+		"@tailwindcss/postcss": "^4",
+		"@types/node": "^25.9.2",
+		"@types/react": "^19",
+		"@types/react-dom": "^19",
+		"dotenv": "^17.4.2",
+		"eslint": "^9",
+		"eslint-config-next": "16.2.7",
+		"eslint-config-prettier": "^10.1.8",
+		"prettier": "3.8.4",
+		"prisma": "^7.8.0",
+		"tailwindcss": "^4",
+		"typescript": "^6"
+	}
 }
