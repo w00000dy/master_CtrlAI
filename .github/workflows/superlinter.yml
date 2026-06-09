@@ -40,3 +40,4 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VALIDATE_SQLFLUFF: false
           VALIDATE_SPELL_CODESPELL: false
+          CSS_FILE_NAME: "stylelint.config.ts"
