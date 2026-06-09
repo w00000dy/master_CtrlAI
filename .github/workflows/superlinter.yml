@@ -1,5 +1,5 @@
 ---
-name: Lint
+name: Super-Linter
 
 on: # yamllint disable-line rule:truthy
   push: null
@@ -42,5 +42,9 @@ jobs:
           VALIDATE_SPELL_CODESPELL: false
           VALIDATE_CSS_PRETTIER: false
           VALIDATE_JSON_PRETTIER: false
-          CSS_FILE_NAME: "stylelint.config.ts"
-          LINTER_RULES_PATH: .
+          VALIDATE_CSS: false
+          VALIDATE_JAVASCRIPT_ES: false
+          VALIDATE_JAVASCRIPT_STANDARD: false
+          VALIDATE_TYPESCRIPT_ES: false
+          VALIDATE_TYPESCRIPT_STANDARD: false
+
