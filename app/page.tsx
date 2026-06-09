@@ -1,11 +1,11 @@
 "use client";
 
-import Link from "next/link";
 import {
+	ChevronRightIcon,
 	MessageSquareIcon,
 	SettingsIcon,
-	ChevronRightIcon,
 } from "lucide-animated";
+import Link from "next/link";
 
 export default function Home() {
 	return (

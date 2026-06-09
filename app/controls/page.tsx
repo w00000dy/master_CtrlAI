@@ -2,22 +2,22 @@
 
 import type React from "react";
 import { useEffect, useState } from "react";
+import type {
+	Document,
+	Paragraph,
+	Section,
+} from "../../generated/prisma/client";
 import {
 	MappedParagraphCard,
 	type ParagraphWithContext,
 } from "../components/MappedParagraphCard";
 import {
-	getControls,
 	createControl,
-	getParagraphsForSelection,
 	deleteControl,
+	getControls,
+	getParagraphsForSelection,
 	updateControl,
 } from "./actions";
-import type {
-	Document,
-	Section,
-	Paragraph,
-} from "../../generated/prisma/client";
 
 type Control = {
 	id: string;

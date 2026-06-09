@@ -1,9 +1,9 @@
 "use server";
 
-import { prisma } from "@/lib/prisma";
-import type { Paragraph } from "../../generated/prisma/client";
 import { Ollama } from "ollama";
 import { Agent, setGlobalDispatcher } from "undici";
+import { prisma } from "@/lib/prisma";
+import type { Paragraph } from "../../generated/prisma/client";
 
 // Disable fetch timeout for long-running LLM calls
 setGlobalDispatcher(new Agent({ headersTimeout: 0 }));

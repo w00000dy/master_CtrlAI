@@ -1,38 +1,38 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import {
+	ArrowLeftIcon,
+	BookTextIcon,
+	type BookTextIconHandle,
+	BotIcon,
+	CalendarCheckIcon,
+	FilePenLineIcon,
+	LoaderIcon,
+	XIcon,
+} from "lucide-animated";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import {
-	getDocumentById,
-	deleteDocument,
-	updateDocumentTitle,
-} from "../actions";
+import { useEffect, useRef, useState } from "react";
+import type {
+	Document,
+	Paragraph,
+	Section,
+} from "../../../generated/prisma/client";
 import {
 	MappedParagraphCard,
 	type ParagraphWithContext,
 } from "../../components/MappedParagraphCard";
-import {
-	LoaderIcon,
-	ArrowLeftIcon,
-	FilePenLineIcon,
-	CalendarCheckIcon,
-	BookTextIcon,
-	XIcon,
-	BotIcon,
-	type BookTextIconHandle,
-} from "lucide-animated";
 import { useModel } from "../../components/ModelContext";
-import {
-	getControlsForParagraph,
-	generateControlsForParagraph,
-} from "../../controls/actions";
 import { ParagraphRenderer } from "../../components/ParagraphRenderer";
-import type {
-	Paragraph,
-	Document,
-	Section,
-} from "../../../generated/prisma/client";
+import {
+	generateControlsForParagraph,
+	getControlsForParagraph,
+} from "../../controls/actions";
+import {
+	deleteDocument,
+	getDocumentById,
+	updateDocumentTitle,
+} from "../actions";
 
 export type DocumentData = Document & {
 	sections: (Section & {

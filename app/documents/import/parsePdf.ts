@@ -1,10 +1,11 @@
 "use server";
 
-import { PDFParse } from "pdf-parse";
 import { Ollama } from "ollama";
+import { PDFParse } from "pdf-parse";
 
 // Disable fetch timeout for long-running LLM calls
 import { Agent, setGlobalDispatcher } from "undici";
+
 setGlobalDispatcher(new Agent({ headersTimeout: 0 }));
 
 const ollama = new Ollama({

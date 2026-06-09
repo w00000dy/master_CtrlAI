@@ -1,7 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import type { ParsedDocument, Paragraph } from "../documents/import/parsePdf";
+import type { Paragraph, ParsedDocument } from "../documents/import/parsePdf";
 
 export async function saveDocument(
 	document: ParsedDocument,

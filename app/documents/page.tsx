@@ -1,16 +1,16 @@
 "use client";
 
-import type React from "react";
-import { useEffect, useState, useRef } from "react";
-import Link from "next/link";
-import { getDocuments, deleteDocument } from "./actions";
 import {
 	BookTextIcon,
-	XIcon,
+	type BookTextIconHandle,
 	ClockIcon,
 	LoaderIcon,
-	type BookTextIconHandle,
+	XIcon,
 } from "lucide-animated";
+import Link from "next/link";
+import type React from "react";
+import { useEffect, useRef, useState } from "react";
+import { deleteDocument, getDocuments } from "./actions";
 
 type DocumentMeta = {
 	id: string;

@@ -1,16 +1,16 @@
 "use client";
 
+import { CheckIcon, type CheckIconHandle, LoaderIcon } from "lucide-animated";
 import React, { useState } from "react";
 import { useModel } from "../../components/ModelContext";
-import {
-	extractPdfText,
-	structureTextWithLlm,
-	type ParsedDocument,
-	type Paragraph,
-} from "./parsePdf";
 import { ParagraphRenderer } from "../../components/ParagraphRenderer";
 import { saveDocument } from "../actions";
-import { LoaderIcon, CheckIcon, type CheckIconHandle } from "lucide-animated";
+import {
+	extractPdfText,
+	type Paragraph,
+	type ParsedDocument,
+	structureTextWithLlm,
+} from "./parsePdf";
 
 function AnimatedCheckIcon() {
 	const iconRef = React.useRef<CheckIconHandle | null>(null);
