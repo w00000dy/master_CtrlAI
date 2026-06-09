@@ -4,17 +4,24 @@ import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { getDocumentById, deleteDocument, updateDocumentTitle } from "../actions";
-import { MappedParagraphCard } from "../../components/MappedParagraphCard";
+import { MappedParagraphCard, ParagraphWithContext } from "../../components/MappedParagraphCard";
 import { LoaderIcon, ArrowLeftIcon, FilePenLineIcon, CalendarCheckIcon, BookTextIcon, XIcon, BotIcon, type BookTextIconHandle } from "lucide-animated";
 import { useModel } from "../../components/ModelContext";
 import { getControlsForParagraph, generateControlsForParagraph } from "../../controls/actions";
 import { ParagraphRenderer } from "../../components/ParagraphRenderer";
 import type { Paragraph, Document, Section } from "../../../generated/prisma/client";
 
-type DocumentData = Document & {
+export type DocumentData = Document & {
   sections: (Section & {
     paragraphs: Paragraph[];
   })[];
+};
+
+type Control = {
+  id: string;
+  title: string;
+  text: string;
+  paragraphs: ParagraphWithContext[];
 };
 
 export default function DocumentViewPage() {
@@ -35,7 +42,7 @@ export default function DocumentViewPage() {
   
   // Side Panel State
   const [selectedParagraph, setSelectedParagraph] = useState<Paragraph | null>(null);
-  const [controls, setControls] = useState<any[]>([]);
+  const [controls, setControls] = useState<Control[]>([]);
   const [isLoadingControls, setIsLoadingControls] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
 
@@ -364,8 +371,7 @@ export default function DocumentViewPage() {
                           <div className="mt-3 ml-2 pt-3 border-t border-zinc-100 dark:border-zinc-800/50">
                             <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2">Also mapped to:</p>
                             <div className="space-y-2">
-                              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                              {ctrl.paragraphs.filter((p: any) => p.id !== selectedParagraph.id).map((p: any) => (
+                              {ctrl.paragraphs.filter(p => p.id !== selectedParagraph.id).map(p => (
                                 <MappedParagraphCard key={p.id} p={p} compact />
                               ))}
                             </div>
