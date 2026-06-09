@@ -142,7 +142,12 @@ export async function generateControlsForParagraph(paragraphId: string, model: s
     });
 
     const allParagraphs = await prisma.paragraph.findMany({
-      include: { section: { include: { document: true } } }
+      include: { section: { include: { document: true } } },
+      orderBy: [
+        { section: { document: { title: 'asc' } } },
+        { section: { marker: 'asc' } },
+        { marker: 'asc' }
+      ]
     });
 
     // Formatting context for LLM
@@ -177,9 +182,12 @@ export async function generateControlsForParagraph(paragraphId: string, model: s
     }
 
     let allParagraphsStr = "";
-    for (const docTitle of Object.keys(grouped)) {
+    
+    const docTitles = Object.keys(grouped);
+    for (const docTitle of docTitles) {
       allParagraphsStr += `Document: ${docTitle}\n`;
-      for (const secTitle of Object.keys(grouped[docTitle])) {
+      const secTitles = Object.keys(grouped[docTitle]);
+      for (const secTitle of secTitles) {
         allParagraphsStr += `  Section: ${secTitle}\n`;
         
         const secParas = grouped[docTitle][secTitle];
