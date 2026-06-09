@@ -19,9 +19,10 @@ export const ParagraphRenderer = ({
 					: "space-y-2"
 			}
 		>
-			<div
-				className={`group flex items-start gap-3 w-fit transition-colors p-1.5 -ml-1.5 rounded-lg ${onClick ? "cursor-pointer hover:bg-zinc-100/50 dark:hover:bg-zinc-800/50" : ""}`}
+			<button
+				type="button"
 				onClick={() => onClick?.(paragraph)}
+				className={`group flex items-start gap-3 text-left w-fit transition-colors p-1.5 -ml-1.5 rounded-lg ${onClick ? "cursor-pointer hover:bg-zinc-100/50 dark:hover:bg-zinc-800/50" : "cursor-default outline-none"}`}
 			>
 				{depth > 0 && (
 					<span className="text-zinc-300 dark:text-zinc-600 mt-1.5 leading-none shrink-0">
@@ -35,12 +36,12 @@ export const ParagraphRenderer = ({
 					</span>
 				)}
 
-				<p
+				<div
 					className={`text-zinc-700 dark:text-zinc-300 leading-relaxed text-[15px] ${!paragraph.marker && depth === 0 ? "mt-0.5" : ""}`}
 				>
 					{paragraph.text}
-				</p>
-			</div>
+				</div>
+			</button>
 		</div>
 	);
 };

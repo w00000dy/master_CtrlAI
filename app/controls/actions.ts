@@ -314,7 +314,7 @@ ${allParagraphsStr}
 			`[LLM Usage] Prompt tokens (Context used): ${promptTokens}, Generated tokens: ${evalTokens}`,
 		);
 
-		let parsedJson;
+		let parsedJson: { title?: string; text?: string; mappedParagraphIds?: string[] }[];
 
 		try {
 			const rawJson = JSON.parse(resultText);

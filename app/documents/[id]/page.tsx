@@ -222,7 +222,6 @@ export default function DocumentViewPage() {
 											value={editTitle}
 											onChange={(e) => setEditTitle(e.target.value)}
 											className="flex-1 text-2xl md:text-3xl font-extrabold bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 rounded-xl px-4 py-3 text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
-											autoFocus
 										/>
 										<button
 											type="button"
@@ -420,6 +419,7 @@ export default function DocumentViewPage() {
 										Controls
 									</div>
 									<button
+										type="button"
 										onClick={handleGenerateControls}
 										disabled={isGenerating || !selectedModel}
 										className="flex items-center gap-2 text-xs font-semibold px-3 py-1.5 bg-zinc-900 hover:bg-zinc-800 dark:bg-zinc-100 dark:hover:bg-white text-white dark:text-zinc-900 rounded-lg transition-all disabled:opacity-50 shadow-sm"
