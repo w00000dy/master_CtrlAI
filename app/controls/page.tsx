@@ -10,6 +10,7 @@ type ParagraphWithContext = {
   text: string;
   section: {
     title: string;
+    marker: string | null;
     document: {
       title: string;
     };
@@ -188,7 +189,8 @@ export default function ControlsPage() {
                             <span className="text-[10px] font-bold uppercase tracking-wide px-2 py-1 bg-blue-100/80 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 rounded-md">
                               {p.section.document.title}
                             </span>
-                            <span className="text-[10px] font-bold uppercase tracking-wide px-2 py-1 bg-zinc-200/80 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 rounded-md">
+                            <span className="text-[10px] font-bold uppercase tracking-wide px-2 py-1 bg-zinc-200/80 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 rounded-md flex items-center">
+                              {p.section.marker && <span className="text-zinc-900 dark:text-zinc-200 mr-1.5 bg-zinc-300/50 dark:bg-zinc-700/50 px-1 rounded-sm font-mono whitespace-nowrap shrink-0">{p.section.marker}</span>}
                               {p.section.title}
                             </span>
                           </div>
@@ -196,19 +198,19 @@ export default function ControlsPage() {
                           {p.ancestors && p.ancestors.length > 0 && (
                             <div className="mb-2 space-y-1.5">
                               {p.ancestors.map((anc, i) => (
-                                <div key={anc.id} style={{ marginLeft: `${i * 0.75}rem` }} className="text-xs text-zinc-500 dark:text-zinc-400 border-l-2 border-zinc-200 dark:border-zinc-800 pl-3 py-0.5">
-                                  {anc.marker && <span className="font-bold mr-1 text-zinc-600 dark:text-zinc-300">{anc.marker}</span>}
-                                  {anc.text}
+                                <div key={anc.id} style={{ marginLeft: `${i * 0.75}rem` }} className="text-xs text-zinc-500 dark:text-zinc-400 border-l-2 border-zinc-200 dark:border-zinc-800 pl-3 py-0.5 flex items-start">
+                                  {anc.marker && <span className="inline-flex items-center justify-center bg-zinc-200 dark:bg-zinc-800 px-1.5 py-0.5 rounded text-[10px] font-mono font-bold text-zinc-600 dark:text-zinc-400 mr-2 border border-zinc-300 dark:border-zinc-700 mt-0.5 shrink-0 whitespace-nowrap">{anc.marker}</span>}
+                                  <span className="leading-relaxed">{anc.text}</span>
                                 </div>
                               ))}
                             </div>
                           )}
-                          <div style={{ marginLeft: p.ancestors && p.ancestors.length > 0 ? `${p.ancestors.length * 0.75}rem` : '0' }} className="text-sm text-zinc-800 dark:text-zinc-200 leading-relaxed pl-3 border-l-2 border-blue-400 dark:border-blue-700 relative py-1">
+                          <div style={{ marginLeft: p.ancestors && p.ancestors.length > 0 ? `${p.ancestors.length * 0.75}rem` : '0' }} className="text-sm text-zinc-800 dark:text-zinc-200 leading-relaxed pl-3 border-l-2 border-blue-400 dark:border-blue-700 relative py-1 flex items-start">
                             {p.ancestors && p.ancestors.length > 0 && (
                               <div className="absolute -left-2.5 top-0 text-blue-400 dark:text-blue-700 text-xs">↳</div>
                             )}
-                            {p.marker && <span className="font-bold text-zinc-900 dark:text-zinc-100 mr-2">{p.marker}</span>}
-                            {p.text}
+                            {p.marker && <span className="inline-flex items-center justify-center bg-blue-100 dark:bg-blue-900/50 px-1.5 py-0.5 rounded text-[11px] font-mono font-bold text-blue-700 dark:text-blue-300 mr-2 border border-blue-200 dark:border-blue-800/50 mt-0.5 shrink-0 whitespace-nowrap">{p.marker}</span>}
+                            <span>{p.text}</span>
                           </div>
                         </div>
                       ))}
@@ -266,8 +268,11 @@ export default function ControlsPage() {
                       <div key={doc.id} className="space-y-4">
                         <div className="font-bold text-zinc-900 dark:text-zinc-100 border-b border-zinc-200 dark:border-zinc-800 pb-1">{doc.title}</div>
                         {doc.sections.map((sec: any) => (
-                          <div key={sec.id} className="pl-2 space-y-3 border-l-2 border-zinc-200 dark:border-zinc-800">
-                            <div className="text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider pl-3">{sec.title}</div>
+                          <div key={sec.id} className="pt-2">
+                            <div className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 mb-3 uppercase tracking-wider flex items-center">
+                              {sec.marker && <span className="inline-flex items-center justify-center bg-zinc-200 dark:bg-zinc-800 px-1.5 py-0.5 rounded text-[10px] font-mono text-zinc-600 dark:text-zinc-400 mr-2 border border-zinc-300 dark:border-zinc-700 whitespace-nowrap shrink-0">{sec.marker}</span>}
+                              {sec.title}
+                            </div>
                             <div className="pl-3 space-y-2">
                               {sec.paragraphs.map((p: any) => (
                                 <label key={p.id} className="flex items-start gap-3 cursor-pointer group p-2 -ml-2 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors">
@@ -277,9 +282,9 @@ export default function ControlsPage() {
                                     onChange={() => toggleParagraph(p.id)}
                                     className="mt-1 shrink-0 w-4 h-4 rounded border-zinc-300 text-blue-600 focus:ring-blue-500 transition-colors cursor-pointer"
                                   />
-                                  <span className="text-sm text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-900 dark:group-hover:text-zinc-100 leading-relaxed">
-                                    {p.marker && <span className="font-bold text-zinc-900 dark:text-zinc-100 mr-2">{p.marker}</span>}
-                                    {p.text}
+                                  <span className="text-sm text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-900 dark:group-hover:text-zinc-100 leading-relaxed flex items-start">
+                                    {p.marker && <span className="inline-flex items-center justify-center bg-zinc-200 dark:bg-zinc-800 px-1.5 py-0.5 rounded text-[11px] font-mono font-bold text-zinc-600 dark:text-zinc-400 mr-2 border border-zinc-300 dark:border-zinc-700 mt-0.5 shrink-0 whitespace-nowrap">{p.marker}</span>}
+                                    <span>{p.text}</span>
                                   </span>
                                 </label>
                               ))}
