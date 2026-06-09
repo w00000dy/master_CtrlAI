@@ -1,8 +1,8 @@
 "use client";
 
+import { DeleteIcon, SquarePenIcon, XIcon } from "lucide-animated";
 import type React from "react";
 import { useEffect, useState } from "react";
-import { SquarePenIcon, DeleteIcon, XIcon } from "lucide-animated";
 import type {
 	Document,
 	Paragraph,
@@ -267,7 +267,10 @@ export default function ControlsPage() {
 								className="space-y-6"
 							>
 								<div>
-									<label htmlFor="control-title" className="block text-sm font-semibold text-zinc-900 dark:text-zinc-100 mb-2">
+									<label
+										htmlFor="control-title"
+										className="block text-sm font-semibold text-zinc-900 dark:text-zinc-100 mb-2"
+									>
 										Control Title / ID
 									</label>
 									<input
@@ -281,7 +284,10 @@ export default function ControlsPage() {
 									/>
 								</div>
 								<div>
-									<label htmlFor="control-text" className="block text-sm font-semibold text-zinc-900 dark:text-zinc-100 mb-2">
+									<label
+										htmlFor="control-text"
+										className="block text-sm font-semibold text-zinc-900 dark:text-zinc-100 mb-2"
+									>
 										Implementation Instruction
 									</label>
 									<textarea
