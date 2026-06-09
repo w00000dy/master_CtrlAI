@@ -226,9 +226,9 @@ export default function ControlsPage() {
                         <div className="font-bold text-zinc-900 dark:text-zinc-100 border-b border-zinc-200 dark:border-zinc-800 pb-1">{doc.title}</div>
                         {doc.sections.map((sec: any) => (
                           <div key={sec.id} className="pt-2">
-                            <div className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 mb-3 uppercase tracking-wider flex items-center">
-                              {sec.marker && <span className="inline-flex items-center justify-center bg-zinc-200 dark:bg-zinc-800 px-1.5 py-0.5 rounded text-[10px] font-mono text-zinc-600 dark:text-zinc-400 mr-2 border border-zinc-300 dark:border-zinc-700 whitespace-nowrap shrink-0">{sec.marker}</span>}
-                              {sec.title}
+                            <div className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 mb-3 uppercase tracking-wider flex items-start">
+                              {sec.marker && <span className="inline-flex items-center justify-center bg-zinc-200 dark:bg-zinc-800 px-1.5 py-0.5 rounded text-[10px] font-mono text-zinc-600 dark:text-zinc-400 mr-2 border border-zinc-300 dark:border-zinc-700 whitespace-nowrap shrink-0 mt-0.5">{sec.marker}</span>}
+                              <span className="leading-relaxed">{sec.title}</span>
                             </div>
                             <div className="pl-3 space-y-2">
                               {sec.paragraphs.map((p: any) => (
