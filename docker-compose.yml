@@ -12,7 +12,17 @@ services:
     ports:
       - "127.0.0.1:${DATABASE_PORT}:3306"
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "${DATABASE_USER}", "-p${DATABASE_PASSWORD}"]
+      test:
+        [
+          "CMD",
+          "mysqladmin",
+          "ping",
+          "-h",
+          "localhost",
+          "-u",
+          "${DATABASE_USER}",
+          "-p${DATABASE_PASSWORD}",
+        ]
       interval: 10s
       timeout: 5s
       retries: 3
