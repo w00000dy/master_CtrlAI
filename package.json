@@ -7,7 +7,7 @@
 		"dev": "npm run migrate:dev && next dev",
 		"build": "next build",
 		"start": "next start",
-		"lint": "eslint",
+		"lint": "eslint && biome check .",
 		"stylelint": "stylelint '**.css'",
 		"migrate:dev": "prisma migrate dev",
 		"migrate:deploy": "prisma migrate deploy",
