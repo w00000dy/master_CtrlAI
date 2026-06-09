@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { getControls, createControl, getParagraphsForSelection } from "./actions";
+import { getControls, createControl, getParagraphsForSelection, deleteControl, updateControl } from "./actions";
 
 // types
 type ParagraphWithContext = {
@@ -34,6 +34,7 @@ export default function ControlsPage() {
   const [newText, setNewText] = useState("");
   const [selectedParagraphs, setSelectedParagraphs] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [editingControlId, setEditingControlId] = useState<string | null>(null);
 
   const fetchControls = async () => {
     setLoading(true);
@@ -63,6 +64,32 @@ export default function ControlsPage() {
     setNewTitle("");
     setNewText("");
     setSelectedParagraphs([]);
+    setEditingControlId(null);
+  };
+
+  const openEditModal = async (control: Control) => {
+    setNewTitle(control.title);
+    setNewText(control.text);
+    setSelectedParagraphs(control.paragraphs.map(p => p.id));
+    setEditingControlId(control.id);
+    setIsModalOpen(true);
+    
+    if (docsWithParagraphs.length === 0) {
+      const res = await getParagraphsForSelection();
+      if (res.success && res.documents) {
+        setDocsWithParagraphs(res.documents);
+      }
+    }
+  };
+
+  const handleDeleteControl = async (id: string) => {
+    if (!window.confirm("Are you sure you want to delete this control?")) return;
+    const res = await deleteControl(id);
+    if (res.success) {
+      fetchControls();
+    } else {
+      alert("Failed to delete control.");
+    }
   };
 
   const toggleParagraph = (id: string) => {
@@ -76,7 +103,12 @@ export default function ControlsPage() {
     if (!newTitle || !newText) return;
 
     setIsSubmitting(true);
-    const res = await createControl({ title: newTitle, text: newText, paragraphIds: selectedParagraphs });
+    let res;
+    if (editingControlId) {
+      res = await updateControl(editingControlId, { title: newTitle, text: newText, paragraphIds: selectedParagraphs });
+    } else {
+      res = await createControl({ title: newTitle, text: newText, paragraphIds: selectedParagraphs });
+    }
     setIsSubmitting(false);
 
     if (res.success) {
@@ -120,13 +152,21 @@ export default function ControlsPage() {
         ) : (
           <div className="grid gap-6 lg:grid-cols-2">
             {controls.map(control => (
-              <div key={control.id} className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl flex flex-col shadow-sm overflow-hidden">
+              <div key={control.id} className="group bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl flex flex-col shadow-sm overflow-hidden">
                 <div className="p-6 border-b border-zinc-100 dark:border-zinc-800/50 bg-zinc-50/50 dark:bg-zinc-900/30">
                   <div className="flex items-start justify-between">
                     <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
                       <span className="w-1.5 h-5 bg-blue-500 rounded-full inline-block"></span>
                       {control.title}
                     </h2>
+                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button onClick={() => openEditModal(control)} className="p-1.5 text-zinc-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-md transition-colors" title="Edit">
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                      </button>
+                      <button onClick={() => handleDeleteControl(control.id)} className="p-1.5 text-zinc-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-md transition-colors" title="Delete">
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                      </button>
+                    </div>
                   </div>
                   <p className="mt-4 text-zinc-700 dark:text-zinc-300 whitespace-pre-wrap leading-relaxed">{control.text}</p>
                 </div>
@@ -167,7 +207,7 @@ export default function ControlsPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-900/60 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden border border-zinc-200 dark:border-zinc-800">
             <div className="p-6 border-b border-zinc-200 dark:border-zinc-800 flex justify-between items-center bg-zinc-50/50 dark:bg-zinc-900/50">
-              <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">Add New Control</h2>
+              <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">{editingControlId ? "Edit Control" : "Add New Control"}</h2>
               <button onClick={closeModal} className="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors">
                 <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
               </button>
@@ -239,7 +279,7 @@ export default function ControlsPage() {
                 Cancel
               </button>
               <button type="submit" form="control-form" disabled={isSubmitting} className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50 shadow-sm">
-                {isSubmitting ? "Creating..." : "Create Control"}
+                {isSubmitting ? "Saving..." : (editingControlId ? "Save Changes" : "Create Control")}
               </button>
             </div>
           </div>

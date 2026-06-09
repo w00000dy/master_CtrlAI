@@ -4,10 +4,10 @@ import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { getDocumentById, deleteDocument, updateDocumentTitle } from "../actions";
-import { ParagraphRenderer } from "../../components/ParagraphRenderer";
 import { LoaderIcon, ArrowLeftIcon, FilePenLineIcon, CalendarCheckIcon, BookTextIcon, XIcon, BotIcon, type BookTextIconHandle } from "lucide-animated";
 import { useModel } from "../../components/ModelContext";
 import { getControlsForParagraph, generateControlsForParagraph } from "../../controls/actions";
+import { ParagraphRenderer } from "../../components/ParagraphRenderer";
 import type { Paragraph, Document, Section } from "../../../generated/prisma/client";
 
 type DocumentData = Document & {

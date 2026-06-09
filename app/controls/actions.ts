@@ -228,3 +228,37 @@ ${allParagraphsStr}
     return { success: false, error: "An unexpected error occurred during LLM processing." };
   }
 }
+
+export async function updateControl(id: string, data: { title: string; text: string; paragraphIds?: string[] }) {
+  try {
+    const control = await prisma.control.update({
+      where: { id },
+      data: {
+        title: data.title,
+        text: data.text,
+        ...(data.paragraphIds && {
+          paragraphs: {
+            set: [], // clear existing
+            connect: data.paragraphIds.map(pid => ({ id: pid }))
+          }
+        })
+      }
+    });
+    return { success: true, control };
+  } catch (error) {
+    console.error("Failed to update control:", error);
+    return { success: false, error: "Failed to update control." };
+  }
+}
+
+export async function deleteControl(id: string) {
+  try {
+    await prisma.control.delete({
+      where: { id }
+    });
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to delete control:", error);
+    return { success: false, error: "Failed to delete control." };
+  }
+}
