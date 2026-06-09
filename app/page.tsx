@@ -37,6 +37,7 @@ export default function Home() {
 					</Link>
 
 					<button
+						type="button"
 						disabled
 						className="flex items-center justify-between p-4 rounded-xl bg-zinc-50 dark:bg-zinc-800 opacity-50 cursor-not-allowed border border-zinc-200 dark:border-zinc-700"
 					>

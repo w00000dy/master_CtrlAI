@@ -160,6 +160,7 @@ export default function ImportPage() {
 						</div>
 
 						<button
+							type="button"
 							onClick={handleImport}
 							disabled={!!processingState || !file}
 							className="w-full sm:w-auto px-6 py-3 bg-zinc-900 hover:bg-zinc-800 dark:bg-zinc-100 dark:hover:bg-zinc-200 text-white dark:text-zinc-900 font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
@@ -265,6 +266,7 @@ export default function ImportPage() {
 								Final Result: {parsedData.title || "Extracted Document"}
 							</h2>
 							<button
+								type="button"
 								onClick={async () => {
 									setIsSaving(true);
 									const result = await saveDocument(parsedData);
@@ -287,9 +289,9 @@ export default function ImportPage() {
 						</div>
 
 						<div className="space-y-6">
-							{parsedData.sections?.map((section, idx) => (
+							{parsedData.sections?.map((section) => (
 								<div
-									key={idx}
+									key={section.title}
 									className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-hidden shadow-sm"
 								>
 									<div className="bg-zinc-50 dark:bg-zinc-900/50 px-6 py-4 border-b border-zinc-200 dark:border-zinc-800">

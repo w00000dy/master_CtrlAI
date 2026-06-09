@@ -41,6 +41,7 @@ function DocumentCard({
 							<BookTextIcon ref={iconRef} animateOnHover={false} size={24} />
 						</div>
 						<button
+							type="button"
 							onClick={(e) => handleDelete(e, doc.id)}
 							className="opacity-0 group-hover:opacity-100 p-2 text-zinc-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all"
 							title="Delete Document"

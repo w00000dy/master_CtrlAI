@@ -37,7 +37,7 @@ export async function extractPdfText(formData: FormData) {
 		const arrayBuffer = await file.arrayBuffer();
 		const buffer = Buffer.from(arrayBuffer);
 
-		let pdfData;
+		let pdfData: { text: string };
 		try {
 			const parser = new PDFParse({ data: buffer });
 			pdfData = await parser.getText();
