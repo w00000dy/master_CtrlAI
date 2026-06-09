@@ -181,8 +181,29 @@ export async function generateControlsForParagraph(paragraphId: string, model: s
       allParagraphsStr += `Document: ${docTitle}\n`;
       for (const secTitle of Object.keys(grouped[docTitle])) {
         allParagraphsStr += `  Section: ${secTitle}\n`;
-        for (const p of grouped[docTitle][secTitle]) {
-          allParagraphsStr += `    - [ID: ${p.id}] ${p.marker ? p.marker + " " : ""}${p.text}\n`;
+        
+        const secParas = grouped[docTitle][secTitle];
+        const roots = secParas.filter(p => !p.parentParagraphId || !secParas.some(sp => sp.id === p.parentParagraphId));
+        
+        const childrenMap = new Map<string, typeof allParagraphs>();
+        for (const p of secParas) {
+          if (p.parentParagraphId) {
+            if (!childrenMap.has(p.parentParagraphId)) childrenMap.set(p.parentParagraphId, []);
+            childrenMap.get(p.parentParagraphId)!.push(p);
+          }
+        }
+        
+        const printPara = (p: typeof allParagraphs[0], depth: number) => {
+          const indent = "    " + "  ".repeat(depth);
+          allParagraphsStr += `${indent}- [ID: ${p.id}] ${p.marker ? p.marker + " " : ""}${p.text}\n`;
+          const children = childrenMap.get(p.id) || [];
+          for (const child of children) {
+            printPara(child, depth + 1);
+          }
+        };
+
+        for (const root of roots) {
+          printPara(root, 0);
         }
       }
       allParagraphsStr += "\n";
