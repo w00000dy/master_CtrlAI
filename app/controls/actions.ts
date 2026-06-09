@@ -124,9 +124,43 @@ export async function generateControlsForParagraph(paragraphId: string, model: s
       ? existingControls.map(c => `- ${c.title}: ${c.text}`).join("\n") 
       : "No existing controls.";
 
-    const allParagraphsStr = allParagraphs.map(p => 
-      `ID: ${p.id} | Document: ${p.section.document.title} | Section: ${p.section.title} | Text: ${p.marker ? p.marker + " " : ""}${p.text}`
-    ).join("\n");
+    // Find ancestors
+    const ancestors = [];
+    let currentId = focusParagraph.parentParagraphId;
+    while (currentId) {
+      const parent = allParagraphs.find(p => p.id === currentId);
+      if (parent) {
+        ancestors.unshift(parent);
+        currentId = parent.parentParagraphId;
+      } else {
+        break;
+      }
+    }
+    const ancestorsStr = ancestors.length > 0 
+      ? ancestors.map(p => `- ${p.marker ? p.marker + " " : ""}${p.text}`).join("\n")
+      : "No ancestor paragraphs.";
+
+    // Group all paragraphs by Document -> Section
+    const grouped: Record<string, Record<string, typeof allParagraphs>> = {};
+    for (const p of allParagraphs) {
+      const docTitle = p.section.document.title;
+      const secTitle = p.section.title;
+      if (!grouped[docTitle]) grouped[docTitle] = {};
+      if (!grouped[docTitle][secTitle]) grouped[docTitle][secTitle] = [];
+      grouped[docTitle][secTitle].push(p);
+    }
+
+    let allParagraphsStr = "";
+    for (const docTitle of Object.keys(grouped)) {
+      allParagraphsStr += `Document: ${docTitle}\n`;
+      for (const secTitle of Object.keys(grouped[docTitle])) {
+        allParagraphsStr += `  Section: ${secTitle}\n`;
+        for (const p of grouped[docTitle][secTitle]) {
+          allParagraphsStr += `    - [ID: ${p.id}] ${p.marker ? p.marker + " " : ""}${p.text}\n`;
+        }
+      }
+      allParagraphsStr += "\n";
+    }
 
     const systemPrompt = `You are a compliance and security expert. 
 Your task is to generate actionable, technical implementation controls for a specific legal paragraph.
@@ -153,9 +187,11 @@ Output ONLY valid JSON. No markdown formatting, no explanations outside the JSON
 
     const userPrompt = `
 FOCUS PARAGRAPH (ID: ${focusParagraph.id}):
-Document: ${focusParagraph.section.document.title}
-Section: ${focusParagraph.section.title}
-Text: ${focusParagraph.marker ? focusParagraph.marker + " " : ""}${focusParagraph.text}
+DOCUMENT: ${focusParagraph.section.document.title}
+SECTION: ${focusParagraph.section.title}
+ANCESTOR PARAGRAPHS (Context):
+${ancestorsStr}
+FOCUS PARAGRAPH TEXT: ${focusParagraph.marker ? focusParagraph.marker + " " : ""}${focusParagraph.text}
 
 EXISTING CONTROLS:
 ${existingControlsStr}
