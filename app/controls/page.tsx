@@ -1,26 +1,11 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { MappedParagraphCard, ParagraphWithContext } from '../components/MappedParagraphCard';
 import { getControls, createControl, getParagraphsForSelection, deleteControl, updateControl } from "./actions";
 
 // types
-type ParagraphWithContext = {
-  id: string;
-  marker: string | null;
-  text: string;
-  section: {
-    title: string;
-    marker: string | null;
-    document: {
-      title: string;
-    };
-  };
-  ancestors?: {
-    id: string;
-    marker: string | null;
-    text: string;
-  }[];
-};
+
 
 type Control = {
   id: string;
@@ -184,35 +169,7 @@ export default function ControlsPage() {
                   ) : (
                     <div className="space-y-3 max-h-64 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-zinc-200 dark:scrollbar-thumb-zinc-800">
                       {control.paragraphs.map(p => (
-                        <div key={p.id} className="bg-zinc-50 dark:bg-zinc-900/80 rounded-lg p-4 border border-zinc-100 dark:border-zinc-800/80 group hover:border-blue-200 dark:hover:border-blue-900/50 transition-colors">
-                          <div className="flex flex-wrap items-center gap-2 mb-3">
-                            <span className="text-[10px] font-bold uppercase tracking-wide px-2 py-1 bg-blue-100/80 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 rounded-md">
-                              {p.section.document.title}
-                            </span>
-                            <span className="text-[10px] font-bold uppercase tracking-wide px-2 py-1 bg-zinc-200/80 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 rounded-md flex items-center">
-                              {p.section.marker && <span className="text-zinc-900 dark:text-zinc-200 mr-1.5 bg-zinc-300/50 dark:bg-zinc-700/50 px-1 rounded-sm font-mono whitespace-nowrap shrink-0">{p.section.marker}</span>}
-                              {p.section.title}
-                            </span>
-                          </div>
-                          
-                          {p.ancestors && p.ancestors.length > 0 && (
-                            <div className="mb-2 space-y-1.5">
-                              {p.ancestors.map((anc, i) => (
-                                <div key={anc.id} style={{ marginLeft: `${i * 0.75}rem` }} className="text-xs text-zinc-500 dark:text-zinc-400 border-l-2 border-zinc-200 dark:border-zinc-800 pl-3 py-0.5 flex items-start">
-                                  {anc.marker && <span className="inline-flex items-center justify-center bg-zinc-200 dark:bg-zinc-800 px-1.5 py-0.5 rounded text-[10px] font-mono font-bold text-zinc-600 dark:text-zinc-400 mr-2 border border-zinc-300 dark:border-zinc-700 mt-0.5 shrink-0 whitespace-nowrap">{anc.marker}</span>}
-                                  <span className="leading-relaxed">{anc.text}</span>
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                          <div style={{ marginLeft: p.ancestors && p.ancestors.length > 0 ? `${p.ancestors.length * 0.75}rem` : '0' }} className="text-sm text-zinc-800 dark:text-zinc-200 leading-relaxed pl-3 border-l-2 border-blue-400 dark:border-blue-700 relative py-1 flex items-start">
-                            {p.ancestors && p.ancestors.length > 0 && (
-                              <div className="absolute -left-2.5 top-0 text-blue-400 dark:text-blue-700 text-xs">↳</div>
-                            )}
-                            {p.marker && <span className="inline-flex items-center justify-center bg-blue-100 dark:bg-blue-900/50 px-1.5 py-0.5 rounded text-[11px] font-mono font-bold text-blue-700 dark:text-blue-300 mr-2 border border-blue-200 dark:border-blue-800/50 mt-0.5 shrink-0 whitespace-nowrap">{p.marker}</span>}
-                            <span>{p.text}</span>
-                          </div>
-                        </div>
+                        <MappedParagraphCard key={p.id} p={p} />
                       ))}
                     </div>
                   )}

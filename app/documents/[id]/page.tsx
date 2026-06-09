@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { getDocumentById, deleteDocument, updateDocumentTitle } from "../actions";
+import { MappedParagraphCard } from "../../components/MappedParagraphCard";
 import { LoaderIcon, ArrowLeftIcon, FilePenLineIcon, CalendarCheckIcon, BookTextIcon, XIcon, BotIcon, type BookTextIconHandle } from "lucide-animated";
 import { useModel } from "../../components/ModelContext";
 import { getControlsForParagraph, generateControlsForParagraph } from "../../controls/actions";
@@ -362,12 +363,10 @@ export default function DocumentViewPage() {
                         {ctrl.paragraphs.length > 1 && (
                           <div className="mt-3 ml-2 pt-3 border-t border-zinc-100 dark:border-zinc-800/50">
                             <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2">Also mapped to:</p>
-                            <div className="flex flex-wrap gap-1.5">
+                            <div className="space-y-2">
                               {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                               {ctrl.paragraphs.filter((p: any) => p.id !== selectedParagraph.id).map((p: any) => (
-                                <span key={p.id} className="text-[10px] px-2 py-0.5 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 rounded-md border border-zinc-200 dark:border-zinc-700">
-                                  {p.section.document.title.substring(0, 15)}... {p.marker}
-                                </span>
+                                <MappedParagraphCard key={p.id} p={p} compact />
                               ))}
                             </div>
                           </div>
