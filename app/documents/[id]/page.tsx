@@ -286,10 +286,42 @@ export default function DocumentViewPage() {
               
               <div>
                 <div className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest mb-3">Selected Text</div>
-                <div className="bg-blue-50/50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-900/30 rounded-xl p-4 text-zinc-800 dark:text-zinc-200 leading-relaxed text-sm">
-                  {selectedParagraph.marker && <span className="font-bold mr-2 text-blue-700 dark:text-blue-400">{selectedParagraph.marker}</span>}
-                  {selectedParagraph.text}
-                </div>
+                
+                {(() => {
+                  const ancestors: Paragraph[] = [];
+                  if (document) {
+                    const allParagraphs = document.sections.flatMap(s => s.paragraphs);
+                    let currentId = selectedParagraph.parentParagraphId;
+                    while (currentId) {
+                      const parent = allParagraphs.find(p => p.id === currentId);
+                      if (parent) {
+                        ancestors.unshift(parent);
+                        currentId = parent.parentParagraphId;
+                      } else {
+                        break;
+                      }
+                    }
+                  }
+                  
+                  return (
+                    <div className="space-y-2">
+                      {ancestors.map((ancestor, i) => (
+                        <div key={ancestor.id} style={{ marginLeft: `${i * 1}rem` }} className="bg-zinc-100/50 dark:bg-zinc-800/30 border border-zinc-200/50 dark:border-zinc-700/50 rounded-xl p-3 text-zinc-500 dark:text-zinc-400 text-xs">
+                          {ancestor.marker && <span className="font-bold mr-2 text-zinc-600 dark:text-zinc-300">{ancestor.marker}</span>}
+                          {ancestor.text}
+                        </div>
+                      ))}
+                      
+                      <div style={{ marginLeft: `${ancestors.length * 1}rem` }} className="bg-blue-50/50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-900/30 rounded-xl p-4 text-zinc-800 dark:text-zinc-200 leading-relaxed text-sm relative">
+                        {ancestors.length > 0 && (
+                          <div className="absolute -left-3 top-4 text-blue-300 dark:text-blue-700">↳</div>
+                        )}
+                        {selectedParagraph.marker && <span className="font-bold mr-2 text-blue-700 dark:text-blue-400">{selectedParagraph.marker}</span>}
+                        {selectedParagraph.text}
+                      </div>
+                    </div>
+                  );
+                })()}
               </div>
 
               <div>
