@@ -259,7 +259,7 @@ ${allParagraphsStr}
     });
 
     const resultText = response.message.content;
-
+    console.log(resultText)
     const promptTokens = response.prompt_eval_count;
     const evalTokens = response.eval_count;
     console.log(`[LLM Usage] Prompt tokens (Context used): ${promptTokens}, Generated tokens: ${evalTokens}`);
