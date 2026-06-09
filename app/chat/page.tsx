@@ -30,7 +30,7 @@ const MessageBubble = ({
 
 export default function ChatPage() {
 	const [messages, setMessages] = useState([
-		{ role: "bot", content: "Hello! How can I help you today?" },
+		{ id: crypto.randomUUID(), role: "bot", content: "Hello! How can I help you today?" },
 	]);
 	const [input, setInput] = useState("");
 	const [isLoading, setIsLoading] = useState(false);
@@ -40,7 +40,7 @@ export default function ChatPage() {
 		e.preventDefault();
 		if (!input.trim() || isLoading) return;
 
-		const newMessages = [...messages, { role: "user", content: input.trim() }];
+		const newMessages = [...messages, { id: crypto.randomUUID(), role: "user", content: input.trim() }];
 		setMessages(newMessages);
 		setInput("");
 		setIsLoading(true);
@@ -53,6 +53,7 @@ export default function ChatPage() {
 			setMessages((prev) => [
 				...prev,
 				{
+					id: crypto.randomUUID(),
 					role: "bot",
 					content: success ? (message as string) : `Error: ${error}`,
 				},
@@ -60,7 +61,7 @@ export default function ChatPage() {
 		} catch {
 			setMessages((prev) => [
 				...prev,
-				{ role: "bot", content: "An unexpected error occurred." },
+				{ id: crypto.randomUUID(), role: "bot", content: "An unexpected error occurred." },
 			]);
 		} finally {
 			setIsLoading(false);
@@ -70,8 +71,8 @@ export default function ChatPage() {
 	return (
 		<div className="flex flex-col flex-1 overflow-hidden">
 			<main className="flex-1 overflow-y-auto p-4 w-full max-w-3xl mx-auto flex flex-col gap-4">
-				{messages.map((msg, idx) => (
-					<MessageBubble key={idx} sender={msg.role} content={msg.content} />
+				{messages.map((msg) => (
+					<MessageBubble key={msg.id} sender={msg.role} content={msg.content} />
 				))}
 				{isLoading && <MessageBubble sender="bot" content="..." />}
 			</main>
