@@ -1,6 +1,6 @@
 "use client";
 
-import { CheckIcon, type CheckIconHandle, LoaderIcon } from "lucide-animated";
+import { CheckIcon, type CheckIconHandle, LoaderIcon, CloudUploadIcon } from "lucide-animated";
 import React, { useState } from "react";
 import { useModel } from "../../components/ModelContext";
 import { ParagraphRenderer } from "../../components/ParagraphRenderer";
@@ -130,20 +130,7 @@ export default function ImportPage() {
 								className="flex justify-center w-full h-32 px-4 transition bg-white dark:bg-zinc-900 border-2 border-zinc-300 dark:border-zinc-700 border-dashed rounded-md appearance-none cursor-pointer hover:border-zinc-400 dark:hover:border-zinc-600 focus:outline-none"
 							>
 								<span className="flex items-center space-x-2">
-									<svg
-										xmlns="http://www.w3.org/2000/svg"
-										className="w-6 h-6 text-zinc-600 dark:text-zinc-400"
-										fill="none"
-										viewBox="0 0 24 24"
-										stroke="currentColor"
-										strokeWidth="2"
-									>
-										<path
-											strokeLinecap="round"
-											strokeLinejoin="round"
-											d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-										/>
-									</svg>
+									<CloudUploadIcon className="text-zinc-600 dark:text-zinc-400" size={24} />
 									<span className="font-medium text-zinc-600 dark:text-zinc-400">
 										{file ? file.name : "Drop PDF to Attach, or browse"}
 									</span>
@@ -167,26 +154,7 @@ export default function ImportPage() {
 						>
 							{processingState ? (
 								<>
-									<svg
-										className="animate-spin -ml-1 mr-2 h-5 w-5 text-current"
-										xmlns="http://www.w3.org/2000/svg"
-										fill="none"
-										viewBox="0 0 24 24"
-									>
-										<circle
-											className="opacity-25"
-											cx="12"
-											cy="12"
-											r="10"
-											stroke="currentColor"
-											strokeWidth="4"
-										></circle>
-										<path
-											className="opacity-75"
-											fill="currentColor"
-											d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-										></path>
-									</svg>
+									<LoaderIcon className="animate-spin -ml-1 mr-2 text-current" size={20} />
 									{processingState === "extracting"
 										? "Extracting Text..."
 										: "Structuring..."}
