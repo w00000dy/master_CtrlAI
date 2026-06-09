@@ -32,4 +32,12 @@ model Paragraph {
   parentParagraphId String?
   parentParagraph   Paragraph?  @relation("SubParagraphs", fields: [parentParagraphId], references: [id], onDelete: Cascade)
   subParagraphs     Paragraph[] @relation("SubParagraphs")
+  controls          Control[]
+}
+
+model Control {
+  id          String      @id @default(cuid(2))
+  title       String
+  text        String      @db.Text
+  paragraphs  Paragraph[]
 }
