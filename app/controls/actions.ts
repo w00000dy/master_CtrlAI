@@ -237,7 +237,7 @@ export async function generateControlsForParagraph(
 					if (p.parentParagraphId) {
 						if (!childrenMap.has(p.parentParagraphId))
 							childrenMap.set(p.parentParagraphId, []);
-						childrenMap.get(p.parentParagraphId)!.push(p);
+						childrenMap.get(p.parentParagraphId)?.push(p);
 					}
 				}
 

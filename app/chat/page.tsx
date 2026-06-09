@@ -30,17 +30,24 @@ const MessageBubble = ({
 
 export default function ChatPage() {
 	const [messages, setMessages] = useState([
-		{ id: crypto.randomUUID(), role: "bot", content: "Hello! How can I help you today?" },
+		{
+			id: crypto.randomUUID(),
+			role: "bot",
+			content: "Hello! How can I help you today?",
+		},
 	]);
 	const [input, setInput] = useState("");
 	const [isLoading, setIsLoading] = useState(false);
 	const { selectedModel } = useModel();
 
-	const handleSend = async (e: React.FormEvent) => {
+	const handleSend = async (e: React.SubmitEvent) => {
 		e.preventDefault();
 		if (!input.trim() || isLoading) return;
 
-		const newMessages = [...messages, { id: crypto.randomUUID(), role: "user", content: input.trim() }];
+		const newMessages = [
+			...messages,
+			{ id: crypto.randomUUID(), role: "user", content: input.trim() },
+		];
 		setMessages(newMessages);
 		setInput("");
 		setIsLoading(true);
@@ -61,7 +68,11 @@ export default function ChatPage() {
 		} catch {
 			setMessages((prev) => [
 				...prev,
-				{ id: crypto.randomUUID(), role: "bot", content: "An unexpected error occurred." },
+				{
+					id: crypto.randomUUID(),
+					role: "bot",
+					content: "An unexpected error occurred.",
+				},
 			]);
 		} finally {
 			setIsLoading(false);
