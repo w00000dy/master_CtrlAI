@@ -5,8 +5,10 @@
 	"private": true,
 	"scripts": {
 		"dev": "npm run migrate:dev && next dev",
-		"build": "next build",
+		"build": "prisma generate && next build",
 		"start": "next start",
+		"postinstall": "npm run generate",
+		"generate": "prisma generate",
 		"lint": "eslint && biome check .",
 		"stylelint": "stylelint '**.css'",
 		"migrate:dev": "prisma migrate dev",
