@@ -3,7 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { ParsedDocument, Paragraph } from "../documents/import/parsePdf";
 
-export async function saveDocument(document: ParsedDocument) {
+export async function saveDocument(document: ParsedDocument): Promise<{ success: true; id: string } | { success: false; error: string }> {
   try {
     return await prisma.$transaction(async (tx) => {
       const doc = await tx.document.create({
