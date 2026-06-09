@@ -1,12 +1,3 @@
-/*
-  Warnings:
-
-  - You are about to drop the `User` table. If the table is not empty, all the data it contains will be lost.
-
-*/
--- DropTable
-DROP TABLE `User`;
-
 -- CreateTable
 CREATE TABLE `Document` (
     `id` VARCHAR(191) NOT NULL,
@@ -19,6 +10,7 @@ CREATE TABLE `Document` (
 -- CreateTable
 CREATE TABLE `Section` (
     `id` VARCHAR(191) NOT NULL,
+    `marker` VARCHAR(191) NULL,
     `title` VARCHAR(191) NOT NULL,
     `documentId` VARCHAR(191) NOT NULL,
 
