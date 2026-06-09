@@ -5,8 +5,8 @@ import { useModel } from "../../components/ModelContext";
 import {
   extractPdfText,
   structureTextWithLlm,
-  ParsedDocument,
-  Paragraph,
+  type ParsedDocument,
+  type Paragraph,
 } from "./parsePdf";
 import { ParagraphRenderer } from "../../components/ParagraphRenderer";
 import { saveDocument } from "../actions";

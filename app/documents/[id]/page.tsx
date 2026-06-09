@@ -10,7 +10,7 @@ import {
 } from "../actions";
 import {
   MappedParagraphCard,
-  ParagraphWithContext,
+  type ParagraphWithContext,
 } from "../../components/MappedParagraphCard";
 import {
   LoaderIcon,

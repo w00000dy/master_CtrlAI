@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import type React from "react";
+import { useEffect, useState } from "react";
 import {
   MappedParagraphCard,
-  ParagraphWithContext,
+  type ParagraphWithContext,
 } from "../components/MappedParagraphCard";
 import {
   getControls,
@@ -12,7 +13,7 @@ import {
   deleteControl,
   updateControl,
 } from "./actions";
-import { Document, Section, Paragraph } from "../../generated/prisma/client";
+import type { Document, Section, Paragraph } from "../../generated/prisma/client";
 
 type Control = {
   id: string;

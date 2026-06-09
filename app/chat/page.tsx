@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
+import type React from "react";
+import { useState } from "react";
 import { generateChatResponse } from "../actions";
 import { useModel } from "../components/ModelContext";
 

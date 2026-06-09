@@ -1,7 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import { Paragraph } from "../../generated/prisma/client";
+import type { Paragraph } from "../../generated/prisma/client";
 import { Ollama } from "ollama";
 import { Agent, setGlobalDispatcher } from "undici";
 
