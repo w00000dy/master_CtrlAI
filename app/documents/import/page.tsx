@@ -42,20 +42,7 @@ export default function ImportPage() {
       setError("Please select a PDF file first.");
       return;
     }
-    if (file.name.endsWith('.json')) {
-      try {
-        const text = await file.text();
-        const json = JSON.parse(text);
-        setParsedData(json);
-        setRawJson(text);
-        setProcessingState(null);
-        return;
-      } catch {
-        setError("Failed to parse the JSON file. Ensure it is formatted correctly.");
-        setProcessingState(null);
-        return;
-      }
-    }
+
 
     if (!selectedModel) {
       setError("Please wait for models to load or select a model in the header.");
@@ -130,10 +117,10 @@ export default function ImportPage() {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                   </svg>
                   <span className="font-medium text-zinc-600 dark:text-zinc-400">
-                    {file ? file.name : "Drop PDF or JSON to Attach, or browse"}
+                    {file ? file.name : "Drop PDF to Attach, or browse"}
                   </span>
                 </span>
-                <input type="file" id="file-upload" name="file_upload" accept="application/pdf,application/json" className="hidden" onChange={handleFileChange} />
+                <input type="file" id="file-upload" name="file_upload" accept="application/pdf" className="hidden" onChange={handleFileChange} />
               </label>
             </div>
             
@@ -151,7 +138,7 @@ export default function ImportPage() {
                   {processingState === "extracting" ? "Extracting Text..." : "Structuring..."}
                 </>
               ) : (
-                file?.name.endsWith('.json') ? "Load JSON" : "Import PDF"
+                "Import PDF"
               )}
             </button>
           </div>
