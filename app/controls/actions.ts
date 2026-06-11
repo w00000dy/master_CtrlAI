@@ -281,7 +281,7 @@ Instructions:
 Output ONLY valid JSON. No markdown formatting, no explanations outside the JSON.`;
 
 		const userPrompt = `
-FOCUS PARAGRAPH (ID: ${focusParagraph.id}):
+FOCUS PARAGRAPH ID: ${focusParagraph.id}
 DOCUMENT: ${focusParagraph.section.document.title}
 SECTION: ${focusParagraph.section.title}
 ANCESTOR PARAGRAPHS (Context):
