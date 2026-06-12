@@ -14,6 +14,7 @@ import {
 } from "../components/MappedParagraphCard";
 import {
 	createControl,
+	deleteAllControls,
 	deleteControl,
 	getControls,
 	getParagraphsForSelection,
@@ -115,6 +116,17 @@ export default function ControlsPage() {
 		}
 	};
 
+	const handleDeleteAllControls = async () => {
+		if (!window.confirm("Are you sure you want to delete ALL controls? This action cannot be undone."))
+			return;
+		const res = await deleteAllControls();
+		if (res.success) {
+			fetchControls();
+		} else {
+			alert("Failed to delete all controls.");
+		}
+	};
+
 	const toggleParagraph = (id: string) => {
 		setSelectedParagraphs((prev) =>
 			prev.includes(id) ? prev.filter((pId) => pId !== id) : [...prev, id],
@@ -162,13 +174,22 @@ export default function ControlsPage() {
 							Manage implementation instructions and map them to paragraphs.
 						</p>
 					</div>
-					<button
-						type="button"
-						onClick={openModal}
-						className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors shadow-sm"
-					>
-						Add Control
-					</button>
+					<div className="flex gap-3">
+						<button
+							type="button"
+							onClick={handleDeleteAllControls}
+							className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-colors shadow-sm"
+						>
+							Delete All Controls
+						</button>
+						<button
+							type="button"
+							onClick={openModal}
+							className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors shadow-sm"
+						>
+							Add Control
+						</button>
+					</div>
 				</div>
 
 				{loading ? (

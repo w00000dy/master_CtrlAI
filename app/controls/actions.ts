@@ -414,3 +414,13 @@ export async function deleteControl(id: string) {
 		return { success: false, error: "Failed to delete control." };
 	}
 }
+
+export async function deleteAllControls() {
+	try {
+		await prisma.control.deleteMany();
+		return { success: true };
+	} catch (error) {
+		console.error("Failed to delete all controls:", error);
+		return { success: false, error: "Failed to delete all controls." };
+	}
+}
