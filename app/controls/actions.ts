@@ -265,9 +265,9 @@ You will be given:
 3. ALL PARAGRAPHS: A list of all paragraphs in the database with their IDs.
 
 Instructions:
-- Write 1 to 3 specific, actionable controls that fulfill the requirements of the FOCUS PARAGRAPH.
-- For each control, determine if it also helps fulfill any OTHER paragraphs from the ALL PARAGRAPHS list.
-- Return a JSON object containing a single key "controls" that holds an array of control objects. Each object must strictly follow this structure:
+Write as many specific, actionable controls as necessary to completely fulfill the requirements of the FOCUS PARAGRAPH. Do not limit yourself to a specific number, but avoid redundancies and irrelevant points.
+For each control, determine if it also helps fulfill any OTHER paragraphs from the ALL PARAGRAPHS list.
+Return a JSON object containing a single key "controls" that holds an array of control objects. Each object must strictly follow this structure:
 {
   "controls": [
     {
