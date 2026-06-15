@@ -1,20 +1,27 @@
 "use client";
 
 import { CheckIcon, CloudUploadIcon, LoaderIcon } from "lucide-animated";
-import React, { useEffect, useState } from "react";
-import { importGuidelineYaml } from "./actions";
-import { getDocuments } from "../../documents/actions";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { type ChangeEvent, useEffect, useState } from "react";
+import { getDocuments } from "../../documents/actions";
+import { importGuidelineYaml } from "./actions";
 
 export default function ImportGuidelinePage() {
-	const router = useRouter();
 	const [file, setFile] = useState<File | null>(null);
 	const [processingState, setProcessingState] = useState<
 		null | "parsing" | "mapping" | "saving"
 	>(null);
 	const [error, setError] = useState<string | null>(null);
-	const [result, setResult] = useState<any>(null);
+
+	type ImportResult = {
+		success: boolean;
+		guidelineId?: string;
+		totalCount?: number;
+		mappedCount?: number;
+		unmappedCount?: number;
+		error?: string;
+	};
+	const [result, setResult] = useState<ImportResult | null>(null);
 	const [documents, setDocuments] = useState<{ id: string; title: string }[]>(
 		[],
 	);
@@ -30,7 +37,7 @@ export default function ImportGuidelinePage() {
 		loadDocuments();
 	}, []);
 
-	const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+	const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
 		if (e.target.files && e.target.files.length > 0) {
 			setFile(e.target.files[0]);
 			setError(null);
@@ -92,10 +99,14 @@ export default function ImportGuidelinePage() {
 				<div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6 shadow-sm space-y-6">
 					{/* Document Selection */}
 					<div className="space-y-2">
-						<label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+						<label
+							htmlFor="document-select"
+							className="block text-sm font-medium text-zinc-700 dark:text-zinc-300"
+						>
 							Target Document
 						</label>
 						<select
+							id="document-select"
 							value={selectedDocumentId}
 							onChange={(e) => setSelectedDocumentId(e.target.value)}
 							className="w-full rounded-md border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
@@ -108,7 +119,7 @@ export default function ImportGuidelinePage() {
 							))}
 						</select>
 						<p className="text-xs text-zinc-500 dark:text-zinc-400">
-							The guideline's paragraphs will only be matched against the
+							The guideline&apos;s paragraphs will only be matched against the
 							selected document.
 						</p>
 					</div>

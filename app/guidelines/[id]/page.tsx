@@ -3,27 +3,25 @@
 import { ArrowLeftIcon, FileTextIcon, LoaderIcon } from "lucide-animated";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import { getGuidelineById, deleteGuideline } from "../actions";
+import { useCallback, useEffect, useState } from "react";
 import { MappedParagraphCard } from "../../components/MappedParagraphCard";
+import { deleteGuideline, getGuidelineById } from "../actions";
+
+type GuidelineData = NonNullable<
+	Awaited<ReturnType<typeof getGuidelineById>>["guideline"]
+>;
 
 export default function GuidelineViewPage() {
 	const params = useParams();
 	const router = useRouter();
 	const id = params.id as string;
 
-	const [guideline, setGuideline] = useState<any>(null);
+	const [guideline, setGuideline] = useState<GuidelineData | null>(null);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 	const [isDeleting, setIsDeleting] = useState(false);
 
-	useEffect(() => {
-		if (id) {
-			fetchGuideline();
-		}
-	}, [id]);
-
-	const fetchGuideline = async () => {
+	const fetchGuideline = useCallback(async () => {
 		setLoading(true);
 		const res = await getGuidelineById(id);
 		if (res.success && res.guideline) {
@@ -32,7 +30,15 @@ export default function GuidelineViewPage() {
 			setError(res.error || "Failed to load guideline.");
 		}
 		setLoading(false);
-	};
+	}, [id]);
+
+	useEffect(() => {
+		if (id) {
+			void (async () => {
+				await fetchGuideline();
+			})();
+		}
+	}, [id, fetchGuideline]);
 
 	const handleDelete = async () => {
 		if (!window.confirm("Are you sure you want to delete this guideline?"))
@@ -84,6 +90,7 @@ export default function GuidelineViewPage() {
 						<ArrowLeftIcon size={16} /> Back to Guidelines
 					</Link>
 					<button
+						type="button"
 						onClick={handleDelete}
 						disabled={isDeleting}
 						className="px-4 py-2 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg text-sm font-medium transition-colors"
@@ -117,7 +124,7 @@ export default function GuidelineViewPage() {
 						Imported Controls
 					</h2>
 					<div className="grid gap-6">
-						{guideline.controls.map((control: any) => {
+						{guideline.controls.map((control) => {
 							const isMapped =
 								control.paragraphs && control.paragraphs.length > 0;
 							return (
@@ -170,7 +177,7 @@ export default function GuidelineViewPage() {
 											</div>
 										) : (
 											<div className="space-y-3 max-h-64 overflow-y-auto pr-2">
-												{control.paragraphs.map((p: any) => (
+												{control.paragraphs.map((p) => (
 													<MappedParagraphCard key={p.id} p={p} compact />
 												))}
 											</div>

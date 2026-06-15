@@ -7,10 +7,10 @@ export async function getGuidelines() {
 		const guidelines = await prisma.guideline.findMany({
 			include: {
 				_count: {
-					select: { controls: true }
-				}
+					select: { controls: true },
+				},
 			},
-			orderBy: { savedAt: "desc" }
+			orderBy: { savedAt: "desc" },
 		});
 		return { success: true, guidelines };
 	} catch (error) {
@@ -29,13 +29,13 @@ export async function getGuidelineById(id: string) {
 						paragraphs: {
 							include: {
 								section: {
-									include: { document: true }
-								}
-							}
-						}
-					}
-				}
-			}
+									include: { document: true },
+								},
+							},
+						},
+					},
+				},
+			},
 		});
 		if (!guideline) return { success: false, error: "Guideline not found." };
 		return { success: true, guideline };

@@ -1,7 +1,31 @@
 "use server";
 
-import { prisma } from "@/lib/prisma";
 import yaml from "yaml";
+import { prisma } from "@/lib/prisma";
+
+type YamlControl = {
+	id: string;
+	title?: string;
+	statements?: string | string[];
+	implementationGuidance?: string;
+	cra?: string[];
+};
+
+type ParsedYaml = {
+	controlGroup?: {
+		id?: string;
+		title?: string;
+		controls?: YamlControl[];
+		subgroups?: { controls?: YamlControl[] }[];
+	};
+	catalog?: {
+		title?: string;
+		groups?: {
+			controls?: YamlControl[];
+			subgroups?: { controls?: YamlControl[] }[];
+		}[];
+	};
+};
 
 function matchesMarker(
 	marker: string | null | undefined,
@@ -37,7 +61,7 @@ export async function importGuidelineYaml(formData: FormData) {
 
 	try {
 		const text = await file.text();
-		let parsed: any;
+		let parsed: ParsedYaml;
 		try {
 			parsed = yaml.parse(text);
 		} catch (e) {
@@ -46,7 +70,7 @@ export async function importGuidelineYaml(formData: FormData) {
 		}
 
 		// Support different root nodes based on BSI schema: controlGroup or catalog
-		let controlsData: any[] = [];
+		let controlsData: YamlControl[] = [];
 		let guidelineTitle = file.name;
 
 		if (parsed.controlGroup) {
@@ -111,7 +135,6 @@ export async function importGuidelineYaml(formData: FormData) {
 		});
 
 		let mappedCount = 0;
-		let unmappedCount = 0;
 
 		const createdControls = [];
 
@@ -165,8 +188,6 @@ export async function importGuidelineYaml(formData: FormData) {
 
 			if (matchedParagraphIds.size > 0) {
 				mappedCount++;
-			} else {
-				unmappedCount++;
 			}
 
 			// Statements are usually an array of strings
