@@ -8,7 +8,7 @@ import { getDocuments } from "../../documents/actions";
 import { importGuidelineYaml } from "./actions";
 
 export default function ImportGuidelinePage() {
-	const [file, setFile] = useState<File | null>(null);
+	const [files, setFiles] = useState<File[]>([]);
 	const [processingState, setProcessingState] = useState<
 		null | "parsing" | "mapping" | "saving"
 	>(null);
@@ -39,41 +39,59 @@ export default function ImportGuidelinePage() {
 	}, []);
 
 	const handleImport = async () => {
-		if (!file) {
-			setError("Please select a .yml file first.");
+		if (files.length === 0) {
+			setError("Please select at least one .yml file first.");
 			return;
 		}
 
 		if (!selectedDocumentId) {
-			setError("Please select a document to associate with this guideline.");
+			setError("Please select a target document.");
 			return;
 		}
 
-		setProcessingState("parsing");
 		setError(null);
+		setProcessingState("mapping");
 		setResult(null);
 
-		const formData = new FormData();
-		formData.append("file", file);
-		formData.append("documentId", selectedDocumentId);
+		let totalCount = 0;
+		let mappedCount = 0;
+		let unmappedCount = 0;
+		let hasError = false;
 
-		try {
-			// Actually the action does parsing, mapping, and saving in one go.
-			setProcessingState("mapping");
-			const importResult = await importGuidelineYaml(formData);
+		for (const file of files) {
+			const formData = new FormData();
+			formData.append("file", file);
+			formData.append("documentId", selectedDocumentId);
 
-			if (!importResult.success) {
-				setError(importResult.error || "Failed to import guideline.");
-				setProcessingState(null);
-				return;
+			try {
+				const importResult = await importGuidelineYaml(formData);
+
+				if (!importResult.success) {
+					setError(importResult.error || `Failed to import ${file.name}.`);
+					hasError = true;
+					break;
+				}
+
+				totalCount += importResult.totalCount || 0;
+				mappedCount += importResult.mappedCount || 0;
+				unmappedCount += importResult.unmappedCount || 0;
+			} catch (err) {
+				console.error(err);
+				setError(`An unexpected error occurred while importing ${file.name}.`);
+				hasError = true;
+				break;
 			}
+		}
 
-			setResult(importResult);
-		} catch (err) {
-			console.error(err);
-			setError("An unexpected error occurred.");
-		} finally {
-			setProcessingState(null);
+		setProcessingState(null);
+
+		if (!hasError) {
+			setResult({
+				success: true,
+				totalCount,
+				mappedCount,
+				unmappedCount,
+			});
 		}
 	};
 
@@ -119,13 +137,14 @@ export default function ImportGuidelinePage() {
 					</div>
 
 					<FileUploadArea
-						file={file}
-						setFile={setFile}
+						files={files}
+						setFiles={setFiles}
 						setError={setError}
 						handleImport={handleImport}
 						isProcessing={!!processingState}
-						isDisabled={!!processingState || !file || !selectedDocumentId}
+						isDisabled={!!processingState || files.length === 0 || !selectedDocumentId}
 						accept=".yml,.yaml"
+						multiple={true}
 						dropText="Drop .yml to Attach, or browse"
 						buttonText="Import Guideline"
 						processingText="Importing..."

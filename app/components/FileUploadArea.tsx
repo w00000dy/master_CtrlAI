@@ -1,11 +1,11 @@
 "use client";
 
 import { CloudUploadIcon, LoaderIcon } from "lucide-animated";
-import type { ChangeEvent, ReactNode } from "react";
+import { type ChangeEvent, type ReactNode, useState, type DragEvent } from "react";
 
 interface FileUploadAreaProps {
-	file: File | null;
-	setFile: (file: File | null) => void;
+	files: File[];
+	setFiles: (files: File[]) => void;
 	setError: (error: string | null) => void;
 	handleImport: () => void;
 	isProcessing: boolean;
@@ -14,11 +14,12 @@ interface FileUploadAreaProps {
 	dropText: string;
 	buttonText: ReactNode;
 	processingText: ReactNode;
+	multiple?: boolean;
 }
 
 export function FileUploadArea({
-	file,
-	setFile,
+	files,
+	setFiles,
 	setError,
 	handleImport,
 	isProcessing,
@@ -27,11 +28,38 @@ export function FileUploadArea({
 	dropText,
 	buttonText,
 	processingText,
+	multiple = false,
 }: FileUploadAreaProps) {
-	const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
-		if (e.target.files && e.target.files.length > 0) {
-			setFile(e.target.files[0]);
+	const [isDragging, setIsDragging] = useState(false);
+
+	const handleFiles = (newFiles: File[]) => {
+		if (newFiles.length > 0) {
+			setFiles(multiple ? newFiles : [newFiles[0]]);
 			setError(null);
+		}
+	};
+
+	const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+		if (e.target.files) {
+			handleFiles(Array.from(e.target.files));
+		}
+	};
+
+	const handleDragOver = (e: DragEvent<HTMLLabelElement>) => {
+		e.preventDefault();
+		setIsDragging(true);
+	};
+
+	const handleDragLeave = (e: DragEvent<HTMLLabelElement>) => {
+		e.preventDefault();
+		setIsDragging(false);
+	};
+
+	const handleDrop = (e: DragEvent<HTMLLabelElement>) => {
+		e.preventDefault();
+		setIsDragging(false);
+		if (e.dataTransfer.files) {
+			handleFiles(Array.from(e.dataTransfer.files));
 		}
 	};
 
@@ -40,22 +68,44 @@ export function FileUploadArea({
 			<div className="flex-1 w-full">
 				<label
 					htmlFor="file-upload"
-					className="flex justify-center w-full h-32 px-4 transition bg-white dark:bg-zinc-900 border-2 border-zinc-300 dark:border-zinc-700 border-dashed rounded-md appearance-none cursor-pointer hover:border-zinc-400 dark:hover:border-zinc-600 focus:outline-none"
+					onDragOver={handleDragOver}
+					onDragLeave={handleDragLeave}
+					onDrop={handleDrop}
+					className={`flex flex-col justify-center w-full min-h-[8rem] h-auto p-4 transition bg-white dark:bg-zinc-900 border-2 border-dashed rounded-md appearance-none cursor-pointer focus:outline-none ${
+						isDragging
+							? "border-blue-500 bg-blue-50 dark:bg-blue-900/10"
+							: "border-zinc-300 dark:border-zinc-700 hover:border-zinc-400 dark:hover:border-zinc-600"
+					}`}
 				>
-					<span className="flex items-center space-x-2">
+					<span className="flex items-center justify-center space-x-2">
 						<CloudUploadIcon
 							className="text-zinc-600 dark:text-zinc-400"
 							size={24}
 						/>
 						<span className="font-medium text-zinc-600 dark:text-zinc-400">
-							{file ? file.name : dropText}
+							{files.length > 0
+								? `${files.length} file(s) selected`
+								: dropText}
 						</span>
 					</span>
+					{files.length > 0 && (
+						<div className="mt-2 flex flex-wrap gap-2 justify-center">
+							{files.map((f, i) => (
+								<span
+									key={`${f.name}-${i}`}
+									className="px-2 py-1 text-xs bg-zinc-100 dark:bg-zinc-800 rounded text-zinc-600 dark:text-zinc-400 max-w-[200px] truncate"
+								>
+									{f.name}
+								</span>
+							))}
+						</div>
+					)}
 					<input
 						type="file"
 						id="file-upload"
 						name="file_upload"
 						accept={accept}
+						multiple={multiple}
 						className="hidden"
 						onChange={handleFileChange}
 					/>

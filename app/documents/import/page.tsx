@@ -33,7 +33,7 @@ function AnimatedLoaderIcon() {
 
 export default function ImportPage() {
 	const { selectedModel } = useModel();
-	const [file, setFile] = useState<File | null>(null);
+	const [files, setFiles] = useState<File[]>([]);
 	const [processingState, setProcessingState] = useState<
 		null | "extracting" | "structuring"
 	>(null);
@@ -45,10 +45,12 @@ export default function ImportPage() {
 	const [saveSuccess, setSaveSuccess] = useState(false);
 
 	const handleImport = async () => {
-		if (!file) {
+		if (files.length === 0) {
 			setError("Please select a PDF file first.");
 			return;
 		}
+
+		const file = files[0];
 
 		if (!selectedModel) {
 			setError(
@@ -118,12 +120,12 @@ export default function ImportPage() {
 				{/* Upload Section */}
 				<div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6 shadow-sm">
 					<FileUploadArea
-						file={file}
-						setFile={setFile}
+						files={files}
+						setFiles={setFiles}
 						setError={setError}
 						handleImport={handleImport}
 						isProcessing={!!processingState}
-						isDisabled={!!processingState || !file}
+						isDisabled={!!processingState || files.length === 0}
 						accept="application/pdf"
 						dropText="Drop PDF to Attach, or browse"
 						buttonText="Import PDF"
