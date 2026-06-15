@@ -1,12 +1,8 @@
 "use client";
 
-import {
-	CheckIcon,
-	type CheckIconHandle,
-	CloudUploadIcon,
-	LoaderIcon,
-} from "lucide-animated";
+import { CheckIcon, type CheckIconHandle, LoaderIcon } from "lucide-animated";
 import React, { useState } from "react";
+import { FileUploadArea } from "../../components/FileUploadArea";
 import { useModel } from "../../components/ModelContext";
 import { ParagraphRenderer } from "../../components/ParagraphRenderer";
 import { saveDocument } from "../actions";
@@ -47,13 +43,6 @@ export default function ImportPage() {
 	const [rawJson, setRawJson] = useState<string | null>(null);
 	const [isSaving, setIsSaving] = useState(false);
 	const [saveSuccess, setSaveSuccess] = useState(false);
-
-	const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		if (e.target.files && e.target.files.length > 0) {
-			setFile(e.target.files[0]);
-			setError(null);
-		}
-	};
 
 	const handleImport = async () => {
 		if (!file) {
@@ -128,53 +117,22 @@ export default function ImportPage() {
 
 				{/* Upload Section */}
 				<div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6 shadow-sm">
-					<div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
-						<div className="flex-1 w-full">
-							<label
-								htmlFor="file-upload"
-								className="flex justify-center w-full h-32 px-4 transition bg-white dark:bg-zinc-900 border-2 border-zinc-300 dark:border-zinc-700 border-dashed rounded-md appearance-none cursor-pointer hover:border-zinc-400 dark:hover:border-zinc-600 focus:outline-none"
-							>
-								<span className="flex items-center space-x-2">
-									<CloudUploadIcon
-										className="text-zinc-600 dark:text-zinc-400"
-										size={24}
-									/>
-									<span className="font-medium text-zinc-600 dark:text-zinc-400">
-										{file ? file.name : "Drop PDF to Attach, or browse"}
-									</span>
-								</span>
-								<input
-									type="file"
-									id="file-upload"
-									name="file_upload"
-									accept="application/pdf"
-									className="hidden"
-									onChange={handleFileChange}
-								/>
-							</label>
-						</div>
-
-						<button
-							type="button"
-							onClick={handleImport}
-							disabled={!!processingState || !file}
-							className="w-full sm:w-auto px-6 py-3 bg-zinc-900 hover:bg-zinc-800 dark:bg-zinc-100 dark:hover:bg-zinc-200 text-white dark:text-zinc-900 font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-						>
-							{processingState ? (
-								<>
-									<LoaderIcon
-										className="animate-spin -ml-1 mr-2 text-current"
-										size={20}
-									/>
-									{processingState === "extracting"
-										? "Extracting Text..."
-										: "Structuring..."}
-								</>
-							) : (
-								"Import PDF"
-							)}
-						</button>
-					</div>
+					<FileUploadArea
+						file={file}
+						setFile={setFile}
+						setError={setError}
+						handleImport={handleImport}
+						isProcessing={!!processingState}
+						isDisabled={!!processingState || !file}
+						accept="application/pdf"
+						dropText="Drop PDF to Attach, or browse"
+						buttonText="Import PDF"
+						processingText={
+							processingState === "extracting"
+								? "Extracting Text..."
+								: "Structuring..."
+						}
+					/>
 					{error && (
 						<p className="mt-4 text-sm text-red-600 dark:text-red-400">
 							{error}
