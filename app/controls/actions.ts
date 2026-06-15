@@ -75,14 +75,16 @@ export async function getControls() {
 
 export async function createControl(data: {
 	title: string;
-	text: string;
+	statement: string;
+	implementationGuidance?: string | null;
 	paragraphIds: string[];
 }) {
 	try {
 		const control = await prisma.control.create({
 			data: {
 				title: data.title,
-				text: data.text,
+				statement: data.statement,
+				implementationGuidance: data.implementationGuidance,
 				paragraphs: {
 					connect: data.paragraphIds.map((id) => ({ id })),
 				},
@@ -169,7 +171,7 @@ export async function generateControlsForParagraph(
 		}
 
 		const existingControls = await prisma.control.findMany({
-			select: { title: true, text: true },
+			select: { title: true, statement: true, implementationGuidance: true },
 		});
 
 		const allParagraphs = await prisma.paragraph.findMany({
@@ -184,7 +186,12 @@ export async function generateControlsForParagraph(
 		// Formatting context for LLM
 		const existingControlsStr =
 			existingControls.length > 0
-				? existingControls.map((c) => `- ${c.title}: ${c.text}`).join("\n")
+				? existingControls
+						.map(
+							(c) =>
+								`- ${c.title}: ${c.statement}${c.implementationGuidance ? ` (Implementation Guidance: ${c.implementationGuidance})` : ""}`,
+						)
+						.join("\n")
 				: "No existing controls.";
 
 		// Find ancestors
@@ -272,7 +279,8 @@ Return a JSON object containing a single key "controls" that holds an array of c
   "controls": [
     {
       "title": "Short title of the control (e.g. Password Policy)",
-      "text": "Detailed, actionable implementation instruction.",
+      "statement": "Detailed, actionable statement defining the control requirement.",
+      "implementationGuidance": "Practical guidance or steps on how to implement this control. If there is no specific guidance to provide, this value MUST be null.",
       "mappedParagraphIds": ["id1", "id2"] // MUST include the FOCUS PARAGRAPH ID, plus any other relevant paragraph IDs from the ALL PARAGRAPHS list.
     }
   ]
@@ -316,7 +324,8 @@ ${allParagraphsStr}
 
 		let parsedJson: {
 			title?: string;
-			text?: string;
+			statement?: string;
+			implementationGuidance?: string;
 			mappedParagraphIds?: string[];
 		}[];
 
@@ -354,7 +363,8 @@ ${allParagraphsStr}
 			const dbControl = await prisma.control.create({
 				data: {
 					title: ctrl.title || "Untitled Control",
-					text: ctrl.text || "",
+					statement: ctrl.statement || "",
+					implementationGuidance: ctrl.implementationGuidance || null,
 					paragraphs: {
 						connect: validIds.map((id) => ({ id })),
 					},
@@ -380,14 +390,20 @@ ${allParagraphsStr}
 
 export async function updateControl(
 	id: string,
-	data: { title: string; text: string; paragraphIds?: string[] },
+	data: {
+		title: string;
+		statement: string;
+		implementationGuidance?: string | null;
+		paragraphIds?: string[];
+	},
 ) {
 	try {
 		const control = await prisma.control.update({
 			where: { id },
 			data: {
 				title: data.title,
-				text: data.text,
+				statement: data.statement,
+				implementationGuidance: data.implementationGuidance,
 				...(data.paragraphIds && {
 					paragraphs: {
 						set: [], // clear existing

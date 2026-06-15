@@ -24,7 +24,8 @@ import {
 type Control = {
 	id: string;
 	title: string;
-	text: string;
+	statement: string;
+	implementationGuidance: string | null;
 	paragraphs: ParagraphWithContext[];
 };
 
@@ -44,7 +45,8 @@ export default function ControlsPage() {
 
 	// form state
 	const [newTitle, setNewTitle] = useState("");
-	const [newText, setNewText] = useState("");
+	const [newStatement, setNewStatement] = useState("");
+	const [newGuidance, setNewGuidance] = useState("");
 	const [selectedParagraphs, setSelectedParagraphs] = useState<string[]>([]);
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [editingControlId, setEditingControlId] = useState<string | null>(null);
@@ -85,14 +87,16 @@ export default function ControlsPage() {
 	const closeModal = () => {
 		setIsModalOpen(false);
 		setNewTitle("");
-		setNewText("");
+		setNewStatement("");
+		setNewGuidance("");
 		setSelectedParagraphs([]);
 		setEditingControlId(null);
 	};
 
 	const openEditModal = async (control: Control) => {
 		setNewTitle(control.title);
-		setNewText(control.text);
+		setNewStatement(control.statement);
+		setNewGuidance(control.implementationGuidance || "");
 		setSelectedParagraphs(control.paragraphs.map((p) => p.id));
 		setEditingControlId(control.id);
 		setIsModalOpen(true);
@@ -139,20 +143,22 @@ export default function ControlsPage() {
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
-		if (!newTitle || !newText) return;
+		if (!newTitle || !newStatement) return;
 
 		setIsSubmitting(true);
 		let res: { success: boolean; control?: unknown; error?: string };
 		if (editingControlId) {
 			res = await updateControl(editingControlId, {
 				title: newTitle,
-				text: newText,
+				statement: newStatement,
+				implementationGuidance: newGuidance,
 				paragraphIds: selectedParagraphs,
 			});
 		} else {
 			res = await createControl({
 				title: newTitle,
-				text: newText,
+				statement: newStatement,
+				implementationGuidance: newGuidance,
 				paragraphIds: selectedParagraphs,
 			});
 		}
@@ -243,8 +249,16 @@ export default function ControlsPage() {
 										</div>
 									</div>
 									<p className="mt-4 text-zinc-700 dark:text-zinc-300 whitespace-pre-wrap leading-relaxed">
-										{control.text}
+										{control.statement}
 									</p>
+									{control.implementationGuidance && (
+										<div className="mt-4 p-4 bg-blue-50/50 dark:bg-blue-900/10 rounded-lg border border-blue-100 dark:border-blue-900/30">
+											<h4 className="text-sm font-semibold text-blue-800 dark:text-blue-300 mb-2">Implementation Guidance</h4>
+											<p className="text-zinc-700 dark:text-zinc-300 text-sm whitespace-pre-wrap leading-relaxed">
+												{control.implementationGuidance}
+											</p>
+										</div>
+									)}
 								</div>
 
 								<div className="p-6 flex-1 bg-white dark:bg-zinc-900">
@@ -310,19 +324,35 @@ export default function ControlsPage() {
 								</div>
 								<div>
 									<label
-										htmlFor="control-text"
+										htmlFor="control-statement"
 										className="block text-sm font-semibold text-zinc-900 dark:text-zinc-100 mb-2"
 									>
-										Implementation Instruction
+										Statement
 									</label>
 									<textarea
-										id="control-text"
+										id="control-statement"
 										required
-										rows={4}
-										value={newText}
-										onChange={(e) => setNewText(e.target.value)}
+										rows={3}
+										value={newStatement}
+										onChange={(e) => setNewStatement(e.target.value)}
 										className="w-full rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-950 px-4 py-3 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow resize-y"
 										placeholder="Describe exactly what needs to be implemented..."
+									/>
+								</div>
+								<div>
+									<label
+										htmlFor="control-guidance"
+										className="block text-sm font-semibold text-zinc-900 dark:text-zinc-100 mb-2"
+									>
+										Implementation Guidance <span className="text-zinc-500 font-normal">(Optional)</span>
+									</label>
+									<textarea
+										id="control-guidance"
+										rows={3}
+										value={newGuidance}
+										onChange={(e) => setNewGuidance(e.target.value)}
+										className="w-full rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-950 px-4 py-3 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow resize-y"
+										placeholder="Additional details on how to implement the control..."
 									/>
 								</div>
 

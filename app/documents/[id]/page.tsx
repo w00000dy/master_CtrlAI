@@ -42,7 +42,8 @@ export type DocumentData = Document & {
 type Control = {
 	id: string;
 	title: string;
-	text: string;
+	statement: string;
+	implementationGuidance: string | null;
 	paragraphs: ParagraphWithContext[];
 };
 
@@ -457,9 +458,15 @@ export default function DocumentViewPage() {
 												<h4 className="font-bold text-zinc-900 dark:text-zinc-100 text-sm mb-2 ml-2">
 													{ctrl.title}
 												</h4>
-												<p className="text-sm text-zinc-600 dark:text-zinc-400 ml-2 whitespace-pre-wrap">
-													{ctrl.text}
+												<p className="text-sm text-zinc-600 dark:text-zinc-400 ml-2 whitespace-pre-wrap mb-3">
+													{ctrl.statement}
 												</p>
+												{ctrl.implementationGuidance && (
+													<div className="ml-2 mb-3 p-3 bg-blue-50/50 dark:bg-blue-900/20 rounded border border-blue-100 dark:border-blue-900/30">
+														<p className="text-xs font-semibold text-blue-800 dark:text-blue-300 mb-1">Implementation Guidance:</p>
+														<p className="text-xs text-zinc-700 dark:text-zinc-300 whitespace-pre-wrap">{ctrl.implementationGuidance}</p>
+													</div>
+												)}
 
 												{ctrl.paragraphs.length > 1 && (
 													<div className="mt-3 ml-2 pt-3 border-t border-zinc-100 dark:border-zinc-800/50">

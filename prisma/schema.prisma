@@ -37,7 +37,8 @@ model Paragraph {
 
 model Control {
   id          String      @id @default(cuid(2))
-  title       String
-  text        String      @db.Text
+  title                  String
+  statement              String      @db.Text
+  implementationGuidance String?     @db.Text
   paragraphs  Paragraph[]
 }
