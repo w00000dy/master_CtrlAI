@@ -10,6 +10,7 @@ export type ControlData = {
 	title: string;
 	statement: string;
 	implementationGuidance: string | null;
+	guidelineId: string | null;
 	paragraphs: ParagraphWithContext[];
 };
 
@@ -54,6 +55,15 @@ export function ControlCard({
 						) : (
 							<span className="px-2 py-1 bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400 text-xs font-semibold rounded-md border border-amber-200 dark:border-amber-800/50">
 								Unmapped
+							</span>
+						)}
+						{control.guidelineId ? (
+							<span className="px-2 py-1 bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400 text-xs font-semibold rounded-md border border-blue-200 dark:border-blue-800/50">
+								Guideline
+							</span>
+						) : (
+							<span className="px-2 py-1 bg-purple-50 text-purple-700 dark:bg-purple-900/20 dark:text-purple-400 text-xs font-semibold rounded-md border border-purple-200 dark:border-purple-800/50">
+								LLM Generated
 							</span>
 						)}
 					</div>

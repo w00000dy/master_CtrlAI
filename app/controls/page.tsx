@@ -24,6 +24,7 @@ type Control = {
 	title: string;
 	statement: string;
 	implementationGuidance: string | null;
+	guidelineId: string | null;
 	paragraphs: ParagraphWithContext[];
 };
 
