@@ -117,7 +117,11 @@ export default function ControlsPage() {
 	};
 
 	const handleDeleteAllControls = async () => {
-		if (!window.confirm("Are you sure you want to delete ALL controls? This action cannot be undone."))
+		if (
+			!window.confirm(
+				"Are you sure you want to delete ALL controls? This action cannot be undone.",
+			)
+		)
 			return;
 		const res = await deleteAllControls();
 		if (res.success) {
