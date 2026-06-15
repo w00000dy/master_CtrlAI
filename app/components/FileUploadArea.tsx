@@ -1,7 +1,12 @@
 "use client";
 
 import { CloudUploadIcon, LoaderIcon } from "lucide-animated";
-import { type ChangeEvent, type ReactNode, useState, type DragEvent } from "react";
+import {
+	type ChangeEvent,
+	type DragEvent,
+	type ReactNode,
+	useState,
+} from "react";
 
 interface FileUploadAreaProps {
 	files: File[];
@@ -83,16 +88,14 @@ export function FileUploadArea({
 							size={24}
 						/>
 						<span className="font-medium text-zinc-600 dark:text-zinc-400">
-							{files.length > 0
-								? `${files.length} file(s) selected`
-								: dropText}
+							{files.length > 0 ? `${files.length} file(s) selected` : dropText}
 						</span>
 					</span>
 					{files.length > 0 && (
 						<div className="mt-2 flex flex-wrap gap-2 justify-center">
-							{files.map((f, i) => (
+							{files.map((f) => (
 								<span
-									key={`${f.name}-${i}`}
+									key={`${f.name}-${f.size}-${f.lastModified}`}
 									className="px-2 py-1 text-xs bg-zinc-100 dark:bg-zinc-800 rounded text-zinc-600 dark:text-zinc-400 max-w-[200px] truncate"
 								>
 									{f.name}

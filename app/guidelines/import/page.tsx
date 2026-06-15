@@ -142,7 +142,9 @@ export default function ImportGuidelinePage() {
 						setError={setError}
 						handleImport={handleImport}
 						isProcessing={!!processingState}
-						isDisabled={!!processingState || files.length === 0 || !selectedDocumentId}
+						isDisabled={
+							!!processingState || files.length === 0 || !selectedDocumentId
+						}
 						accept=".yml,.yaml"
 						multiple={true}
 						dropText="Drop .yml to Attach, or browse"
