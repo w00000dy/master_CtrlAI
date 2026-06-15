@@ -24,27 +24,55 @@ export async function getGuidelines() {
 
 export async function getGuidelineById(id: string) {
 	try {
-		const guideline = await prisma.guideline.findUnique({
-			where: { id },
-			include: {
-				document: {
-					select: { title: true },
-				},
-				controls: {
-					include: {
-						paragraphs: {
-							include: {
-								section: {
-									include: { document: true },
+		const [guideline, allParagraphs] = await Promise.all([
+			prisma.guideline.findUnique({
+				where: { id },
+				include: {
+					document: {
+						select: { title: true },
+					},
+					controls: {
+						include: {
+							paragraphs: {
+								include: {
+									section: {
+										include: { document: true },
+									},
 								},
 							},
 						},
 					},
 				},
-			},
-		});
+			}),
+			prisma.paragraph.findMany(),
+		]);
 		if (!guideline) return { success: false, error: "Guideline not found." };
-		return { success: true, guideline };
+
+		const paraMap = new Map(allParagraphs.map((p) => [p.id, p]));
+		const enrichedControls = guideline.controls.map((control) => {
+			return {
+				...control,
+				paragraphs: control.paragraphs.map((p) => {
+					const ancestors = [];
+					let currentId = p.parentParagraphId;
+					while (currentId) {
+						const parent = paraMap.get(currentId);
+						if (parent) {
+							ancestors.unshift(parent);
+							currentId = parent.parentParagraphId;
+						} else {
+							break;
+						}
+					}
+					return { ...p, ancestors };
+				}),
+			};
+		});
+
+		return {
+			success: true,
+			guideline: { ...guideline, controls: enrichedControls },
+		};
 	} catch (error) {
 		console.error("Failed to fetch guideline:", error);
 		return { success: false, error: "Failed to load guideline." };

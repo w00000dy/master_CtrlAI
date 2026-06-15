@@ -4,7 +4,7 @@ import { ArrowLeftIcon, FileTextIcon, LoaderIcon } from "lucide-animated";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
-import { MappedParagraphCard } from "../../components/MappedParagraphCard";
+import { ControlCard, type ControlData } from "../../components/ControlCard";
 import { deleteGuideline, getGuidelineById } from "../actions";
 
 type GuidelineData = NonNullable<
@@ -127,68 +127,14 @@ export default function GuidelineViewPage() {
 						Imported Controls
 					</h2>
 					<div className="grid gap-6">
-						{guideline.controls.map((control) => {
-							const isMapped =
-								control.paragraphs && control.paragraphs.length > 0;
-							return (
-								<div
-									key={control.id}
-									className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-hidden shadow-sm flex flex-col md:flex-row"
-								>
-									<div className="p-6 md:w-2/3 border-b md:border-b-0 md:border-r border-zinc-100 dark:border-zinc-800">
-										<div className="flex items-center justify-between mb-4">
-											<h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
-												{control.title}
-											</h3>
-											{isMapped ? (
-												<span className="px-2 py-1 bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-400 text-xs font-semibold rounded-md border border-green-200 dark:border-green-800/50">
-													Mapped
-												</span>
-											) : (
-												<span className="px-2 py-1 bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400 text-xs font-semibold rounded-md border border-amber-200 dark:border-amber-800/50">
-													Unmapped
-												</span>
-											)}
-										</div>
-										<p className="text-zinc-700 dark:text-zinc-300 text-sm whitespace-pre-wrap">
-											{control.statement}
-										</p>
-										{control.implementationGuidance && (
-											<div className="mt-4 p-4 bg-zinc-50 dark:bg-zinc-950/50 rounded-lg border border-zinc-200 dark:border-zinc-800">
-												<h4 className="text-xs font-semibold text-zinc-500 uppercase tracking-widest mb-2">
-													Guidance
-												</h4>
-												<p className="text-zinc-600 dark:text-zinc-400 text-sm">
-													{control.implementationGuidance}
-												</p>
-											</div>
-										)}
-									</div>
-									<div className="p-6 md:w-1/3 bg-zinc-50/50 dark:bg-zinc-900/30">
-										<h4 className="text-xs font-semibold text-zinc-400 uppercase tracking-widest mb-4">
-											Mapped Paragraphs
-										</h4>
-										{!isMapped ? (
-											<div className="text-sm text-zinc-500 italic flex flex-col gap-3">
-												<p>No paragraphs matched via CRA reference.</p>
-												<Link
-													href="/controls"
-													className="text-blue-600 hover:underline"
-												>
-													Go to Controls to map manually →
-												</Link>
-											</div>
-										) : (
-											<div className="space-y-3 max-h-64 overflow-y-auto pr-2">
-												{control.paragraphs.map((p) => (
-													<MappedParagraphCard key={p.id} p={p} compact />
-												))}
-											</div>
-										)}
-									</div>
-								</div>
-							);
-						})}
+						{guideline.controls.map((control) => (
+							<ControlCard
+								key={control.id}
+								control={control as unknown as ControlData}
+								showMappingLink={true}
+								layout="horizontal"
+							/>
+						))}
 					</div>
 				</div>
 			</div>

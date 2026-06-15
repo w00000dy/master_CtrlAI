@@ -1,6 +1,6 @@
 "use client";
 
-import { DeleteIcon, SquarePenIcon, XIcon } from "lucide-animated";
+import { XIcon } from "lucide-animated";
 import type React from "react";
 import { useEffect, useState } from "react";
 import type {
@@ -8,10 +8,8 @@ import type {
 	Paragraph,
 	Section,
 } from "../../generated/prisma/client";
-import {
-	MappedParagraphCard,
-	type ParagraphWithContext,
-} from "../components/MappedParagraphCard";
+import { ControlCard } from "../components/ControlCard";
+import type { ParagraphWithContext } from "../components/MappedParagraphCard";
 import {
 	createControl,
 	deleteAllControls,
@@ -219,67 +217,12 @@ export default function ControlsPage() {
 				) : (
 					<div className="grid gap-6 lg:grid-cols-2">
 						{controls.map((control) => (
-							<div
+							<ControlCard
 								key={control.id}
-								className="group bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl flex flex-col shadow-sm overflow-hidden"
-							>
-								<div className="p-6 border-b border-zinc-100 dark:border-zinc-800/50 bg-zinc-50/50 dark:bg-zinc-900/30">
-									<div className="flex items-start justify-between">
-										<h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
-											<span className="w-1.5 h-5 bg-blue-500 rounded-full inline-block"></span>
-											{control.title}
-										</h2>
-										<div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-											<button
-												type="button"
-												onClick={() => openEditModal(control)}
-												className="p-1.5 text-zinc-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-md transition-colors"
-												title="Edit"
-											>
-												<SquarePenIcon size={16} />
-											</button>
-											<button
-												type="button"
-												onClick={() => handleDeleteControl(control.id)}
-												className="p-1.5 text-zinc-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-md transition-colors"
-												title="Delete"
-											>
-												<DeleteIcon size={16} />
-											</button>
-										</div>
-									</div>
-									<p className="mt-4 text-zinc-700 dark:text-zinc-300 whitespace-pre-wrap leading-relaxed">
-										{control.statement}
-									</p>
-									{control.implementationGuidance && (
-										<div className="mt-4 p-4 bg-blue-50/50 dark:bg-blue-900/10 rounded-lg border border-blue-100 dark:border-blue-900/30">
-											<h4 className="text-sm font-semibold text-blue-800 dark:text-blue-300 mb-2">
-												Implementation Guidance
-											</h4>
-											<p className="text-zinc-700 dark:text-zinc-300 text-sm whitespace-pre-wrap leading-relaxed">
-												{control.implementationGuidance}
-											</p>
-										</div>
-									)}
-								</div>
-
-								<div className="p-6 flex-1 bg-white dark:bg-zinc-900">
-									<h3 className="text-xs font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest mb-4">
-										Mapped Paragraphs
-									</h3>
-									{control.paragraphs.length === 0 ? (
-										<p className="text-sm text-zinc-400 italic bg-zinc-50 dark:bg-zinc-900/50 p-4 rounded-lg border border-zinc-100 dark:border-zinc-800 text-center">
-											No paragraphs mapped.
-										</p>
-									) : (
-										<div className="space-y-3 max-h-64 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-zinc-200 dark:scrollbar-thumb-zinc-800">
-											{control.paragraphs.map((p) => (
-												<MappedParagraphCard key={p.id} p={p} />
-											))}
-										</div>
-									)}
-								</div>
-							</div>
+								control={control}
+								onEdit={openEditModal}
+								onDelete={handleDeleteControl}
+							/>
 						))}
 					</div>
 				)}
