@@ -7,7 +7,13 @@
 	},
 	"files": {
 		"ignoreUnknown": false,
-		"includes": ["**", "!**/.next", "!**/node_modules", "!**/generated"]
+		"includes": [
+			"**",
+			"!**/.next",
+			"!**/node_modules",
+			"!**/generated",
+			"!**/tr-03183-1"
+		]
 	},
 	"formatter": {
 		"enabled": true,
