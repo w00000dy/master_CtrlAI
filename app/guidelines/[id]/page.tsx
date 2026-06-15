@@ -127,10 +127,10 @@ export default function GuidelineViewPage() {
 						Imported Controls
 					</h2>
 					<div className="grid gap-6">
-						{guideline.controls.map((control) => (
+						{guideline.controls.map((control: ControlData) => (
 							<ControlCard
 								key={control.id}
-								control={control as unknown as ControlData}
+								control={control}
 								showMappingLink={true}
 								layout="horizontal"
 							/>

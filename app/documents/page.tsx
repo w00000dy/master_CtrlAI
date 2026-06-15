@@ -10,6 +10,7 @@ import {
 import Link from "next/link";
 import type React from "react";
 import { useEffect, useRef, useState } from "react";
+import { CardBase, CardIcon, CardLink } from "@/app/components/CardComponents";
 import { deleteDocument, getDocuments } from "./actions";
 
 type DocumentMeta = {
@@ -28,18 +29,18 @@ function DocumentCard({
 	const iconRef = useRef<BookTextIconHandle | null>(null);
 
 	return (
-		<Link
-			href={`/documents/${doc.id}`}
-			className="group bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6 shadow-sm hover:shadow-md hover:border-zinc-300 dark:hover:border-zinc-700 transition-all block"
-			onMouseEnter={() => iconRef.current?.startAnimation?.()}
-			onMouseLeave={() => iconRef.current?.stopAnimation?.()}
-		>
-			<div className="flex flex-col h-full justify-between gap-4">
+		<CardBase className="flex flex-col">
+			<CardLink
+				href={`/documents/${doc.id}`}
+				className="p-6 flex-1 h-full flex flex-col justify-between gap-4"
+				onMouseEnter={() => iconRef.current?.startAnimation?.()}
+				onMouseLeave={() => iconRef.current?.stopAnimation?.()}
+			>
 				<div>
 					<div className="flex items-start justify-between gap-4 mb-3">
-						<div className="p-2 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-lg shrink-0">
+						<CardIcon className="p-2">
 							<BookTextIcon ref={iconRef} animateOnHover={false} size={24} />
-						</div>
+						</CardIcon>
 						<button
 							type="button"
 							onClick={(e) => handleDelete(e, doc.id)}
@@ -53,12 +54,12 @@ function DocumentCard({
 						{doc.title || "Untitled Document"}
 					</h2>
 				</div>
-				<div className="text-xs text-zinc-500 dark:text-zinc-400 flex items-center gap-1">
+				<div className="text-xs text-zinc-500 dark:text-zinc-400 flex items-center gap-1 mt-4">
 					<ClockIcon size={16} />
 					Saved {new Date(doc.savedAt).toLocaleDateString()}
 				</div>
-			</div>
-		</Link>
+			</CardLink>
+		</CardBase>
 	);
 }
 

@@ -11,6 +11,7 @@ import {
 } from "lucide-animated";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { CardBase, CardIcon, CardLink } from "@/app/components/CardComponents";
 import type { GuidelineModel as Guideline } from "@/generated/prisma/models";
 import { deleteAllGuidelines, deleteGuideline, getGuidelines } from "./actions";
 
@@ -30,17 +31,17 @@ function GuidelineCard({
 	const deleteIconRef = useRef<DeleteIconHandle | null>(null);
 
 	return (
-		<div className="group bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col">
-			<Link
+		<CardBase className="overflow-hidden flex flex-col">
+			<CardLink
 				href={`/guidelines/${gl.id}`}
 				className="p-6 flex-1 block"
 				onMouseEnter={() => iconRef.current?.startAnimation?.()}
 				onMouseLeave={() => iconRef.current?.stopAnimation?.()}
 			>
 				<div className="flex items-start gap-4">
-					<div className="p-3 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-lg shrink-0 group-hover:scale-110 transition-transform">
+					<CardIcon className="group-hover:scale-110 transition-transform">
 						<FileTextIcon ref={iconRef} animateOnHover={false} size={24} />
-					</div>
+					</CardIcon>
 					<div>
 						<h2 className="font-bold text-zinc-900 dark:text-zinc-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-2">
 							{gl.title}
@@ -54,7 +55,7 @@ function GuidelineCard({
 						</div>
 					</div>
 				</div>
-			</Link>
+			</CardLink>
 			<div className="border-t border-zinc-100 dark:border-zinc-800/50 bg-zinc-50/50 dark:bg-zinc-900/30 p-3 flex justify-end">
 				<button
 					type="button"
@@ -70,7 +71,7 @@ function GuidelineCard({
 					<DeleteIcon ref={deleteIconRef} animateOnHover={false} size={18} />
 				</button>
 			</div>
-		</div>
+		</CardBase>
 	);
 }
 

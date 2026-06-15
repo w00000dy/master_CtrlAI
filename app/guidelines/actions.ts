@@ -1,5 +1,6 @@
 "use server";
 
+import { enrichControlsWithAncestors } from "@/lib/controls";
 import { prisma } from "@/lib/prisma";
 
 export async function getGuidelines() {
@@ -48,26 +49,10 @@ export async function getGuidelineById(id: string) {
 		]);
 		if (!guideline) return { success: false, error: "Guideline not found." };
 
-		const paraMap = new Map(allParagraphs.map((p) => [p.id, p]));
-		const enrichedControls = guideline.controls.map((control) => {
-			return {
-				...control,
-				paragraphs: control.paragraphs.map((p) => {
-					const ancestors = [];
-					let currentId = p.parentParagraphId;
-					while (currentId) {
-						const parent = paraMap.get(currentId);
-						if (parent) {
-							ancestors.unshift(parent);
-							currentId = parent.parentParagraphId;
-						} else {
-							break;
-						}
-					}
-					return { ...p, ancestors };
-				}),
-			};
-		});
+		const enrichedControls = enrichControlsWithAncestors(
+			guideline.controls,
+			allParagraphs,
+		);
 
 		return {
 			success: true,
