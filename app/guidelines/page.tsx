@@ -2,12 +2,15 @@
 
 import {
 	DeleteIcon,
+	type DeleteIconHandle,
 	FileTextIcon,
+	type FileTextIconHandle,
 	LoaderIcon,
 	PlusIcon,
+	type PlusIconHandle,
 } from "lucide-animated";
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { GuidelineModel as Guideline } from "@/generated/prisma/models";
 import { deleteAllGuidelines, deleteGuideline, getGuidelines } from "./actions";
 
@@ -16,9 +19,67 @@ type GuidelineWithCount = Guideline & {
 	_count: { controls: number };
 };
 
+function GuidelineCard({
+	gl,
+	handleDelete,
+}: {
+	gl: GuidelineWithCount;
+	handleDelete: (id: string) => void;
+}) {
+	const iconRef = useRef<FileTextIconHandle | null>(null);
+	const deleteIconRef = useRef<DeleteIconHandle | null>(null);
+
+	return (
+		<div className="group bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col">
+			<Link
+				href={`/guidelines/${gl.id}`}
+				className="p-6 flex-1 block"
+				onMouseEnter={() => iconRef.current?.startAnimation?.()}
+				onMouseLeave={() => iconRef.current?.stopAnimation?.()}
+			>
+				<div className="flex items-start gap-4">
+					<div className="p-3 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-lg shrink-0 group-hover:scale-110 transition-transform">
+						<FileTextIcon ref={iconRef} animateOnHover={false} size={24} />
+					</div>
+					<div>
+						<h2 className="font-bold text-zinc-900 dark:text-zinc-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-2">
+							{gl.title}
+						</h2>
+						<div className="mt-2 flex flex-col gap-1 text-sm text-zinc-500 dark:text-zinc-400">
+							<span className="font-medium text-blue-600 dark:text-blue-400">
+								{gl.document?.title || "Unknown Document"}
+							</span>
+							<span>Imported: {new Date(gl.savedAt).toLocaleDateString()}</span>
+							<span>{gl._count.controls} Controls</span>
+						</div>
+					</div>
+				</div>
+			</Link>
+			<div className="border-t border-zinc-100 dark:border-zinc-800/50 bg-zinc-50/50 dark:bg-zinc-900/30 p-3 flex justify-end">
+				<button
+					type="button"
+					onClick={(e) => {
+						e.preventDefault();
+						handleDelete(gl.id);
+					}}
+					onMouseEnter={() => deleteIconRef.current?.startAnimation?.()}
+					onMouseLeave={() => deleteIconRef.current?.stopAnimation?.()}
+					className="p-2 text-zinc-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+					title="Delete Guideline"
+				>
+					<DeleteIcon ref={deleteIconRef} animateOnHover={false} size={18} />
+				</button>
+			</div>
+		</div>
+	);
+}
+
 export default function GuidelinesPage() {
 	const [guidelines, setGuidelines] = useState<GuidelineWithCount[]>([]);
 	const [loading, setLoading] = useState(true);
+
+	const deleteAllIconRef = useRef<DeleteIconHandle | null>(null);
+	const importIconRef = useRef<PlusIconHandle | null>(null);
 
 	const fetchGuidelines = useCallback(async () => {
 		const res = await getGuidelines();
@@ -85,17 +146,27 @@ export default function GuidelinesPage() {
 							<button
 								type="button"
 								onClick={handleDeleteAll}
+								onMouseEnter={() =>
+									deleteAllIconRef.current?.startAnimation?.()
+								}
+								onMouseLeave={() => deleteAllIconRef.current?.stopAnimation?.()}
 								className="px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 dark:bg-red-900/20 dark:hover:bg-red-900/40 dark:text-red-400 font-medium rounded-lg transition-colors shadow-sm flex items-center gap-2"
 							>
-								<DeleteIcon size={20} />
+								<DeleteIcon
+									ref={deleteAllIconRef}
+									animateOnHover={false}
+									size={20}
+								/>
 								Delete All
 							</button>
 						)}
 						<Link
 							href="/guidelines/import"
+							onMouseEnter={() => importIconRef.current?.startAnimation?.()}
+							onMouseLeave={() => importIconRef.current?.stopAnimation?.()}
 							className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors shadow-sm flex items-center gap-2"
 						>
-							<PlusIcon size={20} />
+							<PlusIcon ref={importIconRef} animateOnHover={false} size={20} />
 							Import Guideline
 						</Link>
 					</div>
@@ -117,48 +188,7 @@ export default function GuidelinesPage() {
 				) : (
 					<div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
 						{guidelines.map((gl) => (
-							<div
-								key={gl.id}
-								className="group bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col"
-							>
-								<Link
-									href={`/guidelines/${gl.id}`}
-									className="p-6 flex-1 block"
-								>
-									<div className="flex items-start gap-4">
-										<div className="p-3 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-lg shrink-0 group-hover:scale-110 transition-transform">
-											<FileTextIcon size={24} />
-										</div>
-										<div>
-											<h2 className="font-bold text-zinc-900 dark:text-zinc-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-2">
-												{gl.title}
-											</h2>
-											<div className="mt-2 flex flex-col gap-1 text-sm text-zinc-500 dark:text-zinc-400">
-												<span className="font-medium text-blue-600 dark:text-blue-400">
-													{gl.document?.title || "Unknown Document"}
-												</span>
-												<span>
-													Imported: {new Date(gl.savedAt).toLocaleDateString()}
-												</span>
-												<span>{gl._count.controls} Controls</span>
-											</div>
-										</div>
-									</div>
-								</Link>
-								<div className="border-t border-zinc-100 dark:border-zinc-800/50 bg-zinc-50/50 dark:bg-zinc-900/30 p-3 flex justify-end">
-									<button
-										type="button"
-										onClick={(e) => {
-											e.preventDefault();
-											handleDelete(gl.id);
-										}}
-										className="p-2 text-zinc-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
-										title="Delete Guideline"
-									>
-										<DeleteIcon size={18} />
-									</button>
-								</div>
-							</div>
+							<GuidelineCard key={gl.id} gl={gl} handleDelete={handleDelete} />
 						))}
 					</div>
 				)}
