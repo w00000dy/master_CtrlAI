@@ -40,10 +40,24 @@ function matchesMarker(
 		return true;
 	}
 
-	// For short markers (like "1", "a", "Part I"), require word boundaries to avoid false positives.
-	// We use [^a-z0-9] to match any boundary (space, punctuation, parenthesis)
-	const escaped = m.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-	const regex = new RegExp(`(^|[^a-z0-9])${escaped}([^a-z0-9]|$)`, "i");
+	// For short markers, extract the alphanumeric core to avoid punctuation mismatches
+	// e.g. "1." -> "1", "a)" -> "a"
+	const coreMarker = m.replace(/[^a-z0-9]/g, "");
+	if (!coreMarker) return false;
+
+	const escaped = coreMarker.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+	// If the core marker is purely digits, allow it to match without punctuation as well.
+	// If it contains letters (like 'a', 'i', 'ii'), REQUIRE standard punctuation like (a), a., or a)
+	// to prevent false positives with Roman numerals like 'Annex I' or words.
+	let regexStr = "";
+	if (/^[0-9]+$/.test(coreMarker)) {
+		regexStr = `(^|[^a-z0-9])(\\(${escaped}\\)|${escaped}\\.|${escaped}\\)|${escaped})([^a-z0-9]|$)`;
+	} else {
+		regexStr = `(^|[^a-z0-9])(\\(${escaped}\\)|${escaped}\\.|${escaped}\\))([^a-z0-9]|$)`;
+	}
+
+	const regex = new RegExp(regexStr, "i");
 	return regex.test(ref);
 }
 
@@ -131,6 +145,11 @@ export async function importGuidelineYaml(formData: FormData) {
 						title: true,
 					},
 				},
+				parentParagraph: {
+					select: {
+						marker: true,
+					},
+				},
 			},
 		});
 
@@ -151,6 +170,14 @@ export async function importGuidelineYaml(formData: FormData) {
 
 					// Most specific match: the paragraph marker itself
 					if (matchesMarker(p.marker, craRef)) score += 10;
+
+					// Next: the parent paragraph's marker
+					if (
+						p.parentParagraph &&
+						matchesMarker(p.parentParagraph.marker, craRef)
+					) {
+						score += 5;
+					}
 
 					// Less specific: the section marker or title
 					if (matchesMarker(p.section.marker, craRef)) score += 5;
