@@ -179,13 +179,33 @@ export default function ControlsPage() {
 		}
 	};
 
+	const filteredControls = controls.filter((control) => {
+		const isMapped = control.paragraphs && control.paragraphs.length > 0;
+
+		if (filterMapping === "mapped" && !isMapped) return false;
+		if (filterMapping === "unmapped" && isMapped) return false;
+
+		if (filterOrigin === "guideline" && !control.guidelineId) return false;
+		if (filterOrigin === "llm" && control.guidelineId) return false;
+
+		return true;
+	});
+
 	return (
 		<div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 p-8">
 			<div className="max-w-6xl mx-auto space-y-8">
 				<div className="flex items-center justify-between">
 					<div>
-						<h1 className="text-3xl font-bold text-zinc-900 dark:text-zinc-50">
+						<h1 className="text-3xl font-bold text-zinc-900 dark:text-zinc-50 flex items-center gap-3">
 							Controls
+							{!loading && (
+								<span className="text-sm font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 px-2.5 py-1 rounded-full border border-zinc-200 dark:border-zinc-700">
+									{filteredControls.length}{" "}
+									{controls.length !== filteredControls.length
+										? `of ${controls.length}`
+										: ""}
+								</span>
+							)}
 						</h1>
 						<p className="text-zinc-500 dark:text-zinc-400 mt-2">
 							Manage implementation instructions and map them to paragraphs.
@@ -255,64 +275,48 @@ export default function ControlsPage() {
 					</div>
 				</div>
 
-				{(() => {
-					const filteredControls = controls.filter((control) => {
-						const isMapped =
-							control.paragraphs && control.paragraphs.length > 0;
-
-						if (filterMapping === "mapped" && !isMapped) return false;
-						if (filterMapping === "unmapped" && isMapped) return false;
-
-						if (filterOrigin === "guideline" && !control.guidelineId)
-							return false;
-						if (filterOrigin === "llm" && control.guidelineId) return false;
-
-						return true;
-					});
-
-					return loading ? (
-						<div className="flex justify-center p-12">
-							<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-						</div>
-					) : controls.length === 0 ? (
-						<div className="text-center p-12 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-sm">
-							<p className="text-zinc-500 dark:text-zinc-400 text-lg">
-								No controls found.
-							</p>
-							<p className="text-zinc-400 dark:text-zinc-500 text-sm mt-2">
-								Click &quot;Add Control&quot; to create your first
-								implementation instruction.
-							</p>
-						</div>
-					) : filteredControls.length === 0 ? (
-						<div className="text-center p-12 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-sm">
-							<p className="text-zinc-500 dark:text-zinc-400 text-lg">
-								No controls match your filters.
-							</p>
-							<button
-								type="button"
-								onClick={() => {
-									setFilterMapping("all");
-									setFilterOrigin("all");
-								}}
-								className="mt-4 text-blue-600 hover:text-blue-700 text-sm font-medium hover:underline transition-colors"
-							>
-								Clear filters
-							</button>
-						</div>
-					) : (
-						<div className="grid gap-6 lg:grid-cols-2">
-							{filteredControls.map((control) => (
-								<ControlCard
-									key={control.id}
-									control={control}
-									onEdit={openEditModal}
-									onDelete={handleDeleteControl}
-								/>
-							))}
-						</div>
-					);
-				})()}
+				{loading ? (
+					<div className="flex justify-center p-12">
+						<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+					</div>
+				) : controls.length === 0 ? (
+					<div className="text-center p-12 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-sm">
+						<p className="text-zinc-500 dark:text-zinc-400 text-lg">
+							No controls found.
+						</p>
+						<p className="text-zinc-400 dark:text-zinc-500 text-sm mt-2">
+							Click &quot;Add Control&quot; to create your first implementation
+							instruction.
+						</p>
+					</div>
+				) : filteredControls.length === 0 ? (
+					<div className="text-center p-12 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-sm">
+						<p className="text-zinc-500 dark:text-zinc-400 text-lg">
+							No controls match your filters.
+						</p>
+						<button
+							type="button"
+							onClick={() => {
+								setFilterMapping("all");
+								setFilterOrigin("all");
+							}}
+							className="mt-4 text-blue-600 hover:text-blue-700 text-sm font-medium hover:underline transition-colors"
+						>
+							Clear filters
+						</button>
+					</div>
+				) : (
+					<div className="grid gap-6 lg:grid-cols-2">
+						{filteredControls.map((control) => (
+							<ControlCard
+								key={control.id}
+								control={control}
+								onEdit={openEditModal}
+								onDelete={handleDeleteControl}
+							/>
+						))}
+					</div>
+				)}
 			</div>
 
 			{isModalOpen && (
