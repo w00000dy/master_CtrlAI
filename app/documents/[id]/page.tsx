@@ -463,8 +463,12 @@ export default function DocumentViewPage() {
 												</p>
 												{ctrl.implementationGuidance && (
 													<div className="ml-2 mb-3 p-3 bg-blue-50/50 dark:bg-blue-900/20 rounded border border-blue-100 dark:border-blue-900/30">
-														<p className="text-xs font-semibold text-blue-800 dark:text-blue-300 mb-1">Implementation Guidance:</p>
-														<p className="text-xs text-zinc-700 dark:text-zinc-300 whitespace-pre-wrap">{ctrl.implementationGuidance}</p>
+														<p className="text-xs font-semibold text-blue-800 dark:text-blue-300 mb-1">
+															Implementation Guidance:
+														</p>
+														<p className="text-xs text-zinc-700 dark:text-zinc-300 whitespace-pre-wrap">
+															{ctrl.implementationGuidance}
+														</p>
 													</div>
 												)}
 

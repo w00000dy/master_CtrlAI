@@ -253,7 +253,9 @@ export default function ControlsPage() {
 									</p>
 									{control.implementationGuidance && (
 										<div className="mt-4 p-4 bg-blue-50/50 dark:bg-blue-900/10 rounded-lg border border-blue-100 dark:border-blue-900/30">
-											<h4 className="text-sm font-semibold text-blue-800 dark:text-blue-300 mb-2">Implementation Guidance</h4>
+											<h4 className="text-sm font-semibold text-blue-800 dark:text-blue-300 mb-2">
+												Implementation Guidance
+											</h4>
 											<p className="text-zinc-700 dark:text-zinc-300 text-sm whitespace-pre-wrap leading-relaxed">
 												{control.implementationGuidance}
 											</p>
@@ -344,7 +346,10 @@ export default function ControlsPage() {
 										htmlFor="control-guidance"
 										className="block text-sm font-semibold text-zinc-900 dark:text-zinc-100 mb-2"
 									>
-										Implementation Guidance <span className="text-zinc-500 font-normal">(Optional)</span>
+										Implementation Guidance{" "}
+										<span className="text-zinc-500 font-normal">
+											(Optional)
+										</span>
 									</label>
 									<textarea
 										id="control-guidance"
