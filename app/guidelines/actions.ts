@@ -60,3 +60,13 @@ export async function deleteGuideline(id: string) {
 		return { success: false, error: "Failed to delete guideline." };
 	}
 }
+
+export async function deleteAllGuidelines() {
+	try {
+		await prisma.guideline.deleteMany();
+		return { success: true };
+	} catch (error) {
+		console.error("Failed to delete all guidelines:", error);
+		return { success: false, error: "Failed to delete all guidelines." };
+	}
+}

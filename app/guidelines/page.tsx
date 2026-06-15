@@ -9,7 +9,7 @@ import {
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import type { GuidelineModel as Guideline } from "@/generated/prisma/models";
-import { deleteGuideline, getGuidelines } from "./actions";
+import { deleteAllGuidelines, deleteGuideline, getGuidelines } from "./actions";
 
 type GuidelineWithCount = Guideline & {
 	document: { title: string };
@@ -51,6 +51,23 @@ export default function GuidelinesPage() {
 		}
 	};
 
+	const handleDeleteAll = async () => {
+		if (
+			!window.confirm(
+				"Are you sure you want to delete ALL guidelines? This will also delete all imported controls. This action cannot be undone.",
+			)
+		)
+			return;
+		setLoading(true);
+		const res = await deleteAllGuidelines();
+		if (res.success) {
+			fetchGuidelines();
+		} else {
+			alert("Failed to delete all guidelines");
+			setLoading(false);
+		}
+	};
+
 	return (
 		<div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 p-8">
 			<div className="max-w-6xl mx-auto space-y-8">
@@ -63,13 +80,25 @@ export default function GuidelinesPage() {
 							Manage your imported BSI technical guidelines.
 						</p>
 					</div>
-					<Link
-						href="/guidelines/import"
-						className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors shadow-sm flex items-center gap-2"
-					>
-						<PlusIcon size={20} />
-						Import Guideline
-					</Link>
+					<div className="flex items-center gap-3">
+						{guidelines.length > 0 && (
+							<button
+								type="button"
+								onClick={handleDeleteAll}
+								className="px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 dark:bg-red-900/20 dark:hover:bg-red-900/40 dark:text-red-400 font-medium rounded-lg transition-colors shadow-sm flex items-center gap-2"
+							>
+								<DeleteIcon size={20} />
+								Delete All
+							</button>
+						)}
+						<Link
+							href="/guidelines/import"
+							className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors shadow-sm flex items-center gap-2"
+						>
+							<PlusIcon size={20} />
+							Import Guideline
+						</Link>
+					</div>
 				</div>
 
 				{loading ? (
