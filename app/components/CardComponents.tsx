@@ -1,5 +1,21 @@
 import Link from "next/link";
-import type { ReactNode } from "react";
+import { type ReactNode, useCallback, useRef } from "react";
+
+export function useIconAnimation<
+	T extends { startAnimation?: () => void; stopAnimation?: () => void },
+>() {
+	const iconRef = useRef<T | null>(null);
+	const onMouseEnter = useCallback(
+		() => iconRef.current?.startAnimation?.(),
+		[],
+	);
+	const onMouseLeave = useCallback(
+		() => iconRef.current?.stopAnimation?.(),
+		[],
+	);
+
+	return { iconRef, onMouseEnter, onMouseLeave };
+}
 
 export function CardBase({
 	children,

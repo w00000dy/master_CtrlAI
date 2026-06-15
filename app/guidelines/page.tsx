@@ -11,7 +11,12 @@ import {
 } from "lucide-animated";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { CardBase, CardIcon, CardLink } from "@/app/components/CardComponents";
+import {
+	CardBase,
+	CardIcon,
+	CardLink,
+	useIconAnimation,
+} from "@/app/components/CardComponents";
 import type { GuidelineModel as Guideline } from "@/generated/prisma/models";
 import { deleteAllGuidelines, deleteGuideline, getGuidelines } from "./actions";
 
@@ -27,7 +32,8 @@ function GuidelineCard({
 	gl: GuidelineWithCount;
 	handleDelete: (id: string) => void;
 }) {
-	const iconRef = useRef<FileTextIconHandle | null>(null);
+	const { iconRef, onMouseEnter, onMouseLeave } =
+		useIconAnimation<FileTextIconHandle>();
 	const deleteIconRef = useRef<DeleteIconHandle | null>(null);
 
 	return (
@@ -35,8 +41,8 @@ function GuidelineCard({
 			<CardLink
 				href={`/guidelines/${gl.id}`}
 				className="p-6 flex-1 block"
-				onMouseEnter={() => iconRef.current?.startAnimation?.()}
-				onMouseLeave={() => iconRef.current?.stopAnimation?.()}
+				onMouseEnter={onMouseEnter}
+				onMouseLeave={onMouseLeave}
 			>
 				<div className="flex items-start gap-4">
 					<CardIcon className="group-hover:scale-110 transition-transform">

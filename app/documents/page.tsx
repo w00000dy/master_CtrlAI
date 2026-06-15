@@ -9,8 +9,13 @@ import {
 } from "lucide-animated";
 import Link from "next/link";
 import type React from "react";
-import { useEffect, useRef, useState } from "react";
-import { CardBase, CardIcon, CardLink } from "@/app/components/CardComponents";
+import { useEffect, useState } from "react";
+import {
+	CardBase,
+	CardIcon,
+	CardLink,
+	useIconAnimation,
+} from "@/app/components/CardComponents";
 import { deleteDocument, getDocuments } from "./actions";
 
 type DocumentMeta = {
@@ -26,15 +31,16 @@ function DocumentCard({
 	doc: DocumentMeta;
 	handleDelete: (e: React.MouseEvent, id: string) => void;
 }) {
-	const iconRef = useRef<BookTextIconHandle | null>(null);
+	const { iconRef, onMouseEnter, onMouseLeave } =
+		useIconAnimation<BookTextIconHandle>();
 
 	return (
 		<CardBase className="flex flex-col">
 			<CardLink
 				href={`/documents/${doc.id}`}
 				className="p-6 flex-1 h-full flex flex-col justify-between gap-4"
-				onMouseEnter={() => iconRef.current?.startAnimation?.()}
-				onMouseLeave={() => iconRef.current?.stopAnimation?.()}
+				onMouseEnter={onMouseEnter}
+				onMouseLeave={onMouseLeave}
 			>
 				<div>
 					<div className="flex items-start justify-between gap-4 mb-3">
