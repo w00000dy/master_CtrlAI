@@ -6,6 +6,9 @@ export async function getGuidelines() {
 	try {
 		const guidelines = await prisma.guideline.findMany({
 			include: {
+				document: {
+					select: { title: true },
+				},
 				_count: {
 					select: { controls: true },
 				},
@@ -24,6 +27,9 @@ export async function getGuidelineById(id: string) {
 		const guideline = await prisma.guideline.findUnique({
 			where: { id },
 			include: {
+				document: {
+					select: { title: true },
+				},
 				controls: {
 					include: {
 						paragraphs: {

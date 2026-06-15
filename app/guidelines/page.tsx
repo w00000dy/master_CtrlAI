@@ -12,6 +12,7 @@ import type { GuidelineModel as Guideline } from "@/generated/prisma/models";
 import { deleteGuideline, getGuidelines } from "./actions";
 
 type GuidelineWithCount = Guideline & {
+	document: { title: string };
 	_count: { controls: number };
 };
 
@@ -104,6 +105,9 @@ export default function GuidelinesPage() {
 												{gl.title}
 											</h2>
 											<div className="mt-2 flex flex-col gap-1 text-sm text-zinc-500 dark:text-zinc-400">
+												<span className="font-medium text-blue-600 dark:text-blue-400">
+													{gl.document?.title || "Unknown Document"}
+												</span>
 												<span>
 													Imported: {new Date(gl.savedAt).toLocaleDateString()}
 												</span>

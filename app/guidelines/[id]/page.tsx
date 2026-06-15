@@ -108,7 +108,10 @@ export default function GuidelineViewPage() {
 							<h1 className="text-3xl font-extrabold text-zinc-900 dark:text-zinc-100">
 								{guideline.title}
 							</h1>
-							<p className="mt-2 text-zinc-500 dark:text-zinc-400">
+							<p className="mt-2 text-blue-600 dark:text-blue-400 font-medium">
+								{guideline.document?.title || "Unknown Document"}
+							</p>
+							<p className="mt-1 text-zinc-500 dark:text-zinc-400">
 								Imported on {new Date(guideline.savedAt).toLocaleDateString()}
 							</p>
 							<div className="mt-4 inline-flex items-center gap-2 bg-white dark:bg-zinc-800 px-3 py-1 rounded-full text-sm font-medium border border-zinc-200 dark:border-zinc-700">
