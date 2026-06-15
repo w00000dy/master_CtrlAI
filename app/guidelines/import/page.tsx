@@ -174,12 +174,6 @@ export default function ImportGuidelinePage() {
 							</p>
 							<div className="pt-4 flex gap-4">
 								<Link
-									href={`/guidelines/${result.guidelineId}`}
-									className="px-6 py-2.5 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors shadow-sm"
-								>
-									View Guideline
-								</Link>
-								<Link
 									href="/guidelines"
 									className="px-6 py-2.5 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300 font-medium rounded-lg transition-colors shadow-sm"
 								>
