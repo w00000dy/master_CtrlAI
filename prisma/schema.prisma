@@ -8,10 +8,20 @@ datasource db {
 }
 
 model Document {
-  id       String    @id @default(cuid(2))
-  title    String
-  savedAt  DateTime  @default(now())
-  sections Section[]
+  id         String      @id @default(cuid(2))
+  title      String
+  savedAt    DateTime    @default(now())
+  sections   Section[]
+  guidelines Guideline[]
+}
+
+model Guideline {
+  id         String    @id @default(cuid(2))
+  title      String
+  savedAt    DateTime  @default(now())
+  controls   Control[]
+  documentId String
+  document   Document  @relation(fields: [documentId], references: [id], onDelete: Cascade)
 }
 
 model Section {
@@ -36,9 +46,11 @@ model Paragraph {
 }
 
 model Control {
-  id          String      @id @default(cuid(2))
+  id                     String      @id @default(cuid(2))
   title                  String
   statement              String      @db.Text
   implementationGuidance String?     @db.Text
-  paragraphs  Paragraph[]
+  guidelineId            String?
+  guideline              Guideline?  @relation(fields: [guidelineId], references: [id], onDelete: Cascade)
+  paragraphs             Paragraph[]
 }
