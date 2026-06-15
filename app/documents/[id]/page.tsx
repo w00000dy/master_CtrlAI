@@ -44,6 +44,7 @@ type Control = {
 	title: string;
 	statement: string;
 	implementationGuidance: string | null;
+	guidelineId: string | null;
 	paragraphs: ParagraphWithContext[];
 };
 
@@ -181,7 +182,7 @@ export default function DocumentViewPage() {
 		<div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 flex relative overflow-hidden">
 			{/* Main Document Content */}
 			<div
-				className={`flex-1 p-8 overflow-y-auto transition-all duration-300 ${selectedParagraph ? "mr-[450px]" : ""}`}
+				className={`flex-1 p-8 overflow-y-auto transition-all duration-300 ${selectedParagraph ? "ml-[450px] mr-[450px]" : ""}`}
 			>
 				<div className="max-w-4xl mx-auto space-y-8">
 					{/* Navigation & Actions Header */}
@@ -331,7 +332,99 @@ export default function DocumentViewPage() {
 				</div>
 			</div>
 
-			{/* Side Panel */}
+			{/* Left Side Panel (Guideline Controls) */}
+			<div
+				className={`fixed top-[73px] left-0 bottom-0 w-[450px] bg-white dark:bg-zinc-900 border-r border-zinc-200 dark:border-zinc-800 shadow-2xl transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] z-40 flex flex-col ${selectedParagraph ? "translate-x-0" : "-translate-x-full"}`}
+			>
+				{selectedParagraph && (
+					<>
+						<div className="p-6 border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between bg-zinc-50/80 dark:bg-zinc-900/80 backdrop-blur-md">
+							<h2 className="text-lg font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
+								Guideline Controls
+							</h2>
+							<button
+								type="button"
+								onClick={() => setSelectedParagraph(null)}
+								className="p-2 -mr-2 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors rounded-lg hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50"
+							>
+								<XIcon size={20} />
+							</button>
+						</div>
+
+						<div className="flex-1 overflow-y-auto p-6 space-y-8">
+							<div>
+								<div className="flex items-center justify-between mb-4">
+									<div className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest">
+										Mapped from Guidelines
+									</div>
+								</div>
+
+								{isLoadingControls ? (
+									<div className="flex items-center justify-center p-8 text-zinc-400">
+										<LoaderIcon className="animate-spin" size={24} />
+									</div>
+								) : controls.filter((c) => c.guidelineId !== null).length === 0 ? (
+									<div className="text-center p-8 bg-zinc-50 dark:bg-zinc-900/50 rounded-xl border border-zinc-100 dark:border-zinc-800 border-dashed">
+										<p className="text-zinc-500 dark:text-zinc-400 text-sm">
+											No guideline controls mapped yet.
+										</p>
+									</div>
+								) : (
+									<div className="space-y-4">
+										{controls
+											.filter((c) => c.guidelineId !== null)
+											.map((ctrl) => (
+												<div
+													key={ctrl.id}
+													className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-4 shadow-sm relative group overflow-hidden"
+												>
+													<div className="absolute top-0 left-0 w-1 h-full bg-blue-500"></div>
+													<h4 className="font-bold text-zinc-900 dark:text-zinc-100 text-sm mb-2 ml-2">
+														{ctrl.title}
+													</h4>
+													<p className="text-sm text-zinc-600 dark:text-zinc-400 ml-2 whitespace-pre-wrap mb-3">
+														{ctrl.statement}
+													</p>
+													{ctrl.implementationGuidance && (
+														<div className="ml-2 mb-3 p-3 bg-blue-50/50 dark:bg-blue-900/20 rounded border border-blue-100 dark:border-blue-900/30">
+															<p className="text-xs font-semibold text-blue-800 dark:text-blue-300 mb-1">
+																Implementation Guidance:
+															</p>
+															<p className="text-xs text-zinc-700 dark:text-zinc-300 whitespace-pre-wrap">
+																{ctrl.implementationGuidance}
+															</p>
+														</div>
+													)}
+
+													{ctrl.paragraphs.length > 1 && (
+														<div className="mt-3 ml-2 pt-3 border-t border-zinc-100 dark:border-zinc-800/50">
+															<p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2">
+																Also mapped to:
+															</p>
+															<div className="space-y-2">
+																{ctrl.paragraphs
+																	.filter((p) => p.id !== selectedParagraph.id)
+																	.map((p) => (
+																		<MappedParagraphCard
+																			key={p.id}
+																			p={p}
+																			compact
+																		/>
+																	))}
+															</div>
+														</div>
+													)}
+												</div>
+											))}
+									</div>
+								)}
+							</div>
+						</div>
+					</>
+				)}
+			</div>
+
+			{/* Right Side Panel (LLM Controls & Details) */}
 			<div
 				className={`fixed top-[73px] right-0 bottom-0 w-[450px] bg-white dark:bg-zinc-900 border-l border-zinc-200 dark:border-zinc-800 shadow-2xl transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] z-40 flex flex-col ${selectedParagraph ? "translate-x-0" : "translate-x-full"}`}
 			>
@@ -417,7 +510,7 @@ export default function DocumentViewPage() {
 							<div>
 								<div className="flex items-center justify-between mb-4">
 									<div className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest">
-										Controls
+										LLM Controls
 									</div>
 									<button
 										type="button"
@@ -441,57 +534,59 @@ export default function DocumentViewPage() {
 									<div className="flex items-center justify-center p-8 text-zinc-400">
 										<LoaderIcon className="animate-spin" size={24} />
 									</div>
-								) : controls.length === 0 ? (
+								) : controls.filter((c) => c.guidelineId === null).length === 0 ? (
 									<div className="text-center p-8 bg-zinc-50 dark:bg-zinc-900/50 rounded-xl border border-zinc-100 dark:border-zinc-800 border-dashed">
 										<p className="text-zinc-500 dark:text-zinc-400 text-sm">
-											No controls mapped yet.
+											No LLM controls generated yet.
 										</p>
 									</div>
 								) : (
 									<div className="space-y-4">
-										{controls.map((ctrl) => (
-											<div
-												key={ctrl.id}
-												className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-4 shadow-sm relative group overflow-hidden"
-											>
-												<div className="absolute top-0 left-0 w-1 h-full bg-green-500"></div>
-												<h4 className="font-bold text-zinc-900 dark:text-zinc-100 text-sm mb-2 ml-2">
-													{ctrl.title}
-												</h4>
-												<p className="text-sm text-zinc-600 dark:text-zinc-400 ml-2 whitespace-pre-wrap mb-3">
-													{ctrl.statement}
-												</p>
-												{ctrl.implementationGuidance && (
-													<div className="ml-2 mb-3 p-3 bg-blue-50/50 dark:bg-blue-900/20 rounded border border-blue-100 dark:border-blue-900/30">
-														<p className="text-xs font-semibold text-blue-800 dark:text-blue-300 mb-1">
-															Implementation Guidance:
-														</p>
-														<p className="text-xs text-zinc-700 dark:text-zinc-300 whitespace-pre-wrap">
-															{ctrl.implementationGuidance}
-														</p>
-													</div>
-												)}
-
-												{ctrl.paragraphs.length > 1 && (
-													<div className="mt-3 ml-2 pt-3 border-t border-zinc-100 dark:border-zinc-800/50">
-														<p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2">
-															Also mapped to:
-														</p>
-														<div className="space-y-2">
-															{ctrl.paragraphs
-																.filter((p) => p.id !== selectedParagraph.id)
-																.map((p) => (
-																	<MappedParagraphCard
-																		key={p.id}
-																		p={p}
-																		compact
-																	/>
-																))}
+										{controls
+											.filter((c) => c.guidelineId === null)
+											.map((ctrl) => (
+												<div
+													key={ctrl.id}
+													className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-4 shadow-sm relative group overflow-hidden"
+												>
+													<div className="absolute top-0 left-0 w-1 h-full bg-green-500"></div>
+													<h4 className="font-bold text-zinc-900 dark:text-zinc-100 text-sm mb-2 ml-2">
+														{ctrl.title}
+													</h4>
+													<p className="text-sm text-zinc-600 dark:text-zinc-400 ml-2 whitespace-pre-wrap mb-3">
+														{ctrl.statement}
+													</p>
+													{ctrl.implementationGuidance && (
+														<div className="ml-2 mb-3 p-3 bg-blue-50/50 dark:bg-blue-900/20 rounded border border-blue-100 dark:border-blue-900/30">
+															<p className="text-xs font-semibold text-blue-800 dark:text-blue-300 mb-1">
+																Implementation Guidance:
+															</p>
+															<p className="text-xs text-zinc-700 dark:text-zinc-300 whitespace-pre-wrap">
+																{ctrl.implementationGuidance}
+															</p>
 														</div>
-													</div>
-												)}
-											</div>
-										))}
+													)}
+
+													{ctrl.paragraphs.length > 1 && (
+														<div className="mt-3 ml-2 pt-3 border-t border-zinc-100 dark:border-zinc-800/50">
+															<p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2">
+																Also mapped to:
+															</p>
+															<div className="space-y-2">
+																{ctrl.paragraphs
+																	.filter((p) => p.id !== selectedParagraph.id)
+																	.map((p) => (
+																		<MappedParagraphCard
+																			key={p.id}
+																			p={p}
+																			compact
+																		/>
+																	))}
+															</div>
+														</div>
+													)}
+												</div>
+											))}
 									</div>
 								)}
 							</div>
