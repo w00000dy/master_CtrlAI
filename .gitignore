@@ -46,3 +46,5 @@ data/documents/*
 /app/generated/prisma
 
 /generated/prisma
+
+/tr-03183-1/
