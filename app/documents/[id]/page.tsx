@@ -339,18 +339,10 @@ export default function DocumentViewPage() {
 			>
 				{selectedParagraph && (
 					<>
-						<div className="p-6 border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between bg-zinc-50/80 dark:bg-zinc-900/80 backdrop-blur-md">
-							<h2 className="text-lg font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
-								Guideline Controls
-							</h2>
-							<button
-								type="button"
-								onClick={() => setSelectedParagraph(null)}
-								className="p-2 -mr-2 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors rounded-lg hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50"
-							>
-								<XIcon size={20} />
-							</button>
-						</div>
+						<SidePanelHeader
+							title="Guideline Controls"
+							onClose={() => setSelectedParagraph(null)}
+						/>
 
 						<div className="flex-1 overflow-y-auto p-6 space-y-8">
 							<div>
@@ -376,47 +368,12 @@ export default function DocumentViewPage() {
 										{controls
 											.filter((c) => c.guidelineId !== null)
 											.map((ctrl) => (
-												<div
+												<SidePanelControlCard
 													key={ctrl.id}
-													className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-4 shadow-sm relative group overflow-hidden"
-												>
-													<div className="absolute top-0 left-0 w-1 h-full bg-blue-500"></div>
-													<h4 className="font-bold text-zinc-900 dark:text-zinc-100 text-sm mb-2 ml-2">
-														{ctrl.title}
-													</h4>
-													<p className="text-sm text-zinc-600 dark:text-zinc-400 ml-2 whitespace-pre-wrap mb-3">
-														{ctrl.statement}
-													</p>
-													{ctrl.implementationGuidance && (
-														<div className="ml-2 mb-3 p-3 bg-blue-50/50 dark:bg-blue-900/20 rounded border border-blue-100 dark:border-blue-900/30">
-															<p className="text-xs font-semibold text-blue-800 dark:text-blue-300 mb-1">
-																Implementation Guidance:
-															</p>
-															<p className="text-xs text-zinc-700 dark:text-zinc-300 whitespace-pre-wrap">
-																{ctrl.implementationGuidance}
-															</p>
-														</div>
-													)}
-
-													{ctrl.paragraphs.length > 1 && (
-														<div className="mt-3 ml-2 pt-3 border-t border-zinc-100 dark:border-zinc-800/50">
-															<p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2">
-																Also mapped to:
-															</p>
-															<div className="space-y-2">
-																{ctrl.paragraphs
-																	.filter((p) => p.id !== selectedParagraph.id)
-																	.map((p) => (
-																		<MappedParagraphCard
-																			key={p.id}
-																			p={p}
-																			compact
-																		/>
-																	))}
-															</div>
-														</div>
-													)}
-												</div>
+													ctrl={ctrl}
+													selectedParagraphId={selectedParagraph.id}
+													colorClass="bg-blue-500"
+												/>
 											))}
 									</div>
 								)}
@@ -432,18 +389,10 @@ export default function DocumentViewPage() {
 			>
 				{selectedParagraph && (
 					<>
-						<div className="p-6 border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between bg-zinc-50/80 dark:bg-zinc-900/80 backdrop-blur-md">
-							<h2 className="text-lg font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
-								LLM Controls
-							</h2>
-							<button
-								type="button"
-								onClick={() => setSelectedParagraph(null)}
-								className="p-2 -mr-2 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors rounded-lg hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50"
-							>
-								<XIcon size={20} />
-							</button>
-						</div>
+						<SidePanelHeader
+							title="LLM Controls"
+							onClose={() => setSelectedParagraph(null)}
+						/>
 
 						<div className="flex-1 overflow-y-auto p-6 space-y-8">
 							<div>
@@ -485,47 +434,12 @@ export default function DocumentViewPage() {
 										{controls
 											.filter((c) => c.guidelineId === null)
 											.map((ctrl) => (
-												<div
+												<SidePanelControlCard
 													key={ctrl.id}
-													className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-4 shadow-sm relative group overflow-hidden"
-												>
-													<div className="absolute top-0 left-0 w-1 h-full bg-green-500"></div>
-													<h4 className="font-bold text-zinc-900 dark:text-zinc-100 text-sm mb-2 ml-2">
-														{ctrl.title}
-													</h4>
-													<p className="text-sm text-zinc-600 dark:text-zinc-400 ml-2 whitespace-pre-wrap mb-3">
-														{ctrl.statement}
-													</p>
-													{ctrl.implementationGuidance && (
-														<div className="ml-2 mb-3 p-3 bg-blue-50/50 dark:bg-blue-900/20 rounded border border-blue-100 dark:border-blue-900/30">
-															<p className="text-xs font-semibold text-blue-800 dark:text-blue-300 mb-1">
-																Implementation Guidance:
-															</p>
-															<p className="text-xs text-zinc-700 dark:text-zinc-300 whitespace-pre-wrap">
-																{ctrl.implementationGuidance}
-															</p>
-														</div>
-													)}
-
-													{ctrl.paragraphs.length > 1 && (
-														<div className="mt-3 ml-2 pt-3 border-t border-zinc-100 dark:border-zinc-800/50">
-															<p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2">
-																Also mapped to:
-															</p>
-															<div className="space-y-2">
-																{ctrl.paragraphs
-																	.filter((p) => p.id !== selectedParagraph.id)
-																	.map((p) => (
-																		<MappedParagraphCard
-																			key={p.id}
-																			p={p}
-																			compact
-																		/>
-																	))}
-															</div>
-														</div>
-													)}
-												</div>
+													ctrl={ctrl}
+													selectedParagraphId={selectedParagraph.id}
+													colorClass="bg-green-500"
+												/>
 											))}
 									</div>
 								)}
@@ -534,6 +448,76 @@ export default function DocumentViewPage() {
 					</>
 				)}
 			</div>
+		</div>
+	);
+}
+
+function SidePanelHeader({
+	title,
+	onClose,
+}: {
+	title: string;
+	onClose: () => void;
+}) {
+	return (
+		<div className="p-6 border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between bg-zinc-50/80 dark:bg-zinc-900/80 backdrop-blur-md">
+			<h2 className="text-lg font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
+				{title}
+			</h2>
+			<button
+				type="button"
+				onClick={onClose}
+				className="p-2 -mr-2 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors rounded-lg hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50"
+			>
+				<XIcon size={20} />
+			</button>
+		</div>
+	);
+}
+
+function SidePanelControlCard({
+	ctrl,
+	selectedParagraphId,
+	colorClass,
+}: {
+	ctrl: Control;
+	selectedParagraphId: string;
+	colorClass: string;
+}) {
+	return (
+		<div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-4 shadow-sm relative group overflow-hidden">
+			<div className={`absolute top-0 left-0 w-1 h-full ${colorClass}`}></div>
+			<h4 className="font-bold text-zinc-900 dark:text-zinc-100 text-sm mb-2 ml-2">
+				{ctrl.title}
+			</h4>
+			<p className="text-sm text-zinc-600 dark:text-zinc-400 ml-2 whitespace-pre-wrap mb-3">
+				{ctrl.statement}
+			</p>
+			{ctrl.implementationGuidance && (
+				<div className="ml-2 mb-3 p-3 bg-blue-50/50 dark:bg-blue-900/20 rounded border border-blue-100 dark:border-blue-900/30">
+					<p className="text-xs font-semibold text-blue-800 dark:text-blue-300 mb-1">
+						Implementation Guidance:
+					</p>
+					<p className="text-xs text-zinc-700 dark:text-zinc-300 whitespace-pre-wrap">
+						{ctrl.implementationGuidance}
+					</p>
+				</div>
+			)}
+
+			{ctrl.paragraphs.length > 1 && (
+				<div className="mt-3 ml-2 pt-3 border-t border-zinc-100 dark:border-zinc-800/50">
+					<p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2">
+						Also mapped to:
+					</p>
+					<div className="space-y-2">
+						{ctrl.paragraphs
+							.filter((p) => p.id !== selectedParagraphId)
+							.map((p) => (
+								<MappedParagraphCard key={p.id} p={p} compact />
+							))}
+					</div>
+				</div>
+			)}
 		</div>
 	);
 }
