@@ -10,6 +10,7 @@
 		"postinstall": "npm run generate",
 		"generate": "prisma generate",
 		"lint": "eslint && biome check .",
+		"lint:fix": "eslint && biome check --write .",
 		"stylelint": "stylelint '**.css'",
 		"migrate:dev": "prisma migrate dev",
 		"migrate:deploy": "prisma migrate deploy",
