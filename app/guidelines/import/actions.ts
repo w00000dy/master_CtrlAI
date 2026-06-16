@@ -35,9 +35,14 @@ function matchesMarker(
 	const m = marker.toLowerCase().trim();
 	const ref = craRef.toLowerCase();
 
-	// For long markers, simple inclusion is safe and handles complex strings well
-	if (m.length > 5 && ref.includes(m)) {
-		return true;
+	// For long markers, use word boundaries to avoid partial matches
+	// e.g., "Part I" should not match "Part II"
+	if (m.length > 5) {
+		const escapedM = m.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+		const regex = new RegExp(`(^|[^a-z0-9])${escapedM}([^a-z0-9]|$)`, "i");
+		if (regex.test(ref)) {
+			return true;
+		}
 	}
 
 	// For short markers, extract the alphanumeric core to avoid punctuation mismatches
@@ -166,6 +171,41 @@ export async function importGuidelineYaml(formData: FormData) {
 				const scoredParagraphs: { id: string; score: number }[] = [];
 
 				for (const p of allParagraphs) {
+					// Check if section constraints are met
+					const sectionRefsMatch = craRef.match(/(article\s+\d+|art\.?\s*\d+|annex\s+[ivx]+|part\s+[ivx]+|chapter\s+[ivx\d]+)/gi);
+					if (sectionRefsMatch && sectionRefsMatch.length > 0) {
+						const sectionRefs: string[] = [];
+						for (const match of sectionRefsMatch) {
+							const normalized = match.toLowerCase().replace(/\s+/g, " ");
+							sectionRefs.push(normalized);
+							if (normalized.startsWith("art") && !normalized.startsWith("article")) {
+								sectionRefs.push(normalized.replace(/^art\.?\s*/, "article "));
+							} else if (normalized.startsWith("article")) {
+								sectionRefs.push(normalized.replace(/^article\s*/, "art. "));
+								sectionRefs.push(normalized.replace(/^article\s*/, "art "));
+							}
+						}
+
+						let sectionSatisfied = false;
+						for (const sr of sectionRefs) {
+							const markerStr = p.section.marker?.toLowerCase() || "";
+							const titleStr = p.section.title?.toLowerCase() || "";
+
+							if (
+								markerStr.includes(sr) || 
+								titleStr.includes(sr) || 
+								matchesMarker(p.section.marker, sr) || 
+								matchesMarker(p.section.title, sr)
+							) {
+								sectionSatisfied = true;
+								break;
+							}
+						}
+						if (!sectionSatisfied) {
+							continue; // Skip because the paragraph is not in the required section
+						}
+					}
+
 					let score = 0;
 
 					// Most specific match: the paragraph marker itself
