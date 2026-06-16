@@ -13,11 +13,10 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import type { Paragraph, Prisma } from "../../../generated/prisma/client";
+import { CompactControlCard } from "../../components/CompactControlCard";
 import type { ControlData } from "../../components/ControlCard";
-
 import { useModel } from "../../components/ModelContext";
 import { ParagraphRenderer } from "../../components/ParagraphRenderer";
-import { CompactControlCard } from "../../components/CompactControlCard";
 import {
 	generateControlsForParagraph,
 	getControlsForParagraph,
@@ -464,5 +463,3 @@ function SidePanelHeader({
 		</div>
 	);
 }
-
-

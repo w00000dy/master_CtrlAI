@@ -112,33 +112,29 @@ export default function DocumentsPage() {
 			}
 		>
 			{isLoading ? (
-					<div className="flex justify-center p-12">
-						<LoaderIcon className="animate-spin text-zinc-400" size={32} />
-					</div>
-				) : error ? (
-					<div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-4 rounded-lg">
-						{error}
-					</div>
-				) : documents.length === 0 ? (
-					<div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-12 text-center shadow-sm">
-						<h3 className="text-lg font-medium text-zinc-900 dark:text-zinc-100 mb-2">
-							No documents found
-						</h3>
-						<p className="text-zinc-500 dark:text-zinc-400 mb-6">
-							You haven&apos;t saved any legal texts yet.
-						</p>
-					</div>
-				) : (
-					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-						{documents.map((doc) => (
-							<DocumentCard
-								key={doc.id}
-								doc={doc}
-								handleDelete={handleDelete}
-							/>
-						))}
-					</div>
-				)}
+				<div className="flex justify-center p-12">
+					<LoaderIcon className="animate-spin text-zinc-400" size={32} />
+				</div>
+			) : error ? (
+				<div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-4 rounded-lg">
+					{error}
+				</div>
+			) : documents.length === 0 ? (
+				<div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-12 text-center shadow-sm">
+					<h3 className="text-lg font-medium text-zinc-900 dark:text-zinc-100 mb-2">
+						No documents found
+					</h3>
+					<p className="text-zinc-500 dark:text-zinc-400 mb-6">
+						You haven&apos;t saved any legal texts yet.
+					</p>
+				</div>
+			) : (
+				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+					{documents.map((doc) => (
+						<DocumentCard key={doc.id} doc={doc} handleDelete={handleDelete} />
+					))}
+				</div>
+			)}
 		</PageLayout>
 	);
 }

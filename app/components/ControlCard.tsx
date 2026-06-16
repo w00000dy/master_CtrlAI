@@ -143,7 +143,10 @@ export function ControlCard({
 						<div className="text-sm text-zinc-400 italic bg-zinc-50 dark:bg-zinc-900/50 p-4 rounded-lg border border-zinc-100 dark:border-zinc-800 text-center flex flex-col gap-3">
 							<p>No paragraphs mapped.</p>
 							{showMappingLink && (
-								<Link href="/controls" className="text-blue-600 hover:underline">
+								<Link
+									href="/controls"
+									className="text-blue-600 hover:underline"
+								>
 									Go to Controls to map manually →
 								</Link>
 							)}

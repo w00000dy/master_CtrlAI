@@ -1,6 +1,6 @@
 "use client";
 
-import { CheckIcon, UploadIcon } from "lucide-animated";
+import { CheckIcon } from "lucide-animated";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { PageLayout } from "@/app/components/PageLayout";
@@ -103,84 +103,82 @@ export default function ImportGuidelinePage() {
 			maxWidth="max-w-4xl"
 		>
 			<div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6 shadow-sm space-y-6">
-					{/* Document Selection */}
-					<div className="space-y-2">
-						<label
-							htmlFor="document-select"
-							className="block text-sm font-medium text-zinc-700 dark:text-zinc-300"
-						>
-							Target Document
-						</label>
-						<select
-							id="document-select"
-							value={selectedDocumentId}
-							onChange={(e) =>
-								setSelectedDocumentId(
-									e.target.value === "" ? "" : Number(e.target.value),
-								)
-							}
-							className="w-full rounded-md border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
-						>
-							<option value="">-- Select a Document --</option>
-							{documents.map((doc) => (
-								<option key={doc.id} value={doc.id}>
-									{doc.title}
-								</option>
-							))}
-						</select>
-						<p className="text-xs text-zinc-500 dark:text-zinc-400">
-							The guideline&apos;s paragraphs will only be matched against the
-							selected document.
-						</p>
-					</div>
-
-					<FileUploadArea
-						files={files}
-						setFiles={setFiles}
-						setError={setError}
-						handleImport={handleImport}
-						isProcessing={!!processingState}
-						isDisabled={
-							!!processingState || files.length === 0 || !selectedDocumentId
+				{/* Document Selection */}
+				<div className="space-y-2">
+					<label
+						htmlFor="document-select"
+						className="block text-sm font-medium text-zinc-700 dark:text-zinc-300"
+					>
+						Target Document
+					</label>
+					<select
+						id="document-select"
+						value={selectedDocumentId}
+						onChange={(e) =>
+							setSelectedDocumentId(
+								e.target.value === "" ? "" : Number(e.target.value),
+							)
 						}
-						accept=".yml,.yaml"
-						multiple={true}
-						dropText="Drop .yml to Attach, or browse"
-						buttonText="Import Guideline"
-						processingText="Importing..."
-					/>
-					{error && (
-						<p className="mt-4 text-sm text-red-600 dark:text-red-400">
-							{error}
-						</p>
-					)}
+						className="w-full rounded-md border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
+					>
+						<option value="">-- Select a Document --</option>
+						{documents.map((doc) => (
+							<option key={doc.id} value={doc.id}>
+								{doc.title}
+							</option>
+						))}
+					</select>
+					<p className="text-xs text-zinc-500 dark:text-zinc-400">
+						The guideline&apos;s paragraphs will only be matched against the
+						selected document.
+					</p>
 				</div>
 
-				{result && (
-					<div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 mt-8">
-						<div className="bg-green-50 dark:bg-green-900/10 border border-green-200 dark:border-green-900/50 rounded-xl p-8 shadow-sm flex flex-col items-center text-center space-y-4">
-							<div className="w-16 h-16 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 rounded-full flex items-center justify-center mb-2">
-								<CheckIcon size={32} />
-							</div>
-							<h2 className="text-2xl font-bold text-green-800 dark:text-green-400">
-								Import Successful!
-							</h2>
-							<p className="text-green-700 dark:text-green-500 max-w-lg">
-								Successfully imported {result.totalCount} controls.{" "}
-								{result.mappedCount} were automatically mapped to paragraphs,
-								and {result.unmappedCount} remain unmapped.
-							</p>
-							<div className="pt-4 flex gap-4">
-								<Link
-									href="/guidelines"
-									className="px-6 py-2.5 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300 font-medium rounded-lg transition-colors shadow-sm"
-								>
-									Back to Guidelines
-								</Link>
-							</div>
+				<FileUploadArea
+					files={files}
+					setFiles={setFiles}
+					setError={setError}
+					handleImport={handleImport}
+					isProcessing={!!processingState}
+					isDisabled={
+						!!processingState || files.length === 0 || !selectedDocumentId
+					}
+					accept=".yml,.yaml"
+					multiple={true}
+					dropText="Drop .yml to Attach, or browse"
+					buttonText="Import Guideline"
+					processingText="Importing..."
+				/>
+				{error && (
+					<p className="mt-4 text-sm text-red-600 dark:text-red-400">{error}</p>
+				)}
+			</div>
+
+			{result && (
+				<div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 mt-8">
+					<div className="bg-green-50 dark:bg-green-900/10 border border-green-200 dark:border-green-900/50 rounded-xl p-8 shadow-sm flex flex-col items-center text-center space-y-4">
+						<div className="w-16 h-16 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 rounded-full flex items-center justify-center mb-2">
+							<CheckIcon size={32} />
+						</div>
+						<h2 className="text-2xl font-bold text-green-800 dark:text-green-400">
+							Import Successful!
+						</h2>
+						<p className="text-green-700 dark:text-green-500 max-w-lg">
+							Successfully imported {result.totalCount} controls.{" "}
+							{result.mappedCount} were automatically mapped to paragraphs, and{" "}
+							{result.unmappedCount} remain unmapped.
+						</p>
+						<div className="pt-4 flex gap-4">
+							<Link
+								href="/guidelines"
+								className="px-6 py-2.5 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300 font-medium rounded-lg transition-colors shadow-sm"
+							>
+								Back to Guidelines
+							</Link>
 						</div>
 					</div>
-				)}
+				</div>
+			)}
 		</PageLayout>
 	);
 }

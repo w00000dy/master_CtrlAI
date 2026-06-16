@@ -19,9 +19,9 @@ export async function getNextBenchmarkTask() {
 						benchmarkResult: true,
 						paragraphs: {
 							include: {
-								section: { include: { document: true } }
-							}
-						}
+								section: { include: { document: true } },
+							},
+						},
 					},
 					orderBy: { id: "asc" },
 				},
@@ -69,25 +69,30 @@ export async function getNextBenchmarkTask() {
 
 		if (unevaluatedControl) {
 			// Enrich all paragraphs of the unevaluated control with ancestors
-			const enrichedControlParagraphs = unevaluatedControl.paragraphs.map(p => {
-				const pAncestors = [];
-				let pCurrentId = p.parentParagraphId;
-				while (pCurrentId) {
-					const parent = paraMap.get(pCurrentId);
-					if (parent) {
-						pAncestors.unshift(parent);
-						pCurrentId = parent.parentParagraphId;
-					} else {
-						break;
+			const enrichedControlParagraphs = unevaluatedControl.paragraphs.map(
+				(p) => {
+					const pAncestors = [];
+					let pCurrentId = p.parentParagraphId;
+					while (pCurrentId) {
+						const parent = paraMap.get(pCurrentId);
+						if (parent) {
+							pAncestors.unshift(parent);
+							pCurrentId = parent.parentParagraphId;
+						} else {
+							break;
+						}
 					}
-				}
-				return { ...p, ancestors: pAncestors };
-			});
+					return { ...p, ancestors: pAncestors };
+				},
+			);
 
 			return {
 				type: "CONTROL" as const,
 				paragraph: enrichedParagraph,
-				control: { ...unevaluatedControl, paragraphs: enrichedControlParagraphs },
+				control: {
+					...unevaluatedControl,
+					paragraphs: enrichedControlParagraphs,
+				},
 			};
 		} else {
 			return {

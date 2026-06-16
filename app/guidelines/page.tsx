@@ -150,9 +150,7 @@ export default function GuidelinesPage() {
 						<button
 							type="button"
 							onClick={handleDeleteAll}
-							onMouseEnter={() =>
-								deleteAllIconRef.current?.startAnimation?.()
-							}
+							onMouseEnter={() => deleteAllIconRef.current?.startAnimation?.()}
 							onMouseLeave={() => deleteAllIconRef.current?.stopAnimation?.()}
 							className="px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 dark:bg-red-900/20 dark:hover:bg-red-900/40 dark:text-red-400 font-medium rounded-lg transition-colors shadow-sm flex items-center gap-2"
 						>
@@ -176,26 +174,26 @@ export default function GuidelinesPage() {
 				</>
 			}
 		>
-				{loading ? (
-					<div className="flex justify-center p-12">
-						<LoaderIcon className="animate-spin text-blue-600" size={32} />
-					</div>
-				) : guidelines.length === 0 ? (
-					<div className="text-center p-12 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-sm">
-						<p className="text-zinc-500 dark:text-zinc-400 text-lg">
-							No guidelines imported yet.
-						</p>
-						<p className="text-zinc-400 dark:text-zinc-500 text-sm mt-2">
-							Click &quot;Import Guideline&quot; to add a .yml file.
-						</p>
-					</div>
-				) : (
-					<div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-						{guidelines.map((gl) => (
-							<GuidelineCard key={gl.id} gl={gl} handleDelete={handleDelete} />
-						))}
-					</div>
-				)}
+			{loading ? (
+				<div className="flex justify-center p-12">
+					<LoaderIcon className="animate-spin text-blue-600" size={32} />
+				</div>
+			) : guidelines.length === 0 ? (
+				<div className="text-center p-12 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-sm">
+					<p className="text-zinc-500 dark:text-zinc-400 text-lg">
+						No guidelines imported yet.
+					</p>
+					<p className="text-zinc-400 dark:text-zinc-500 text-sm mt-2">
+						Click &quot;Import Guideline&quot; to add a .yml file.
+					</p>
+				</div>
+			) : (
+				<div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+					{guidelines.map((gl) => (
+						<GuidelineCard key={gl.id} gl={gl} handleDelete={handleDelete} />
+					))}
+				</div>
+			)}
 		</PageLayout>
 	);
 }

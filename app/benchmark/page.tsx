@@ -1,14 +1,14 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import type { Control, Guideline } from "../../generated/prisma/client";
+import { CompactControlCard } from "../components/CompactControlCard";
+import { ControlCard } from "../components/ControlCard";
 import {
 	MappedParagraphCard,
 	type ParagraphWithContext,
 } from "../components/MappedParagraphCard";
-import { CompactControlCard } from "../components/CompactControlCard";
-import { ControlCard } from "../components/ControlCard";
 import {
 	getNextBenchmarkTask,
 	getTechnicalControls,
