@@ -323,10 +323,17 @@ ${allParagraphsStr}
 
 		const createdControls = [];
 		for (const ctrl of parsedJson) {
-			const pIds = new Set<string>(
-				Array.isArray(ctrl.mappedParagraphIds) ? ctrl.mappedParagraphIds : [],
-			);
-			pIds.add(focusParagraph.id); // Ensure the focus paragraph is included
+			const mappedArray = Array.isArray(ctrl.mappedParagraphIds)
+				? ctrl.mappedParagraphIds
+				: [];
+			const pIds = new Set<string>(mappedArray);
+
+			if (!pIds.has(focusParagraph.id)) {
+				console.warn(
+					`[LLM Mapping Warning] LLM forgot to include the focus paragraph ID for control "${ctrl.title}". Adding it automatically.`,
+				);
+				pIds.add(focusParagraph.id);
+			}
 
 			const invalidIds: string[] = [];
 			const validIds = Array.from(pIds).filter((id) => {
