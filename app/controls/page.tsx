@@ -3,13 +3,8 @@
 import { XIcon } from "lucide-animated";
 import type React from "react";
 import { useEffect, useState } from "react";
-import type {
-	Document,
-	Paragraph,
-	Section,
-} from "../../generated/prisma/client";
-import { ControlCard } from "../components/ControlCard";
-import type { ParagraphWithContext } from "../components/MappedParagraphCard";
+import type { Prisma } from "../../generated/prisma/client";
+import { ControlCard, type ControlData } from "../components/ControlCard";
 import {
 	createControl,
 	deleteAllControls,
@@ -19,23 +14,18 @@ import {
 	updateControl,
 } from "./actions";
 
-type Control = {
-	id: number;
-	title: string;
-	statement: string;
-	implementationGuidance: string | null;
-	guidelineId: number | null;
-	paragraphs: ParagraphWithContext[];
-};
-
-type DocumentWithParagraphs = Document & {
-	sections: (Section & {
-		paragraphs: Paragraph[];
-	})[];
-};
+type DocumentWithParagraphs = Prisma.DocumentGetPayload<{
+	include: {
+		sections: {
+			include: {
+				paragraphs: true;
+			};
+		};
+	};
+}>;
 
 export default function ControlsPage() {
-	const [controls, setControls] = useState<Control[]>([]);
+	const [controls, setControls] = useState<ControlData[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [docsWithParagraphs, setDocsWithParagraphs] = useState<
@@ -62,7 +52,7 @@ export default function ControlsPage() {
 		setLoading(true);
 		const res = await getControls();
 		if (res.success && res.controls) {
-			setControls(res.controls as unknown as Control[]);
+			setControls(res.controls as unknown as ControlData[]);
 		}
 		setLoading(false);
 	};
@@ -73,7 +63,7 @@ export default function ControlsPage() {
 			const res = await getControls();
 			if (!active) return;
 			if (res.success && res.controls) {
-				setControls(res.controls as unknown as Control[]);
+				setControls(res.controls as unknown as ControlData[]);
 			}
 			setLoading(false);
 		};
@@ -100,7 +90,7 @@ export default function ControlsPage() {
 		setEditingControlId(null);
 	};
 
-	const openEditModal = async (control: Control) => {
+	const openEditModal = async (control: ControlData) => {
 		setNewTitle(control.title);
 		setNewStatement(control.statement);
 		setNewGuidance(control.implementationGuidance || "");

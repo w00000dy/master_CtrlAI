@@ -17,13 +17,15 @@ import {
 	CardLink,
 	useIconAnimation,
 } from "@/app/components/CardComponents";
-import type { GuidelineModel as Guideline } from "@/generated/prisma/models";
+import type { Prisma } from "@/generated/prisma/client";
 import { deleteAllGuidelines, deleteGuideline, getGuidelines } from "./actions";
 
-type GuidelineWithCount = Guideline & {
-	document: { title: string };
-	_count: { controls: number };
-};
+type GuidelineWithCount = Prisma.GuidelineGetPayload<{
+	include: {
+		document: { select: { title: true } };
+		_count: { select: { controls: true } };
+	};
+}>;
 
 function GuidelineCard({
 	gl,

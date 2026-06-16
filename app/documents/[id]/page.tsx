@@ -12,11 +12,8 @@ import {
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import type {
-	Document,
-	Paragraph,
-	Section,
-} from "../../../generated/prisma/client";
+import type { Paragraph, Prisma } from "../../../generated/prisma/client";
+import type { ControlData } from "../../components/ControlCard";
 import {
 	MappedParagraphCard,
 	type ParagraphWithContext,
@@ -33,20 +30,15 @@ import {
 	updateDocumentTitle,
 } from "../actions";
 
-export type DocumentData = Document & {
-	sections: (Section & {
-		paragraphs: Paragraph[];
-	})[];
-};
-
-type Control = {
-	id: number;
-	title: string;
-	statement: string;
-	implementationGuidance: string | null;
-	guidelineId: number | null;
-	paragraphs: ParagraphWithContext[];
-};
+export type DocumentData = Prisma.DocumentGetPayload<{
+	include: {
+		sections: {
+			include: {
+				paragraphs: true;
+			};
+		};
+	};
+}>;
 
 export default function DocumentViewPage() {
 	const params = useParams();
@@ -68,7 +60,7 @@ export default function DocumentViewPage() {
 	const [selectedParagraph, setSelectedParagraph] = useState<Paragraph | null>(
 		null,
 	);
-	const [controls, setControls] = useState<Control[]>([]);
+	const [controls, setControls] = useState<ControlData[]>([]);
 	const [isLoadingControls, setIsLoadingControls] = useState(false);
 	const [isGenerating, setIsGenerating] = useState(false);
 
@@ -480,7 +472,7 @@ function SidePanelControlCard({
 	selectedParagraphId,
 	colorClass,
 }: {
-	ctrl: Control;
+	ctrl: ControlData;
 	selectedParagraphId: number;
 	colorClass: string;
 }) {
@@ -511,8 +503,8 @@ function SidePanelControlCard({
 					</p>
 					<div className="space-y-2">
 						{ctrl.paragraphs
-							.filter((p) => p.id !== selectedParagraphId)
-							.map((p) => (
+							.filter((p: ParagraphWithContext) => p.id !== selectedParagraphId)
+							.map((p: ParagraphWithContext) => (
 								<MappedParagraphCard key={p.id} p={p} compact />
 							))}
 					</div>
