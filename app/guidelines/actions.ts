@@ -23,7 +23,7 @@ export async function getGuidelines() {
 	}
 }
 
-export async function getGuidelineById(id: string) {
+export async function getGuidelineById(id: number) {
 	try {
 		const [guideline, allParagraphs] = await Promise.all([
 			prisma.guideline.findUnique({
@@ -64,7 +64,7 @@ export async function getGuidelineById(id: string) {
 	}
 }
 
-export async function deleteGuideline(id: string) {
+export async function deleteGuideline(id: number) {
 	try {
 		await prisma.guideline.delete({ where: { id } });
 		return { success: true };

@@ -8,7 +8,7 @@ datasource db {
 }
 
 model Document {
-  id         String      @id @default(cuid(2))
+  id         Int         @id @default(autoincrement())
   title      String
   savedAt    DateTime    @default(now())
   sections   Section[]
@@ -16,41 +16,41 @@ model Document {
 }
 
 model Guideline {
-  id         String    @id @default(cuid(2))
+  id         Int       @id @default(autoincrement())
   title      String
   savedAt    DateTime  @default(now())
   controls   Control[]
-  documentId String
+  documentId Int
   document   Document  @relation(fields: [documentId], references: [id], onDelete: Cascade)
 }
 
 model Section {
-  id         String      @id @default(cuid(2))
+  id         Int         @id @default(autoincrement())
   marker     String?
   title      String
-  documentId String
+  documentId Int
   document   Document    @relation(fields: [documentId], references: [id], onDelete: Cascade)
   paragraphs Paragraph[]
 }
 
 model Paragraph {
-  id                String      @id @default(cuid(2))
+  id                Int         @id @default(autoincrement())
   marker            String?
   text              String      @db.Text
-  sectionId         String
+  sectionId         Int
   section           Section     @relation(fields: [sectionId], references: [id], onDelete: Cascade)
-  parentParagraphId String?
+  parentParagraphId Int?
   parentParagraph   Paragraph?  @relation("SubParagraphs", fields: [parentParagraphId], references: [id], onDelete: Cascade)
   subParagraphs     Paragraph[] @relation("SubParagraphs")
   controls          Control[]
 }
 
 model Control {
-  id                     String      @id @default(cuid(2))
+  id                     Int         @id @default(autoincrement())
   title                  String
   statement              String      @db.Text
   implementationGuidance String?     @db.Text
-  guidelineId            String?
+  guidelineId            Int?
   guideline              Guideline?  @relation(fields: [guidelineId], references: [id], onDelete: Cascade)
   paragraphs             Paragraph[]
 }

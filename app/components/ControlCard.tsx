@@ -6,11 +6,11 @@ import {
 } from "./MappedParagraphCard";
 
 export type ControlData = {
-	id: string;
+	id: number;
 	title: string;
 	statement: string;
 	implementationGuidance: string | null;
-	guidelineId: string | null;
+	guidelineId: number | null;
 	paragraphs: ParagraphWithContext[];
 };
 
@@ -23,7 +23,7 @@ export function ControlCard({
 }: {
 	control: ControlData;
 	onEdit?: (control: ControlData) => void;
-	onDelete?: (id: string) => void;
+	onDelete?: (id: number) => void;
 	showMappingLink?: boolean;
 	layout?: "vertical" | "horizontal";
 }) {

@@ -19,7 +19,7 @@ import {
 import { deleteDocument, getDocuments } from "./actions";
 
 type DocumentMeta = {
-	id: string;
+	id: number;
 	title: string;
 	savedAt: string;
 };
@@ -29,7 +29,7 @@ function DocumentCard({
 	handleDelete,
 }: {
 	doc: DocumentMeta;
-	handleDelete: (e: React.MouseEvent, id: string) => void;
+	handleDelete: (e: React.MouseEvent, id: number) => void;
 }) {
 	const { iconRef, onMouseEnter, onMouseLeave } =
 		useIconAnimation<BookTextIconHandle>();
@@ -74,7 +74,7 @@ export default function DocumentsPage() {
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 
-	const handleDelete = async (e: React.MouseEvent, id: string) => {
+	const handleDelete = async (e: React.MouseEvent, id: number) => {
 		e.preventDefault();
 		if (!confirm("Are you sure you want to delete this document?")) return;
 

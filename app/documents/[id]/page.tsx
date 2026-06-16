@@ -40,11 +40,11 @@ export type DocumentData = Document & {
 };
 
 type Control = {
-	id: string;
+	id: number;
 	title: string;
 	statement: string;
 	implementationGuidance: string | null;
-	guidelineId: string | null;
+	guidelineId: number | null;
 	paragraphs: ParagraphWithContext[];
 };
 
@@ -75,7 +75,7 @@ export default function DocumentViewPage() {
 	useEffect(() => {
 		if (!id) return;
 
-		getDocumentById(id).then((res) => {
+		getDocumentById(parseInt(id, 10)).then((res) => {
 			if (res.success && res.data) {
 				setDocument(res.data.document as DocumentData);
 				setEditTitle(res.data.document.title || "");
@@ -92,7 +92,7 @@ export default function DocumentViewPage() {
 	const handleUpdateTitle = async () => {
 		if (!editTitle.trim()) return;
 		setIsSavingTitle(true);
-		const res = await updateDocumentTitle(id, editTitle.trim());
+		const res = await updateDocumentTitle(parseInt(id, 10), editTitle.trim());
 		if (res.success) {
 			setDocument((prev) =>
 				prev ? { ...prev, title: editTitle.trim() } : prev,
@@ -108,7 +108,7 @@ export default function DocumentViewPage() {
 		if (!window.confirm("Are you sure you want to delete this document?"))
 			return;
 		setIsDeleting(true);
-		const res = await deleteDocument(id);
+		const res = await deleteDocument(parseInt(id, 10));
 		if (res.success) {
 			router.push("/documents");
 		} else {
@@ -300,7 +300,7 @@ export default function DocumentViewPage() {
 										<div className="space-y-6">
 											{(() => {
 												const renderTree = (
-													parentId: string | null = null,
+													parentId: number | null = null,
 													depth = 0,
 												): React.ReactNode[] =>
 													section.paragraphs
@@ -481,7 +481,7 @@ function SidePanelControlCard({
 	colorClass,
 }: {
 	ctrl: Control;
-	selectedParagraphId: string;
+	selectedParagraphId: number;
 	colorClass: string;
 }) {
 	return (

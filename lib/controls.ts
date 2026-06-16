@@ -2,7 +2,7 @@ import type { Paragraph } from "@/generated/prisma/client";
 
 export function enrichControlsWithAncestors<
 	C extends { paragraphs: P[] },
-	P extends { parentParagraphId: string | null },
+	P extends { parentParagraphId: number | null },
 >(controls: C[], allParagraphs: Paragraph[]) {
 	const paraMap = new Map(allParagraphs.map((p) => [p.id, p]));
 

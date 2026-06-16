@@ -51,7 +51,7 @@ export async function createControl(data: {
 	title: string;
 	statement: string;
 	implementationGuidance?: string | null;
-	paragraphIds: string[];
+	paragraphIds: number[];
 }) {
 	try {
 		const control = await prisma.control.create({
@@ -97,7 +97,7 @@ export async function getParagraphsForSelection() {
 	}
 }
 
-export async function getControlsForParagraph(paragraphId: string) {
+export async function getControlsForParagraph(paragraphId: number) {
 	try {
 		const [controls, allParagraphs] = await Promise.all([
 			prisma.control.findMany({
@@ -131,7 +131,7 @@ export async function getControlsForParagraph(paragraphId: string) {
 }
 
 export async function generateControlsForParagraph(
-	paragraphId: string,
+	paragraphId: number,
 	model: string,
 ) {
 	try {
@@ -214,7 +214,7 @@ export async function generateControlsForParagraph(
 						!secParas.some((sp) => sp.id === p.parentParagraphId),
 				);
 
-				const childrenMap = new Map<string, typeof allParagraphs>();
+				const childrenMap = new Map<number, typeof allParagraphs>();
 				for (const p of secParas) {
 					if (p.parentParagraphId) {
 						if (!childrenMap.has(p.parentParagraphId))
@@ -256,7 +256,7 @@ Return a JSON object containing a single key "controls" that holds an array of c
       "title": "Short title of the control (e.g. Password Policy)",
       "statement": "Detailed, actionable statement defining the control requirement.",
       "implementationGuidance": "Practical guidance or steps on how to implement this control. If there is no specific guidance to provide, this value MUST be null.",
-      "mappedParagraphIds": ["focus-paragraph-id", "other-paragraph-id-1", "other-paragraph-id-2"]
+      "mappedParagraphIds": [focus-paragraph-id, other-paragraph-id-1, other-paragraph-id-2]
     }
   ]
 }
@@ -301,7 +301,7 @@ ${allParagraphsStr}
 			title?: string;
 			statement?: string;
 			implementationGuidance?: string;
-			mappedParagraphIds?: string[];
+			mappedParagraphIds?: number[];
 		}[];
 
 		try {
@@ -326,7 +326,7 @@ ${allParagraphsStr}
 			const mappedArray = Array.isArray(ctrl.mappedParagraphIds)
 				? ctrl.mappedParagraphIds
 				: [];
-			const pIds = new Set<string>(mappedArray);
+			const pIds = new Set<number>(mappedArray);
 
 			if (!pIds.has(focusParagraph.id)) {
 				console.warn(
@@ -335,7 +335,7 @@ ${allParagraphsStr}
 				pIds.add(focusParagraph.id);
 			}
 
-			const invalidIds: string[] = [];
+			const invalidIds: number[] = [];
 			const validIds = Array.from(pIds).filter((id) => {
 				const isValid = allParagraphs.some((p) => p.id === id);
 				if (!isValid) {
@@ -382,12 +382,12 @@ ${allParagraphsStr}
 }
 
 export async function updateControl(
-	id: string,
+	id: number,
 	data: {
 		title: string;
 		statement: string;
 		implementationGuidance?: string | null;
-		paragraphIds?: string[];
+		paragraphIds?: number[];
 	},
 ) {
 	try {
@@ -412,7 +412,7 @@ export async function updateControl(
 	}
 }
 
-export async function deleteControl(id: string) {
+export async function deleteControl(id: number) {
 	try {
 		await prisma.control.delete({
 			where: { id },

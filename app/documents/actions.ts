@@ -5,7 +5,7 @@ import type { Paragraph, ParsedDocument } from "../documents/import/parsePdf";
 
 export async function saveDocument(
 	document: ParsedDocument,
-): Promise<{ success: true; id: string } | { success: false; error: string }> {
+): Promise<{ success: true; id: number } | { success: false; error: string }> {
 	try {
 		return await prisma.$transaction(async (tx) => {
 			const doc = await tx.document.create({
@@ -26,8 +26,8 @@ export async function saveDocument(
 				// Recursive function to insert paragraphs sequentially
 				async function insertParagraphs(
 					paragraphs: Paragraph[],
-					sectionId: string,
-					parentParagraphId: string | null = null,
+					sectionId: number,
+					parentParagraphId: number | null = null,
 				) {
 					for (const p of paragraphs) {
 						const createdP = await tx.paragraph.create({
@@ -88,7 +88,7 @@ export async function getDocuments() {
 	}
 }
 
-export async function getDocumentById(id: string) {
+export async function getDocumentById(id: number) {
 	try {
 		const document = await prisma.document.findUnique({
 			where: { id },
@@ -122,7 +122,7 @@ export async function getDocumentById(id: string) {
 	}
 }
 
-export async function deleteDocument(id: string) {
+export async function deleteDocument(id: number) {
 	try {
 		await prisma.document.delete({
 			where: { id },
@@ -134,7 +134,7 @@ export async function deleteDocument(id: string) {
 	}
 }
 
-export async function updateDocumentTitle(id: string, newTitle: string) {
+export async function updateDocumentTitle(id: number, newTitle: string) {
 	try {
 		await prisma.document.update({
 			where: { id },

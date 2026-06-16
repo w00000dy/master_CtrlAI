@@ -20,11 +20,11 @@ import {
 } from "./actions";
 
 type Control = {
-	id: string;
+	id: number;
 	title: string;
 	statement: string;
 	implementationGuidance: string | null;
-	guidelineId: string | null;
+	guidelineId: number | null;
 	paragraphs: ParagraphWithContext[];
 };
 
@@ -54,9 +54,9 @@ export default function ControlsPage() {
 	const [newTitle, setNewTitle] = useState("");
 	const [newStatement, setNewStatement] = useState("");
 	const [newGuidance, setNewGuidance] = useState("");
-	const [selectedParagraphs, setSelectedParagraphs] = useState<string[]>([]);
+	const [selectedParagraphs, setSelectedParagraphs] = useState<number[]>([]);
 	const [isSubmitting, setIsSubmitting] = useState(false);
-	const [editingControlId, setEditingControlId] = useState<string | null>(null);
+	const [editingControlId, setEditingControlId] = useState<number | null>(null);
 
 	const fetchControls = async () => {
 		setLoading(true);
@@ -116,7 +116,7 @@ export default function ControlsPage() {
 		}
 	};
 
-	const handleDeleteControl = async (id: string) => {
+	const handleDeleteControl = async (id: number) => {
 		if (!window.confirm("Are you sure you want to delete this control?"))
 			return;
 		const res = await deleteControl(id);
@@ -142,7 +142,7 @@ export default function ControlsPage() {
 		}
 	};
 
-	const toggleParagraph = (id: string) => {
+	const toggleParagraph = (id: number) => {
 		setSelectedParagraphs((prev) =>
 			prev.includes(id) ? prev.filter((pId) => pId !== id) : [...prev, id],
 		);

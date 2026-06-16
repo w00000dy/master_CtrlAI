@@ -30,7 +30,7 @@ function GuidelineCard({
 	handleDelete,
 }: {
 	gl: GuidelineWithCount;
-	handleDelete: (id: string) => void;
+	handleDelete: (id: number) => void;
 }) {
 	const { iconRef, onMouseEnter, onMouseLeave } =
 		useIconAnimation<FileTextIconHandle>();
@@ -102,7 +102,7 @@ export default function GuidelinesPage() {
 		})();
 	}, [fetchGuidelines]);
 
-	const handleDelete = async (id: string) => {
+	const handleDelete = async (id: number) => {
 		if (
 			!window.confirm(
 				"Are you sure you want to delete this guideline? This will also delete its controls.",

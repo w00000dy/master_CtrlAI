@@ -14,7 +14,7 @@ type GuidelineData = NonNullable<
 export default function GuidelineViewPage() {
 	const params = useParams();
 	const router = useRouter();
-	const id = params.id as string;
+	const id = Number(params.id);
 
 	const [guideline, setGuideline] = useState<GuidelineData | null>(null);
 	const [loading, setLoading] = useState(true);

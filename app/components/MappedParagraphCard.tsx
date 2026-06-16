@@ -1,16 +1,18 @@
 export type ParagraphWithContext = {
-	id: string;
+	id: number;
 	marker: string | null;
 	text: string;
 	section: {
+		id: number;
 		title: string;
 		marker: string | null;
 		document: {
+			id: number;
 			title: string;
 		};
 	};
 	ancestors?: {
-		id: string;
+		id: number;
 		marker: string | null;
 		text: string;
 	}[];

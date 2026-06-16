@@ -68,7 +68,7 @@ function matchesMarker(
 
 export async function importGuidelineYaml(formData: FormData) {
 	const file = formData.get("file") as File;
-	const documentId = formData.get("documentId") as string;
+	const documentId = parseInt(formData.get("documentId") as string, 10);
 
 	if (!file) {
 		return { success: false, error: "No file uploaded." };
@@ -164,11 +164,11 @@ export async function importGuidelineYaml(formData: FormData) {
 
 		for (const ctrl of controlsData) {
 			const craRefs: string[] = Array.isArray(ctrl.cra) ? ctrl.cra : [];
-			const matchedParagraphIds = new Set<string>();
+			const matchedParagraphIds = new Set<number>();
 
 			for (const craRef of craRefs) {
 				let bestScore = 0;
-				const scoredParagraphs: { id: string; score: number }[] = [];
+				const scoredParagraphs: { id: number; score: number }[] = [];
 
 				for (const p of allParagraphs) {
 					// Check if section constraints are met

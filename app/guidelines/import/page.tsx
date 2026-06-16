@@ -16,17 +16,17 @@ export default function ImportGuidelinePage() {
 
 	type ImportResult = {
 		success: boolean;
-		guidelineId?: string;
+		guidelineId?: number;
 		totalCount?: number;
 		mappedCount?: number;
 		unmappedCount?: number;
 		error?: string;
 	};
 	const [result, setResult] = useState<ImportResult | null>(null);
-	const [documents, setDocuments] = useState<{ id: string; title: string }[]>(
+	const [documents, setDocuments] = useState<{ id: number; title: string }[]>(
 		[],
 	);
-	const [selectedDocumentId, setSelectedDocumentId] = useState<string>("");
+	const [selectedDocumentId, setSelectedDocumentId] = useState<number | "">("");
 
 	useEffect(() => {
 		const loadDocuments = async () => {
@@ -61,7 +61,7 @@ export default function ImportGuidelinePage() {
 		for (const file of files) {
 			const formData = new FormData();
 			formData.append("file", file);
-			formData.append("documentId", selectedDocumentId);
+			formData.append("documentId", selectedDocumentId.toString());
 
 			try {
 				const importResult = await importGuidelineYaml(formData);
@@ -120,7 +120,11 @@ export default function ImportGuidelinePage() {
 						<select
 							id="document-select"
 							value={selectedDocumentId}
-							onChange={(e) => setSelectedDocumentId(e.target.value)}
+							onChange={(e) =>
+								setSelectedDocumentId(
+									e.target.value === "" ? "" : Number(e.target.value),
+								)
+							}
 							className="w-full rounded-md border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
 						>
 							<option value="">-- Select a Document --</option>
