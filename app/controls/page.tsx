@@ -185,7 +185,7 @@ export default function ControlsPage() {
 	const handleDeleteFilteredControls = async () => {
 		if (
 			!window.confirm(
-				`Are you sure you want to delete ${filteredControls.length} filtered controls? This action cannot be undone.`,
+				`Are you sure you want to delete ${filteredControls.length} controls? This action cannot be undone.`,
 			)
 		)
 			return;
