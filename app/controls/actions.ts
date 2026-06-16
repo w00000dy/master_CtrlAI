@@ -248,7 +248,7 @@ You will be given:
 
 Instructions:
 Write as many specific, actionable controls as necessary to completely fulfill the requirements of the FOCUS PARAGRAPH. Do not limit yourself to a specific number, but avoid redundancies and irrelevant points.
-For each control, determine if it also helps fulfill any OTHER paragraphs from the ALL PARAGRAPHS list.
+For each control, determine if it also helps fulfill any OTHER paragraphs from the ALL PARAGRAPHS list. When mapping to paragraphs, YOU MUST USE THE EXACT ID specified inside the [ID: ...] brackets.
 Return a JSON object containing a single key "controls" that holds an array of control objects. Each object must strictly follow this structure:
 {
   "controls": [
@@ -256,7 +256,7 @@ Return a JSON object containing a single key "controls" that holds an array of c
       "title": "Short title of the control (e.g. Password Policy)",
       "statement": "Detailed, actionable statement defining the control requirement.",
       "implementationGuidance": "Practical guidance or steps on how to implement this control. If there is no specific guidance to provide, this value MUST be null.",
-      "mappedParagraphIds": ["id1", "id2"] // MUST include the FOCUS PARAGRAPH ID, plus any other relevant paragraph IDs from the ALL PARAGRAPHS list.
+      "mappedParagraphIds": ["focus-paragraph-id", "other-paragraph-id-1", "other-paragraph-id-2"]
     }
   ]
 }
