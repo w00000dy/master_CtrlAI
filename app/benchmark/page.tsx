@@ -8,6 +8,7 @@ import {
 	type ParagraphWithContext,
 } from "../components/MappedParagraphCard";
 import { CompactControlCard } from "../components/CompactControlCard";
+import { ControlCard } from "../components/ControlCard";
 import {
 	getNextBenchmarkTask,
 	getTechnicalControls,
@@ -167,15 +168,11 @@ export default function BenchmarkPage() {
 
 						{/* Column 2: Control to evaluate & Mapping */}
 						<div className="space-y-6">
-							<div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-6">
-								<h3 className="text-sm font-semibold text-blue-500 uppercase tracking-wider mb-2">
+							<div className="space-y-2">
+								<h3 className="text-sm font-semibold text-blue-500 uppercase tracking-wider">
 									Control to evaluate
 								</h3>
-								<h4 className="text-xl font-bold mb-2">{task.control.title}</h4>
-								<p className="text-zinc-800 dark:text-zinc-200 mb-4 whitespace-pre-wrap">
-									{task.control.statement}
-								</p>
-
+								<ControlCard control={task.control} hideMappedParagraphs variant="blue" />
 							</div>
 
 							<div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6 space-y-6">
