@@ -7,6 +7,7 @@ import {
 	MappedParagraphCard,
 	type ParagraphWithContext,
 } from "../components/MappedParagraphCard";
+import { CompactControlCard } from "../components/CompactControlCard";
 import {
 	getNextBenchmarkTask,
 	getTechnicalControls,
@@ -187,25 +188,19 @@ export default function BenchmarkPage() {
 								</p>
 								<div className="max-h-64 overflow-y-auto border border-zinc-200 dark:border-zinc-800 rounded-lg divide-y divide-zinc-200 dark:divide-zinc-800">
 									{technicalControls.map((tc) => (
-										<div
+										<CompactControlCard
 											key={tc.id}
-											className="p-3 hover:bg-zinc-50 dark:hover:bg-zinc-800 flex items-start gap-3"
-										>
-											<input
-												type="checkbox"
-												className="mt-1"
-												checked={selectedCoveredControls.has(tc.id)}
-												onChange={() => toggleTechControl(tc.id)}
-											/>
-											<div>
-												<div className="font-semibold text-sm">
-													[{tc.guideline?.title ?? "No Guideline"}] {tc.title}
-												</div>
-												<div className="text-sm text-zinc-600 dark:text-zinc-400 mt-1 line-clamp-2">
-													{tc.statement}
-												</div>
-											</div>
-										</div>
+											ctrl={{ ...tc, title: `[${tc.guideline?.title ?? "No Guideline"}] ${tc.title}` }}
+											colorClass="bg-blue-500"
+											action={
+												<input
+													type="checkbox"
+													className="mt-1 mr-1"
+													checked={selectedCoveredControls.has(tc.id)}
+													onChange={() => toggleTechControl(tc.id)}
+												/>
+											}
+										/>
 									))}
 								</div>
 							</div>
