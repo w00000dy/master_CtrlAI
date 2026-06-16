@@ -140,7 +140,7 @@ export default function DocumentViewPage() {
 
 	if (isLoading) {
 		return (
-			<div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 p-8 flex items-center justify-center">
+			<div className="flex-1 min-h-0 bg-zinc-50 dark:bg-zinc-950 p-8 flex items-center justify-center">
 				<div className="flex flex-col items-center gap-4 text-zinc-500">
 					<LoaderIcon className="animate-spin text-blue-600" size={32} />
 					<p>Loading document...</p>
@@ -151,7 +151,7 @@ export default function DocumentViewPage() {
 
 	if (error || !document) {
 		return (
-			<div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 p-8">
+			<div className="flex-1 min-h-0 bg-zinc-50 dark:bg-zinc-950 p-8">
 				<div className="max-w-4xl mx-auto space-y-6">
 					<Link
 						href="/documents"
@@ -169,7 +169,7 @@ export default function DocumentViewPage() {
 	}
 
 	return (
-		<div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 flex relative overflow-hidden">
+		<div className="flex-1 min-h-0 bg-zinc-50 dark:bg-zinc-950 flex relative overflow-hidden">
 			{/* Main Document Content */}
 			<div
 				className={`flex-1 p-8 overflow-y-auto transition-all duration-300 ${selectedParagraph ? "ml-[450px] mr-[450px]" : ""}`}

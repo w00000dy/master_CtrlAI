@@ -137,7 +137,7 @@ export default function BenchmarkPage() {
 	};
 
 	return (
-		<div className="min-h-screen bg-zinc-50 dark:bg-zinc-950">
+		<div className="flex-1 min-h-0 bg-zinc-50 dark:bg-zinc-950">
 			<main className="w-full px-4 md:px-8 lg:px-12 py-8">
 				{loading ? (
 					<div className="flex justify-center p-12">

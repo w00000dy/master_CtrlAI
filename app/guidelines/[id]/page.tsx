@@ -55,7 +55,7 @@ export default function GuidelineViewPage() {
 
 	if (loading) {
 		return (
-			<div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 p-8 flex justify-center items-center">
+			<div className="flex-1 min-h-0 bg-zinc-50 dark:bg-zinc-950 p-8 flex justify-center items-center">
 				<LoaderIcon className="animate-spin text-blue-600" size={32} />
 			</div>
 		);
@@ -63,7 +63,7 @@ export default function GuidelineViewPage() {
 
 	if (error || !guideline) {
 		return (
-			<div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 p-8">
+			<div className="flex-1 min-h-0 bg-zinc-50 dark:bg-zinc-950 p-8">
 				<div className="max-w-4xl mx-auto space-y-6">
 					<Link
 						href="/guidelines"
@@ -80,7 +80,7 @@ export default function GuidelineViewPage() {
 	}
 
 	return (
-		<div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 p-8">
+		<div className="flex-1 min-h-0 bg-zinc-50 dark:bg-zinc-950 p-8">
 			<div className="max-w-5xl mx-auto space-y-8">
 				<div className="flex items-center justify-between">
 					<Link
