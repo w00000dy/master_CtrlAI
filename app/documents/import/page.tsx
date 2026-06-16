@@ -12,6 +12,7 @@ import {
 	type ParsedDocument,
 	structureTextWithLlm,
 } from "./parsePdf";
+import { PageLayout } from "@/app/components/PageLayout";
 
 function AnimatedCheckIcon() {
 	const iconRef = React.useRef<CheckIconHandle | null>(null);
@@ -104,19 +105,11 @@ export default function ImportPage() {
 	};
 
 	return (
-		<div className="flex-1 min-h-0 bg-zinc-50 dark:bg-zinc-950 p-8">
-			<div className="max-w-4xl mx-auto space-y-8">
-				{/* Header Section */}
-				<div className="space-y-2">
-					<h1 className="text-3xl font-bold text-zinc-900 dark:text-zinc-50">
-						Import Legal Document
-					</h1>
-					<p className="text-zinc-500 dark:text-zinc-400">
-						Upload a PDF to extract and structure its paragraphs and guidelines
-						using {selectedModel || "the selected LLM"}.
-					</p>
-				</div>
-
+		<PageLayout
+			title="Import Legal Document"
+			description={`Upload a PDF to extract and structure its paragraphs and guidelines using ${selectedModel || "the selected LLM"}.`}
+			maxWidth="max-w-4xl"
+		>
 				{/* Upload Section */}
 				<div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6 shadow-sm">
 					<FileUploadArea
@@ -283,7 +276,6 @@ export default function ImportPage() {
 						</div>
 					</div>
 				)}
-			</div>
-		</div>
+		</PageLayout>
 	);
 }

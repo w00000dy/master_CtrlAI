@@ -17,6 +17,7 @@ import {
 	CardLink,
 	useIconAnimation,
 } from "@/app/components/CardComponents";
+import { PageLayout } from "@/app/components/PageLayout";
 import type { Prisma } from "@/generated/prisma/client";
 import { deleteAllGuidelines, deleteGuideline, getGuidelines } from "./actions";
 
@@ -139,48 +140,42 @@ export default function GuidelinesPage() {
 	};
 
 	return (
-		<div className="flex-1 min-h-0 bg-zinc-50 dark:bg-zinc-950 p-8">
-			<div className="max-w-6xl mx-auto space-y-8">
-				<div className="flex items-center justify-between">
-					<div>
-						<h1 className="text-3xl font-bold text-zinc-900 dark:text-zinc-50">
-							Technical Guidelines
-						</h1>
-						<p className="text-zinc-500 dark:text-zinc-400 mt-2">
-							Manage your imported BSI technical guidelines.
-						</p>
-					</div>
-					<div className="flex items-center gap-3">
-						{guidelines.length > 0 && (
-							<button
-								type="button"
-								onClick={handleDeleteAll}
-								onMouseEnter={() =>
-									deleteAllIconRef.current?.startAnimation?.()
-								}
-								onMouseLeave={() => deleteAllIconRef.current?.stopAnimation?.()}
-								className="px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 dark:bg-red-900/20 dark:hover:bg-red-900/40 dark:text-red-400 font-medium rounded-lg transition-colors shadow-sm flex items-center gap-2"
-							>
-								<DeleteIcon
-									ref={deleteAllIconRef}
-									animateOnHover={false}
-									size={20}
-								/>
-								Delete All
-							</button>
-						)}
-						<Link
-							href="/guidelines/import"
-							onMouseEnter={() => importIconRef.current?.startAnimation?.()}
-							onMouseLeave={() => importIconRef.current?.stopAnimation?.()}
-							className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors shadow-sm flex items-center gap-2"
+		<PageLayout
+			title="Technical Guidelines"
+			description="Manage your imported BSI technical guidelines."
+			maxWidth="max-w-6xl"
+			actions={
+				<>
+					{guidelines.length > 0 && (
+						<button
+							type="button"
+							onClick={handleDeleteAll}
+							onMouseEnter={() =>
+								deleteAllIconRef.current?.startAnimation?.()
+							}
+							onMouseLeave={() => deleteAllIconRef.current?.stopAnimation?.()}
+							className="px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 dark:bg-red-900/20 dark:hover:bg-red-900/40 dark:text-red-400 font-medium rounded-lg transition-colors shadow-sm flex items-center gap-2"
 						>
-							<PlusIcon ref={importIconRef} animateOnHover={false} size={20} />
-							Import Guideline
-						</Link>
-					</div>
-				</div>
-
+							<DeleteIcon
+								ref={deleteAllIconRef}
+								animateOnHover={false}
+								size={20}
+							/>
+							Delete All
+						</button>
+					)}
+					<Link
+						href="/guidelines/import"
+						onMouseEnter={() => importIconRef.current?.startAnimation?.()}
+						onMouseLeave={() => importIconRef.current?.stopAnimation?.()}
+						className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors shadow-sm flex items-center gap-2"
+					>
+						<PlusIcon ref={importIconRef} animateOnHover={false} size={20} />
+						Import Guideline
+					</Link>
+				</>
+			}
+		>
 				{loading ? (
 					<div className="flex justify-center p-12">
 						<LoaderIcon className="animate-spin text-blue-600" size={32} />
@@ -201,7 +196,6 @@ export default function GuidelinesPage() {
 						))}
 					</div>
 				)}
-			</div>
-		</div>
+		</PageLayout>
 	);
 }

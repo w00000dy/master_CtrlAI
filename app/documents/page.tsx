@@ -16,6 +16,7 @@ import {
 	CardLink,
 	useIconAnimation,
 } from "@/app/components/CardComponents";
+import { PageLayout } from "@/app/components/PageLayout";
 import { deleteDocument, getDocuments } from "./actions";
 
 type DocumentMeta = {
@@ -98,26 +99,19 @@ export default function DocumentsPage() {
 	}, []);
 
 	return (
-		<div className="flex-1 min-h-0 bg-zinc-50 dark:bg-zinc-950 p-8">
-			<div className="max-w-5xl mx-auto space-y-8">
-				<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-					<div className="space-y-2">
-						<h1 className="text-3xl font-bold text-zinc-900 dark:text-zinc-50">
-							Legal Documents
-						</h1>
-						<p className="text-zinc-500 dark:text-zinc-400">
-							View all parsed and saved legal texts.
-						</p>
-					</div>
-					<Link
-						href="/documents/import"
-						className="inline-flex items-center justify-center px-5 py-2.5 bg-zinc-900 hover:bg-zinc-800 dark:bg-zinc-100 dark:hover:bg-zinc-200 text-white dark:text-zinc-900 text-sm font-medium rounded-xl transition-all shadow-sm"
-					>
-						Import Document
-					</Link>
-				</div>
-
-				{isLoading ? (
+		<PageLayout
+			title="Legal Documents"
+			description="View all parsed and saved legal texts."
+			actions={
+				<Link
+					href="/documents/import"
+					className="inline-flex items-center justify-center px-5 py-2.5 bg-zinc-900 hover:bg-zinc-800 dark:bg-zinc-100 dark:hover:bg-zinc-200 text-white dark:text-zinc-900 text-sm font-medium rounded-xl transition-all shadow-sm"
+				>
+					Import Document
+				</Link>
+			}
+		>
+			{isLoading ? (
 					<div className="flex justify-center p-12">
 						<LoaderIcon className="animate-spin text-zinc-400" size={32} />
 					</div>
@@ -145,7 +139,6 @@ export default function DocumentsPage() {
 						))}
 					</div>
 				)}
-			</div>
-		</div>
+		</PageLayout>
 	);
 }

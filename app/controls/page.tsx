@@ -5,6 +5,7 @@ import type React from "react";
 import { useEffect, useState } from "react";
 import type { Prisma } from "../../generated/prisma/client";
 import { ControlCard, type ControlData } from "../components/ControlCard";
+import { PageLayout } from "@/app/components/PageLayout";
 import {
 	createControl,
 	deleteAllControls,
@@ -199,53 +200,51 @@ export default function ControlsPage() {
 	};
 
 	return (
-		<div className="flex-1 min-h-0 bg-zinc-50 dark:bg-zinc-950 p-8">
-			<div className="max-w-6xl mx-auto space-y-8">
-				<div className="flex items-center justify-between">
-					<div>
-						<h1 className="text-3xl font-bold text-zinc-900 dark:text-zinc-50 flex items-center gap-3">
-							Controls
-							{!loading && (
-								<span className="text-sm font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 px-2.5 py-1 rounded-full border border-zinc-200 dark:border-zinc-700">
-									{filteredControls.length}{" "}
-									{controls.length !== filteredControls.length
-										? `of ${controls.length}`
-										: ""}
-								</span>
-							)}
-						</h1>
-						<p className="text-zinc-500 dark:text-zinc-400 mt-2">
-							Manage implementation instructions and map them to paragraphs.
-						</p>
-					</div>
-					<div className="flex gap-3">
-						{controls.length !== filteredControls.length &&
-							filteredControls.length > 0 && (
-								<button
-									type="button"
-									onClick={handleDeleteFilteredControls}
-									className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white font-medium rounded-lg transition-colors shadow-sm"
-								>
-									Delete Filtered
-								</button>
-							)}
-						<button
-							type="button"
-							onClick={handleDeleteAllControls}
-							className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-colors shadow-sm"
-						>
-							Delete All Controls
-						</button>
-						<button
-							type="button"
-							onClick={openModal}
-							className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors shadow-sm"
-						>
-							Add Control
-						</button>
-					</div>
-				</div>
-
+		<PageLayout
+			title={
+				<>
+					Controls
+					{!loading && (
+						<span className="text-sm font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 px-2.5 py-1 rounded-full border border-zinc-200 dark:border-zinc-700">
+							{filteredControls.length}{" "}
+							{controls.length !== filteredControls.length
+								? `of ${controls.length}`
+								: ""}
+						</span>
+					)}
+				</>
+			}
+			description="Manage implementation instructions and map them to paragraphs."
+			maxWidth="max-w-6xl"
+			actions={
+				<>
+					{controls.length !== filteredControls.length &&
+						filteredControls.length > 0 && (
+							<button
+								type="button"
+								onClick={handleDeleteFilteredControls}
+								className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white font-medium rounded-lg transition-colors shadow-sm"
+							>
+								Delete Filtered
+							</button>
+						)}
+					<button
+						type="button"
+						onClick={handleDeleteAllControls}
+						className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-colors shadow-sm"
+					>
+						Delete All Controls
+					</button>
+					<button
+						type="button"
+						onClick={openModal}
+						className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors shadow-sm"
+					>
+						Add Control
+					</button>
+				</>
+			}
+		>
 				<div className="flex gap-6 p-5 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-sm">
 					<div className="flex flex-col gap-2">
 						<label
@@ -334,7 +333,6 @@ export default function ControlsPage() {
 						))}
 					</div>
 				)}
-			</div>
 
 			{isModalOpen && (
 				<div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-900/60 backdrop-blur-sm animate-in fade-in duration-200">
@@ -498,6 +496,6 @@ export default function ControlsPage() {
 					</div>
 				</div>
 			)}
-		</div>
+		</PageLayout>
 	);
 }

@@ -1,8 +1,9 @@
 "use client";
 
-import { CheckIcon } from "lucide-animated";
+import { CheckIcon, UploadIcon } from "lucide-animated";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { PageLayout } from "@/app/components/PageLayout";
 import { FileUploadArea } from "../../components/FileUploadArea";
 import { getDocuments } from "../../documents/actions";
 import { importGuidelineYaml } from "./actions";
@@ -96,19 +97,12 @@ export default function ImportGuidelinePage() {
 	};
 
 	return (
-		<div className="flex-1 min-h-0 bg-zinc-50 dark:bg-zinc-950 p-8">
-			<div className="max-w-4xl mx-auto space-y-8">
-				<div className="space-y-2">
-					<h1 className="text-3xl font-bold text-zinc-900 dark:text-zinc-50">
-						Import Technical Guideline
-					</h1>
-					<p className="text-zinc-500 dark:text-zinc-400">
-						Upload a .yml file (e.g. from BSI TR-03183-1) to import controls and
-						automatically map them to paragraphs.
-					</p>
-				</div>
-
-				<div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6 shadow-sm space-y-6">
+		<PageLayout
+			title="Import Technical Guideline"
+			description="Upload a .yml file (e.g. from BSI TR-03183-1) to import controls and automatically map them to paragraphs."
+			maxWidth="max-w-4xl"
+		>
+			<div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6 shadow-sm space-y-6">
 					{/* Document Selection */}
 					<div className="space-y-2">
 						<label
@@ -187,7 +181,6 @@ export default function ImportGuidelinePage() {
 						</div>
 					</div>
 				)}
-			</div>
-		</div>
+		</PageLayout>
 	);
 }
