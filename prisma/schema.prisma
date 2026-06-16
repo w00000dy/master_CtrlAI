@@ -34,15 +34,16 @@ model Section {
 }
 
 model Paragraph {
-  id                Int         @id @default(autoincrement())
+  id                Int                 @id @default(autoincrement())
   marker            String?
-  text              String      @db.Text
+  text              String              @db.Text
   sectionId         Int
-  section           Section     @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  section           Section             @relation(fields: [sectionId], references: [id], onDelete: Cascade)
   parentParagraphId Int?
-  parentParagraph   Paragraph?  @relation("SubParagraphs", fields: [parentParagraphId], references: [id], onDelete: Cascade)
-  subParagraphs     Paragraph[] @relation("SubParagraphs")
+  parentParagraph   Paragraph?          @relation("SubParagraphs", fields: [parentParagraphId], references: [id], onDelete: Cascade)
+  subParagraphs     Paragraph[]         @relation("SubParagraphs")
   controls          Control[]
+  benchmarkResult   ParagraphBenchmark?
 }
 
 model Control {
@@ -53,4 +54,32 @@ model Control {
   guidelineId            Int?
   guideline              Guideline?  @relation(fields: [guidelineId], references: [id], onDelete: Cascade)
   paragraphs             Paragraph[]
+
+  benchmarkResult     BenchmarkResult?  @relation("LlmControlBenchmark")
+  coveredByBenchmarks BenchmarkResult[] @relation("CoveredByBenchmark")
+}
+
+model BenchmarkResult {
+  id           Int     @id @default(autoincrement())
+  llmControlId Int     @unique
+  llmControl   Control @relation("LlmControlBenchmark", fields: [llmControlId], references: [id], onDelete: Cascade)
+
+  coveredControls Control[] @relation("CoveredByBenchmark")
+
+  isRelevant           Boolean
+  isActionable         Boolean
+  isTechnicallyCorrect Boolean
+
+  createdAt DateTime @default(now())
+}
+
+model ParagraphBenchmark {
+  id          Int       @id @default(autoincrement())
+  paragraphId Int       @unique
+  paragraph   Paragraph @relation(fields: [paragraphId], references: [id], onDelete: Cascade)
+
+  isComplete    Boolean
+  hasRedundancy Boolean
+
+  createdAt DateTime @default(now())
 }

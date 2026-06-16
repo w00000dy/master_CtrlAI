@@ -44,6 +44,12 @@ export default function Header() {
 					>
 						Guidelines
 					</Link>
+					<Link
+						href="/benchmark"
+						className="text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
+					>
+						Benchmark
+					</Link>
 				</nav>
 			</div>
 
