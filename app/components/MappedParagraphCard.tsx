@@ -1,21 +1,15 @@
-export type ParagraphWithContext = {
-	id: number;
-	marker: string | null;
-	text: string;
-	section: {
-		id: number;
-		title: string;
-		marker: string | null;
-		document: {
-			id: number;
-			title: string;
+import type { Paragraph, Prisma } from "@/generated/prisma/client";
+
+export type ParagraphWithContext = Prisma.ParagraphGetPayload<{
+	include: {
+		section: {
+			include: {
+				document: true;
+			};
 		};
 	};
-	ancestors?: {
-		id: number;
-		marker: string | null;
-		text: string;
-	}[];
+}> & {
+	ancestors?: Paragraph[];
 };
 
 export function MappedParagraphCard({

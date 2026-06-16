@@ -1,16 +1,12 @@
 import { DeleteIcon, SquarePenIcon } from "lucide-animated";
 import Link from "next/link";
+import type { Control } from "@/generated/prisma/client";
 import {
 	MappedParagraphCard,
 	type ParagraphWithContext,
 } from "./MappedParagraphCard";
 
-export type ControlData = {
-	id: number;
-	title: string;
-	statement: string;
-	implementationGuidance: string | null;
-	guidelineId: number | null;
+export type ControlData = Control & {
 	paragraphs: ParagraphWithContext[];
 };
 
