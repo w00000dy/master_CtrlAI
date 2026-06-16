@@ -413,14 +413,22 @@ export async function updateControl(
 }
 
 export async function deleteControl(id: number) {
+	return deleteControls([id]);
+}
+
+export async function deleteControls(ids: number[]) {
 	try {
-		await prisma.control.delete({
-			where: { id },
+		await prisma.control.deleteMany({
+			where: {
+				id: {
+					in: ids,
+				},
+			},
 		});
 		return { success: true };
 	} catch (error) {
-		console.error("Failed to delete control:", error);
-		return { success: false, error: "Failed to delete control." };
+		console.error("Failed to delete controls:", error);
+		return { success: false, error: "Failed to delete controls." };
 	}
 }
 

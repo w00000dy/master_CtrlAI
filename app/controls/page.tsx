@@ -9,6 +9,7 @@ import {
 	createControl,
 	deleteAllControls,
 	deleteControl,
+	deleteControls,
 	getControls,
 	getParagraphsForSelection,
 	updateControl,
@@ -181,6 +182,22 @@ export default function ControlsPage() {
 		return true;
 	});
 
+	const handleDeleteFilteredControls = async () => {
+		if (
+			!window.confirm(
+				`Are you sure you want to delete ${filteredControls.length} filtered controls? This action cannot be undone.`,
+			)
+		)
+			return;
+		const ids = filteredControls.map((c) => c.id);
+		const res = await deleteControls(ids);
+		if (res.success) {
+			fetchControls();
+		} else {
+			alert("Failed to delete filtered controls.");
+		}
+	};
+
 	return (
 		<div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 p-8">
 			<div className="max-w-6xl mx-auto space-y-8">
@@ -202,6 +219,15 @@ export default function ControlsPage() {
 						</p>
 					</div>
 					<div className="flex gap-3">
+						{controls.length !== filteredControls.length && filteredControls.length > 0 && (
+							<button
+								type="button"
+								onClick={handleDeleteFilteredControls}
+								className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white font-medium rounded-lg transition-colors shadow-sm"
+							>
+								Delete Filtered
+							</button>
+						)}
 						<button
 							type="button"
 							onClick={handleDeleteAllControls}
