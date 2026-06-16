@@ -328,10 +328,21 @@ ${allParagraphsStr}
 			);
 			pIds.add(focusParagraph.id); // Ensure the focus paragraph is included
 
-			// Filter valid IDs
-			const validIds = Array.from(pIds).filter((id) =>
-				allParagraphs.some((p) => p.id === id),
-			);
+			const invalidIds: string[] = [];
+			const validIds = Array.from(pIds).filter((id) => {
+				const isValid = allParagraphs.some((p) => p.id === id);
+				if (!isValid) {
+					invalidIds.push(id);
+				}
+				return isValid;
+			});
+
+			if (invalidIds.length > 0) {
+				console.warn(
+					`[LLM Mapping Warning] LLM returned invalid paragraph IDs for control "${ctrl.title}":`,
+					invalidIds,
+				);
+			}
 
 			if (validIds.length === 0) continue;
 
