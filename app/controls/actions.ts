@@ -145,6 +145,7 @@ export async function generateControlsForParagraph(
 		}
 
 		const existingControls = await prisma.control.findMany({
+			where: { guidelineId: null },
 			select: { title: true, statement: true, implementationGuidance: true },
 		});
 
