@@ -219,15 +219,16 @@ export default function ControlsPage() {
 						</p>
 					</div>
 					<div className="flex gap-3">
-						{controls.length !== filteredControls.length && filteredControls.length > 0 && (
-							<button
-								type="button"
-								onClick={handleDeleteFilteredControls}
-								className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white font-medium rounded-lg transition-colors shadow-sm"
-							>
-								Delete Filtered
-							</button>
-						)}
+						{controls.length !== filteredControls.length &&
+							filteredControls.length > 0 && (
+								<button
+									type="button"
+									onClick={handleDeleteFilteredControls}
+									className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white font-medium rounded-lg transition-colors shadow-sm"
+								>
+									Delete Filtered
+								</button>
+							)}
 						<button
 							type="button"
 							onClick={handleDeleteAllControls}
