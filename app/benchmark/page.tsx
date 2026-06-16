@@ -59,7 +59,7 @@ export default function BenchmarkPage() {
 			setTask(nextTask);
 			if (nextTask.type === "CONTROL") {
 				const techControls = await getTechnicalControls(
-					nextTask.control.paragraphs.map((p) => p.id)
+					nextTask.control.paragraphs.map((p) => p.id),
 				);
 				setTechnicalControls(techControls);
 
@@ -151,14 +151,14 @@ export default function BenchmarkPage() {
 						<p>All controls and paragraphs have been successfully evaluated.</p>
 					</div>
 				) : task.type === "CONTROL" ? (
-					<div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+					<div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:h-[calc(100vh-8rem)]">
 						{/* Column 1: Context */}
-						<div className="space-y-6">
-							<div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6">
-								<h3 className="text-sm font-semibold text-zinc-500 uppercase tracking-wider mb-4">
+						<div className="flex flex-col h-full min-h-0">
+							<div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6 flex flex-col h-full min-h-0">
+								<h3 className="text-sm font-semibold text-zinc-500 uppercase tracking-wider mb-4 shrink-0">
 									Context
 								</h3>
-								<div className="space-y-4">
+								<div className="space-y-4 flex-1 overflow-y-auto min-h-0 pr-2 pb-2">
 									{task.control.paragraphs.map((p) => (
 										<MappedParagraphCard key={p.id} p={p} />
 									))}
@@ -167,27 +167,36 @@ export default function BenchmarkPage() {
 						</div>
 
 						{/* Column 2: Control to evaluate & Mapping */}
-						<div className="space-y-6">
+						<div className="flex flex-col h-full min-h-0 space-y-6">
 							<div className="space-y-2">
 								<h3 className="text-sm font-semibold text-blue-500 uppercase tracking-wider">
 									Control to evaluate
 								</h3>
-								<ControlCard control={task.control} hideMappedParagraphs variant="blue" />
+								<ControlCard
+									control={task.control}
+									hideMappedParagraphs
+									variant="blue"
+								/>
 							</div>
 
-							<div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6 space-y-6">
-								<h3 className="text-lg font-bold">
-									1. Mapping to Technical Guidelines
-								</h3>
-								<p className="text-sm text-zinc-500 mb-4">
-									Which controls from existing guidelines (e.g., BSI) does this
-									generated control cover?
-								</p>
-								<div className="max-h-64 overflow-y-auto border border-zinc-200 dark:border-zinc-800 rounded-lg divide-y divide-zinc-200 dark:divide-zinc-800">
+							<div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6 flex flex-col flex-1 min-h-0 space-y-4">
+								<div className="shrink-0">
+									<h3 className="text-lg font-bold">
+										1. Mapping to Technical Guidelines
+									</h3>
+									<p className="text-sm text-zinc-500">
+										Which controls from existing guidelines (e.g., BSI) does
+										this generated control cover?
+									</p>
+								</div>
+								<div className="flex-1 overflow-y-auto min-h-0 border border-zinc-200 dark:border-zinc-800 rounded-lg divide-y divide-zinc-200 dark:divide-zinc-800">
 									{technicalControls.map((tc) => (
 										<CompactControlCard
 											key={tc.id}
-											ctrl={{ ...tc, title: `[${tc.guideline?.title ?? "No Guideline"}] ${tc.title}` }}
+											ctrl={{
+												...tc,
+												title: `[${tc.guideline?.title ?? "No Guideline"}] ${tc.title}`,
+											}}
 											colorClass="bg-blue-500"
 											action={
 												<input
@@ -204,11 +213,13 @@ export default function BenchmarkPage() {
 						</div>
 
 						{/* Column 3: Questions */}
-						<div className="space-y-6">
-							<div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6 space-y-6 flex flex-col h-[calc(100%-4rem)]">
-								<h3 className="text-lg font-bold">2. Evaluation Questions</h3>
+						<div className="flex flex-col h-full min-h-0">
+							<div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6 flex flex-col h-full min-h-0">
+								<h3 className="text-lg font-bold mb-6 shrink-0">
+									2. Evaluation Questions
+								</h3>
 
-								<div className="space-y-4">
+								<div className="space-y-4 flex-1 overflow-y-auto min-h-0 pr-2 pb-4">
 									<div className="bg-zinc-50 dark:bg-zinc-800/50 p-4 rounded-lg">
 										<p className="font-medium mb-3">
 											Is the generated control truly relevant to the legal text,
@@ -379,8 +390,8 @@ export default function BenchmarkPage() {
 
 								<div className="bg-zinc-50 dark:bg-zinc-800/50 p-4 rounded-lg">
 									<p className="font-medium mb-3">
-										<strong>Redundancy:</strong> Are there unnecessary overlaps or
-										content repetitions among the generated controls for this
+										<strong>Redundancy:</strong> Are there unnecessary overlaps
+										or content repetitions among the generated controls for this
 										paragraph?
 									</p>
 									<div className="flex gap-4">
