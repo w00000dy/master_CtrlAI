@@ -172,13 +172,18 @@ export async function importGuidelineYaml(formData: FormData) {
 
 				for (const p of allParagraphs) {
 					// Check if section constraints are met
-					const sectionRefsMatch = craRef.match(/(article\s+\d+|art\.?\s*\d+|annex\s+[ivx]+|part\s+[ivx]+|chapter\s+[ivx\d]+)/gi);
+					const sectionRefsMatch = craRef.match(
+						/(article\s+\d+|art\.?\s*\d+|annex\s+[ivx]+|part\s+[ivx]+|chapter\s+[ivx\d]+)/gi,
+					);
 					if (sectionRefsMatch && sectionRefsMatch.length > 0) {
 						const sectionRefs: string[] = [];
 						for (const match of sectionRefsMatch) {
 							const normalized = match.toLowerCase().replace(/\s+/g, " ");
 							sectionRefs.push(normalized);
-							if (normalized.startsWith("art") && !normalized.startsWith("article")) {
+							if (
+								normalized.startsWith("art") &&
+								!normalized.startsWith("article")
+							) {
 								sectionRefs.push(normalized.replace(/^art\.?\s*/, "article "));
 							} else if (normalized.startsWith("article")) {
 								sectionRefs.push(normalized.replace(/^article\s*/, "art. "));
@@ -192,9 +197,9 @@ export async function importGuidelineYaml(formData: FormData) {
 							const titleStr = p.section.title?.toLowerCase() || "";
 
 							if (
-								markerStr.includes(sr) || 
-								titleStr.includes(sr) || 
-								matchesMarker(p.section.marker, sr) || 
+								markerStr.includes(sr) ||
+								titleStr.includes(sr) ||
+								matchesMarker(p.section.marker, sr) ||
 								matchesMarker(p.section.title, sr)
 							) {
 								sectionSatisfied = true;
