@@ -39,7 +39,9 @@ export default function BenchmarkPage() {
 	const [loading, setLoading] = useState(true);
 
 	// Form State for Control
-	const [isRelevant, setIsRelevant] = useState<boolean | null>(null);
+	const [relevantParagraphs, setRelevantParagraphs] = useState<Set<number>>(
+		new Set(),
+	);
 	const [isActionable, setIsActionable] = useState<boolean | null>(null);
 	const [isTechnicallyCorrect, setIsTechnicallyCorrect] = useState<
 		boolean | null
@@ -64,7 +66,7 @@ export default function BenchmarkPage() {
 				setTechnicalControls(techControls);
 
 				// Reset control form
-				setIsRelevant(null);
+				setRelevantParagraphs(new Set());
 				setIsActionable(null);
 				setIsTechnicallyCorrect(null);
 				setSelectedCoveredControls(new Set());
@@ -97,10 +99,19 @@ export default function BenchmarkPage() {
 		setSelectedCoveredControls(newSet);
 	};
 
+	const toggleRelevantParagraph = (id: number) => {
+		const newSet = new Set(relevantParagraphs);
+		if (newSet.has(id)) {
+			newSet.delete(id);
+		} else {
+			newSet.add(id);
+		}
+		setRelevantParagraphs(newSet);
+	};
+
 	const submitControl = async () => {
 		if (
 			task?.type !== "CONTROL" ||
-			isRelevant === null ||
 			isActionable === null ||
 			isTechnicallyCorrect === null
 		) {
@@ -110,7 +121,7 @@ export default function BenchmarkPage() {
 		await saveControlBenchmark({
 			llmControlId: task.control.id,
 			coveredControlIds: Array.from(selectedCoveredControls),
-			isRelevant,
+			relevantParagraphIds: Array.from(relevantParagraphs),
 			isActionable,
 			isTechnicallyCorrect,
 		});
@@ -224,28 +235,23 @@ export default function BenchmarkPage() {
 										<p className="font-medium mb-3">
 											Is the generated control truly relevant to the legal text,
 											or is the LLM &apos;hallucinating&apos; requirements?
+											(Select paragraphs where the control is relevant)
 										</p>
-										<div className="flex gap-4">
-											<label className="flex items-center">
-												<input
-													type="radio"
-													name="relevant"
-													checked={isRelevant === true}
-													onChange={() => setIsRelevant(true)}
-													className="mr-2"
-												/>
-												Yes (Relevant)
-											</label>
-											<label className="flex items-center">
-												<input
-													type="radio"
-													name="relevant"
-													checked={isRelevant === false}
-													onChange={() => setIsRelevant(false)}
-													className="mr-2"
-												/>
-												No (Hallucinated / Irrelevant)
-											</label>
+										<div className="flex flex-col gap-2">
+											{task.control.paragraphs.map((p) => (
+												<label key={p.id} className="flex items-start">
+													<input
+														type="checkbox"
+														checked={relevantParagraphs.has(p.id)}
+														onChange={() => toggleRelevantParagraph(p.id)}
+														className="mt-1 mr-2 shrink-0"
+													/>
+													<span className="text-sm">
+														{p.marker && <strong className="mr-1">{p.marker}</strong>}
+														{p.text}
+													</span>
+												</label>
+											))}
 										</div>
 									</div>
 
@@ -314,7 +320,6 @@ export default function BenchmarkPage() {
 									type="button"
 									onClick={submitControl}
 									disabled={
-										isRelevant === null ||
 										isActionable === null ||
 										isTechnicallyCorrect === null
 									}

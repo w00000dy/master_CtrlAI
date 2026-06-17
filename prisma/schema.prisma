@@ -44,6 +44,7 @@ model Paragraph {
   subParagraphs     Paragraph[]         @relation("SubParagraphs")
   controls          Control[]
   benchmarkResult   ParagraphBenchmark?
+  relevantForBenchmarks BenchmarkResult[] @relation("RelevantBenchmarkParagraphs")
 }
 
 model Control {
@@ -66,7 +67,8 @@ model BenchmarkResult {
 
   coveredControls Control[] @relation("CoveredByBenchmark")
 
-  isRelevant           Boolean
+  relevantParagraphs Paragraph[] @relation("RelevantBenchmarkParagraphs")
+
   isActionable         Boolean
   isTechnicallyCorrect Boolean
 

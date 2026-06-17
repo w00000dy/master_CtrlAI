@@ -131,7 +131,7 @@ export async function getTechnicalControls(paragraphIds?: number[]) {
 export async function saveControlBenchmark(data: {
 	llmControlId: number;
 	coveredControlIds: number[];
-	isRelevant: boolean;
+	relevantParagraphIds: number[];
 	isActionable: boolean;
 	isTechnicallyCorrect: boolean;
 }) {
@@ -139,9 +139,11 @@ export async function saveControlBenchmark(data: {
 		await prisma.benchmarkResult.create({
 			data: {
 				llmControlId: data.llmControlId,
-				isRelevant: data.isRelevant,
 				isActionable: data.isActionable,
 				isTechnicallyCorrect: data.isTechnicallyCorrect,
+				relevantParagraphs: {
+					connect: data.relevantParagraphIds.map((id) => ({ id })),
+				},
 				coveredControls: {
 					connect: data.coveredControlIds.map((id) => ({ id })),
 				},
