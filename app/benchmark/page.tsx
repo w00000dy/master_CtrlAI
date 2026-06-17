@@ -247,7 +247,9 @@ export default function BenchmarkPage() {
 														className="mt-1 mr-2 shrink-0"
 													/>
 													<span className="text-sm">
-														{p.marker && <strong className="mr-1">{p.marker}</strong>}
+														{p.marker && (
+															<strong className="mr-1">{p.marker}</strong>
+														)}
 														{p.text}
 													</span>
 												</label>
@@ -320,8 +322,7 @@ export default function BenchmarkPage() {
 									type="button"
 									onClick={submitControl}
 									disabled={
-										isActionable === null ||
-										isTechnicallyCorrect === null
+										isActionable === null || isTechnicallyCorrect === null
 									}
 									className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
 								>
