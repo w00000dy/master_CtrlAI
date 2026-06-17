@@ -17,6 +17,7 @@ export function ControlCard({
 	showMappingLink = false,
 	layout = "vertical",
 	hideMappedParagraphs = false,
+	hideBadges = false,
 	variant = "default",
 }: {
 	control: ControlData;
@@ -25,6 +26,7 @@ export function ControlCard({
 	showMappingLink?: boolean;
 	layout?: "vertical" | "horizontal";
 	hideMappedParagraphs?: boolean;
+	hideBadges?: boolean;
 	variant?: "default" | "blue";
 }) {
 	const isMapped = control.paragraphs && control.paragraphs.length > 0;
@@ -58,23 +60,27 @@ export function ControlCard({
 							<span className="w-1.5 h-5 bg-blue-500 rounded-full inline-block"></span>
 							{control.title}
 						</h2>
-						{isMapped ? (
-							<span className="px-2 py-1 bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-400 text-xs font-semibold rounded-md border border-green-200 dark:border-green-800/50">
-								Mapped
-							</span>
-						) : (
-							<span className="px-2 py-1 bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400 text-xs font-semibold rounded-md border border-amber-200 dark:border-amber-800/50">
-								Unmapped
-							</span>
-						)}
-						{control.guidelineId ? (
-							<span className="px-2 py-1 bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400 text-xs font-semibold rounded-md border border-blue-200 dark:border-blue-800/50">
-								Guideline
-							</span>
-						) : (
-							<span className="px-2 py-1 bg-purple-50 text-purple-700 dark:bg-purple-900/20 dark:text-purple-400 text-xs font-semibold rounded-md border border-purple-200 dark:border-purple-800/50">
-								LLM Generated
-							</span>
+						{!hideBadges && (
+							<>
+								{isMapped ? (
+									<span className="px-2 py-1 bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-400 text-xs font-semibold rounded-md border border-green-200 dark:border-green-800/50">
+										Mapped
+									</span>
+								) : (
+									<span className="px-2 py-1 bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400 text-xs font-semibold rounded-md border border-amber-200 dark:border-amber-800/50">
+										Unmapped
+									</span>
+								)}
+								{control.guidelineId ? (
+									<span className="px-2 py-1 bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400 text-xs font-semibold rounded-md border border-blue-200 dark:border-blue-800/50">
+										Guideline
+									</span>
+								) : (
+									<span className="px-2 py-1 bg-purple-50 text-purple-700 dark:bg-purple-900/20 dark:text-purple-400 text-xs font-semibold rounded-md border border-purple-200 dark:border-purple-800/50">
+										LLM Generated
+									</span>
+								)}
+							</>
 						)}
 					</div>
 

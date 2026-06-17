@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 
 import type { Control, Guideline } from "../../generated/prisma/client";
 import { CompactControlCard } from "../components/CompactControlCard";
-import { ControlCard } from "../components/ControlCard";
+import { ControlCard, type ControlData } from "../components/ControlCard";
 import {
 	MappedParagraphCard,
 	type ParagraphWithContext,
@@ -205,6 +205,7 @@ export default function BenchmarkPage() {
 								<ControlCard
 									control={task.control}
 									hideMappedParagraphs
+									hideBadges
 									variant="blue"
 								/>
 							</div>
@@ -368,19 +369,16 @@ export default function BenchmarkPage() {
 								<h3 className="text-md font-semibold mb-4 shrink-0">
 									Evaluated controls for this paragraph:
 								</h3>
-								<ul className="space-y-4 mb-6 flex-1 overflow-y-auto min-h-0 pr-2">
+								<div className="space-y-4 mb-6 flex-1 overflow-y-auto min-h-0 pr-2 pb-2">
 									{task.evaluatedControls.map((ctrl) => (
-										<li
+										<ControlCard
 											key={ctrl.id}
-											className="p-3 bg-zinc-50 dark:bg-zinc-800/50 rounded-lg border border-zinc-200 dark:border-zinc-800"
-										>
-											<div className="font-semibold">{ctrl.title}</div>
-											<div className="text-sm text-zinc-600 dark:text-zinc-400 mt-1 line-clamp-2">
-												{ctrl.statement}
-											</div>
-										</li>
+											control={{ ...ctrl, paragraphs: [] } as ControlData}
+											hideMappedParagraphs
+											hideBadges
+										/>
 									))}
-								</ul>
+								</div>
 							</div>
 						</div>
 
