@@ -37,6 +37,7 @@ export default function BenchmarkPage() {
 		TechnicalControl[]
 	>([]);
 	const [loading, setLoading] = useState(true);
+	const [mode, setMode] = useState<"CONTROL" | "PARAGRAPH">("CONTROL");
 
 	// Form State for Control
 	const [relevantParagraphs, setRelevantParagraphs] = useState<Set<number>>(
@@ -57,7 +58,7 @@ export default function BenchmarkPage() {
 	const loadTask = useCallback(async () => {
 		setLoading(true);
 		try {
-			const nextTask = await getNextBenchmarkTask();
+			const nextTask = await getNextBenchmarkTask(mode);
 			setTask(nextTask);
 			if (nextTask.type === "CONTROL") {
 				const techControls = await getTechnicalControls(
@@ -80,7 +81,7 @@ export default function BenchmarkPage() {
 		} finally {
 			setLoading(false);
 		}
-	}, []);
+	}, [mode]);
 
 	useEffect(() => {
 		const init = async () => {
@@ -148,8 +149,26 @@ export default function BenchmarkPage() {
 	};
 
 	return (
-		<div className="flex-1 min-h-0 bg-zinc-50 dark:bg-zinc-950">
-			<main className="w-full px-4 md:px-8 lg:px-12 py-8">
+		<div className="flex-1 min-h-0 bg-zinc-50 dark:bg-zinc-950 flex flex-col">
+			<div className="bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 py-2 px-4 shrink-0 flex justify-center">
+				<div className="flex bg-zinc-100 dark:bg-zinc-800 p-1 rounded-lg">
+					<button
+						type="button"
+						onClick={() => setMode("CONTROL")}
+						className={`px-4 py-1 text-sm font-medium rounded-md transition-colors ${mode === "CONTROL" ? "bg-white dark:bg-zinc-900 shadow-sm text-blue-600 dark:text-blue-400" : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100"}`}
+					>
+						Control Benchmark
+					</button>
+					<button
+						type="button"
+						onClick={() => setMode("PARAGRAPH")}
+						className={`px-4 py-1 text-sm font-medium rounded-md transition-colors ${mode === "PARAGRAPH" ? "bg-white dark:bg-zinc-900 shadow-sm text-blue-600 dark:text-blue-400" : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100"}`}
+					>
+						Paragraph Benchmark
+					</button>
+				</div>
+			</div>
+			<main className="w-full px-4 md:px-8 lg:px-12 py-8 flex-1 min-h-0 flex flex-col">
 				{loading ? (
 					<div className="flex justify-center p-12">
 						<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
@@ -162,7 +181,7 @@ export default function BenchmarkPage() {
 						<p>All controls and paragraphs have been successfully evaluated.</p>
 					</div>
 				) : task.type === "CONTROL" ? (
-					<div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:h-[calc(100vh-8rem)]">
+					<div className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1 min-h-0">
 						{/* Column 1: Context */}
 						<div className="flex flex-col h-full min-h-0">
 							<div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6 flex flex-col h-full min-h-0">
@@ -332,22 +351,24 @@ export default function BenchmarkPage() {
 						</div>
 					</div>
 				) : (
-					<div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-						<div className="space-y-6 lg:col-span-1">
-							<div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6">
-								<h3 className="text-lg font-bold text-zinc-800 dark:text-zinc-200 mb-4">
+					<div className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1 min-h-0">
+						<div className="space-y-6 lg:col-span-1 flex flex-col h-full min-h-0">
+							<div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6 flex flex-col h-full min-h-0">
+								<h3 className="text-lg font-bold text-zinc-800 dark:text-zinc-200 mb-4 shrink-0">
 									Final Evaluation
 								</h3>
-								<MappedParagraphCard p={task.paragraph} />
+								<div className="flex-1 overflow-y-auto min-h-0 pr-2 pb-2">
+									<MappedParagraphCard p={task.paragraph} />
+								</div>
 							</div>
 						</div>
 
-						<div className="space-y-6 lg:col-span-1">
-							<div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6">
-								<h3 className="text-md font-semibold mb-4">
+						<div className="space-y-6 lg:col-span-1 flex flex-col h-full min-h-0">
+							<div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6 flex flex-col h-full min-h-0">
+								<h3 className="text-md font-semibold mb-4 shrink-0">
 									Evaluated controls for this paragraph:
 								</h3>
-								<ul className="space-y-4 mb-6">
+								<ul className="space-y-4 mb-6 flex-1 overflow-y-auto min-h-0 pr-2">
 									{task.evaluatedControls.map((ctrl) => (
 										<li
 											key={ctrl.id}
@@ -363,68 +384,70 @@ export default function BenchmarkPage() {
 							</div>
 						</div>
 
-						<div className="space-y-6 lg:col-span-1">
-							<div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6 space-y-6 flex flex-col h-full">
-								<div className="bg-zinc-50 dark:bg-zinc-800/50 p-4 rounded-lg">
-									<p className="font-medium mb-3">
-										<strong>Completeness:</strong> Do all generated controls
-										completely cover the intention of this paragraph?
-									</p>
-									<div className="flex gap-4">
-										<label className="flex items-center">
-											<input
-												type="radio"
-												name="complete"
-												checked={isComplete === true}
-												onChange={() => setIsComplete(true)}
-												className="mr-2"
-											/>
-											Yes
-										</label>
-										<label className="flex items-center">
-											<input
-												type="radio"
-												name="complete"
-												checked={isComplete === false}
-												onChange={() => setIsComplete(false)}
-												className="mr-2"
-											/>
-											No
-										</label>
+						<div className="space-y-6 lg:col-span-1 flex flex-col h-full min-h-0">
+							<div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6 flex flex-col h-full min-h-0">
+								<div className="space-y-6 flex-1 overflow-y-auto min-h-0 pr-2 pb-4">
+									<div className="bg-zinc-50 dark:bg-zinc-800/50 p-4 rounded-lg">
+										<p className="font-medium mb-3">
+											<strong>Completeness:</strong> Do all generated controls
+											completely cover the intention of this paragraph?
+										</p>
+										<div className="flex gap-4">
+											<label className="flex items-center">
+												<input
+													type="radio"
+													name="complete"
+													checked={isComplete === true}
+													onChange={() => setIsComplete(true)}
+													className="mr-2"
+												/>
+												Yes
+											</label>
+											<label className="flex items-center">
+												<input
+													type="radio"
+													name="complete"
+													checked={isComplete === false}
+													onChange={() => setIsComplete(false)}
+													className="mr-2"
+												/>
+												No
+											</label>
+										</div>
+									</div>
+
+									<div className="bg-zinc-50 dark:bg-zinc-800/50 p-4 rounded-lg">
+										<p className="font-medium mb-3">
+											<strong>Redundancy:</strong> Are there unnecessary
+											overlaps or content repetitions among the generated
+											controls for this paragraph?
+										</p>
+										<div className="flex gap-4">
+											<label className="flex items-center">
+												<input
+													type="radio"
+													name="redundancy"
+													checked={hasRedundancy === true}
+													onChange={() => setHasRedundancy(true)}
+													className="mr-2"
+												/>
+												Yes (There are redundancies)
+											</label>
+											<label className="flex items-center">
+												<input
+													type="radio"
+													name="redundancy"
+													checked={hasRedundancy === false}
+													onChange={() => setHasRedundancy(false)}
+													className="mr-2"
+												/>
+												No (No redundancies)
+											</label>
+										</div>
 									</div>
 								</div>
 
-								<div className="bg-zinc-50 dark:bg-zinc-800/50 p-4 rounded-lg">
-									<p className="font-medium mb-3">
-										<strong>Redundancy:</strong> Are there unnecessary overlaps
-										or content repetitions among the generated controls for this
-										paragraph?
-									</p>
-									<div className="flex gap-4">
-										<label className="flex items-center">
-											<input
-												type="radio"
-												name="redundancy"
-												checked={hasRedundancy === true}
-												onChange={() => setHasRedundancy(true)}
-												className="mr-2"
-											/>
-											Yes (There are redundancies)
-										</label>
-										<label className="flex items-center">
-											<input
-												type="radio"
-												name="redundancy"
-												checked={hasRedundancy === false}
-												onChange={() => setHasRedundancy(false)}
-												className="mr-2"
-											/>
-											No (No redundancies)
-										</label>
-									</div>
-								</div>
-
-								<div className="flex justify-end mt-auto pt-6">
+								<div className="flex justify-end mt-auto pt-6 shrink-0">
 									<button
 										type="button"
 										onClick={submitParagraph}

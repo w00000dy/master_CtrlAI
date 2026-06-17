@@ -2,72 +2,34 @@
 
 import { prisma } from "@/lib/prisma";
 
-export async function getNextBenchmarkTask() {
+export async function getNextBenchmarkTask(
+	mode: "CONTROL" | "PARAGRAPH" = "CONTROL",
+) {
 	try {
-		// Get all paragraphs that have at least one LLM-generated control
-		const paragraphs = await prisma.paragraph.findMany({
-			where: {
-				controls: {
-					some: { guidelineId: null },
-				},
-				benchmarkResult: null, // Paragraph itself not evaluated yet
-			},
-			include: {
-				controls: {
-					where: { guidelineId: null },
-					include: {
-						benchmarkResult: true,
-						paragraphs: {
-							include: {
-								section: { include: { document: true } },
-							},
-						},
-					},
-					orderBy: { id: "asc" },
-				},
-				section: {
-					include: {
-						document: true,
-					},
-				},
-			},
-			orderBy: [
-				{ section: { document: { title: "asc" } } },
-				{ section: { marker: "asc" } },
-				{ marker: "asc" },
-			],
-		});
-
-		if (paragraphs.length === 0) {
-			return { type: "DONE" as const };
-		}
-
-		// Find the first paragraph
-		const currentParagraph = paragraphs[0];
-
-		// Fetch ancestors for currentParagraph
 		const allParagraphs = await prisma.paragraph.findMany();
 		const paraMap = new Map(allParagraphs.map((p) => [p.id, p]));
-		const ancestors = [];
-		let currentId = currentParagraph.parentParagraphId;
-		while (currentId) {
-			const parent = paraMap.get(currentId);
-			if (parent) {
-				ancestors.unshift(parent);
-				currentId = parent.parentParagraphId;
-			} else {
-				break;
+
+		if (mode === "CONTROL") {
+			// Find the first LLM control that hasn't been evaluated yet
+			const unevaluatedControl = await prisma.control.findFirst({
+				where: {
+					guidelineId: null,
+					benchmarkResult: null,
+				},
+				include: {
+					paragraphs: {
+						include: {
+							section: { include: { document: true } },
+						},
+					},
+				},
+				orderBy: { id: "asc" },
+			});
+
+			if (!unevaluatedControl) {
+				return { type: "DONE" as const };
 			}
-		}
 
-		const enrichedParagraph = { ...currentParagraph, ancestors };
-
-		// Check if any LLM controls mapped to this paragraph are unevaluated
-		const unevaluatedControl = enrichedParagraph.controls.find(
-			(c) => !c.benchmarkResult,
-		);
-
-		if (unevaluatedControl) {
 			// Enrich all paragraphs of the unevaluated control with ancestors
 			const enrichedControlParagraphs = unevaluatedControl.paragraphs.map(
 				(p) => {
@@ -86,15 +48,66 @@ export async function getNextBenchmarkTask() {
 				},
 			);
 
+			// We need to return a 'paragraph' as context.
+			// Let's just use the first mapped paragraph, or if none, a dummy.
+			const primaryParagraph = enrichedControlParagraphs[0] || null;
+
 			return {
 				type: "CONTROL" as const,
-				paragraph: enrichedParagraph,
+				paragraph: primaryParagraph, // The UI uses this for context, but it actually maps over control.paragraphs. So it's fine.
 				control: {
 					...unevaluatedControl,
 					paragraphs: enrichedControlParagraphs,
 				},
 			};
 		} else {
+			// Find the first paragraph that hasn't been evaluated yet
+			// For relevance, maybe only paragraphs that actually have LLM controls mapped?
+			// The original logic did that.
+			const unevaluatedParagraph = await prisma.paragraph.findFirst({
+				where: {
+					controls: {
+						some: { guidelineId: null },
+					},
+					benchmarkResult: null,
+				},
+				include: {
+					controls: {
+						where: { guidelineId: null },
+						include: {
+							benchmarkResult: true,
+						},
+						orderBy: { id: "asc" },
+					},
+					section: {
+						include: { document: true },
+					},
+				},
+				orderBy: [
+					{ section: { document: { title: "asc" } } },
+					{ section: { marker: "asc" } },
+					{ marker: "asc" },
+				],
+			});
+
+			if (!unevaluatedParagraph) {
+				return { type: "DONE" as const };
+			}
+
+			const ancestors = [];
+			let currentId = unevaluatedParagraph.parentParagraphId;
+			while (currentId) {
+				const parent = paraMap.get(currentId);
+				if (parent) {
+					ancestors.unshift(parent);
+					currentId = parent.parentParagraphId;
+				} else {
+					break;
+				}
+			}
+
+			const enrichedParagraph = { ...unevaluatedParagraph, ancestors };
+
 			return {
 				type: "PARAGRAPH" as const,
 				paragraph: enrichedParagraph,
