@@ -90,24 +90,37 @@ export async function getParagraphsForSelection() {
 
 export async function getControlsForParagraph(paragraphId: number) {
 	try {
-		const [controls, allParagraphs] = await Promise.all([
-			prisma.control.findMany({
-				where: {
-					paragraphs: {
-						some: { id: paragraphId },
+		const allParagraphs = await prisma.paragraph.findMany();
+
+		const descendantIds: number[] = [];
+		const getDescendants = (parentId: number) => {
+			const children = allParagraphs.filter(
+				(p) => p.parentParagraphId === parentId,
+			);
+			for (const child of children) {
+				descendantIds.push(child.id);
+				getDescendants(child.id);
+			}
+		};
+		getDescendants(paragraphId);
+
+		const allIdsToFetch = [paragraphId, ...descendantIds];
+
+		const controls = await prisma.control.findMany({
+			where: {
+				paragraphs: {
+					some: { id: { in: allIdsToFetch } },
+				},
+			},
+			include: {
+				paragraphs: {
+					include: {
+						section: { include: { document: true } },
 					},
 				},
-				include: {
-					paragraphs: {
-						include: {
-							section: { include: { document: true } },
-						},
-					},
-				},
-				orderBy: { id: "desc" },
-			}),
-			prisma.paragraph.findMany(),
-		]);
+			},
+			orderBy: { id: "desc" },
+		});
 
 		const enrichedControls = enrichControlsWithAncestors(
 			controls,
