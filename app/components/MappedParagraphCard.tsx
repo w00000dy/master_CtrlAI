@@ -28,19 +28,19 @@ export function MappedParagraphCard({
 			>
 				<span
 					className={`font-bold uppercase tracking-wide bg-blue-100/80 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 rounded ${compact ? "text-[9px] px-1.5 py-0.5 shrink-0 truncate max-w-[120px]" : "text-[10px] px-2 py-1"}`}
-					title={p.section.document.title}
+					title={p.section?.document?.title || "Deleted Document"}
 				>
-					{p.section.document.title}
+					{p.section?.document?.title || "Deleted Document"}
 				</span>
 				<div
 					className={`font-bold uppercase tracking-wide bg-zinc-200/80 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 rounded flex items-start ${compact ? "text-[9px] px-1.5 py-0.5" : "text-[10px] px-2 py-1"}`}
 				>
-					{p.section.marker && (
+					{p.section?.marker && (
 						<span className="text-zinc-900 dark:text-zinc-200 mr-1.5 bg-zinc-300/50 dark:bg-zinc-700/50 px-1 rounded-sm font-mono whitespace-nowrap shrink-0 mt-0.5">
 							{p.section.marker}
 						</span>
 					)}
-					<span className="leading-relaxed">{p.section.title}</span>
+					<span className="leading-relaxed">{p.section?.title || "Unknown Section"}</span>
 				</div>
 			</div>
 

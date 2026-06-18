@@ -124,9 +124,20 @@ export async function getDocumentById(id: number) {
 
 export async function deleteDocument(id: number) {
 	try {
-		await prisma.document.delete({
-			where: { id },
+		const guidelines = await prisma.guideline.findMany({
+			where: { documentId: id },
+			select: { id: true },
 		});
+		const guidelineIds = guidelines.map((g) => g.id);
+
+		await prisma.$transaction([
+			prisma.control.deleteMany({
+				where: { guidelineId: { in: guidelineIds } },
+			}),
+			prisma.document.delete({
+				where: { id },
+			}),
+		]);
 		return { success: true };
 	} catch (error) {
 		console.error(`Failed to delete document ${id}:`, error);

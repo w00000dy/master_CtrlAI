@@ -34,17 +34,17 @@ model Section {
 }
 
 model Paragraph {
-  id                Int                 @id @default(autoincrement())
-  marker            String?
-  text              String              @db.Text
-  sectionId         Int
-  section           Section             @relation(fields: [sectionId], references: [id], onDelete: Cascade)
-  parentParagraphId Int?
-  parentParagraph   Paragraph?          @relation("SubParagraphs", fields: [parentParagraphId], references: [id], onDelete: Cascade)
-  subParagraphs     Paragraph[]         @relation("SubParagraphs")
-  controls          Control[]
-  benchmarkResult   ParagraphBenchmark?
-  relevantForBenchmarks BenchmarkResult[] @relation("RelevantBenchmarkParagraphs")
+  id                    Int                 @id @default(autoincrement())
+  marker                String?
+  text                  String              @db.Text
+  sectionId             Int
+  section               Section             @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  parentParagraphId     Int?
+  parentParagraph       Paragraph?          @relation("SubParagraphs", fields: [parentParagraphId], references: [id], onDelete: Cascade)
+  subParagraphs         Paragraph[]         @relation("SubParagraphs")
+  controls              Control[]
+  benchmarkResult       ParagraphBenchmark?
+  relevantForBenchmarks BenchmarkResult[]   @relation("RelevantBenchmarkParagraphs")
 }
 
 model Control {

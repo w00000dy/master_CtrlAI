@@ -66,7 +66,10 @@ export async function getGuidelineById(id: number) {
 
 export async function deleteGuideline(id: number) {
 	try {
-		await prisma.guideline.delete({ where: { id } });
+		await prisma.$transaction([
+			prisma.control.deleteMany({ where: { guidelineId: id } }),
+			prisma.guideline.delete({ where: { id } }),
+		]);
 		return { success: true };
 	} catch (error) {
 		console.error("Failed to delete guideline:", error);
@@ -76,7 +79,10 @@ export async function deleteGuideline(id: number) {
 
 export async function deleteAllGuidelines() {
 	try {
-		await prisma.guideline.deleteMany();
+		await prisma.$transaction([
+			prisma.control.deleteMany({ where: { guidelineId: { not: null } } }),
+			prisma.guideline.deleteMany(),
+		]);
 		return { success: true };
 	} catch (error) {
 		console.error("Failed to delete all guidelines:", error);
