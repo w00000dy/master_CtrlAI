@@ -1,16 +1,7 @@
 "use server";
 
-import { Ollama } from "ollama";
 import { PDFParse } from "pdf-parse";
-
-// Disable fetch timeout for long-running LLM calls
-import { Agent, setGlobalDispatcher } from "undici";
-
-setGlobalDispatcher(new Agent({ headersTimeout: 0 }));
-
-const ollama = new Ollama({
-	host: process.env.OLLAMA_HOST || "http://127.0.0.1:11434",
-});
+import { generateChat } from "@/lib/llm";
 
 export type Paragraph = {
 	marker: string | null;
@@ -100,7 +91,7 @@ The output MUST strictly match this JSON schema and contain no markdown blocks o
 
 Ensure all text is captured accurately and organized logically based on the document's recursive structure.`;
 
-		const response = await ollama.chat({
+		const response = await generateChat({
 			model: model,
 			messages: [
 				{ role: "system", content: systemPrompt },
@@ -109,9 +100,16 @@ Ensure all text is captured accurately and organized logically based on the docu
 			format: "json",
 		});
 
-		const resultText = response.message.content;
-		const promptTokens = response.prompt_eval_count;
-		const evalTokens = response.eval_count;
+		if (!response.success) {
+			return {
+				success: false,
+				error: response.error,
+			};
+		}
+
+		const resultText = response.content;
+		const promptTokens = response.promptTokens;
+		const evalTokens = response.completionTokens;
 		console.log(
 			`[LLM Usage] Prompt tokens (Context used): ${promptTokens}, Generated tokens: ${evalTokens}`,
 		);

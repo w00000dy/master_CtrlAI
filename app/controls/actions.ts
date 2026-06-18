@@ -1,17 +1,8 @@
 "use server";
 
-import { Ollama } from "ollama";
-import { Agent, setGlobalDispatcher } from "undici";
-import { prisma } from "@/lib/prisma";
-
-// Disable fetch timeout for long-running LLM calls
-setGlobalDispatcher(new Agent({ headersTimeout: 0 }));
-
-const ollama = new Ollama({
-	host: process.env.OLLAMA_HOST || "http://127.0.0.1:11434",
-});
-
 import { enrichControlsWithAncestors } from "@/lib/controls";
+import { generateChat } from "@/lib/llm";
+import { prisma } from "@/lib/prisma";
 
 export async function getControls() {
 	try {
@@ -280,7 +271,7 @@ ${allParagraphsStr}
 
 		console.log(userPrompt);
 
-		const response = await ollama.chat({
+		const response = await generateChat({
 			model: model,
 			messages: [
 				{ role: "system", content: systemPrompt },
@@ -289,10 +280,14 @@ ${allParagraphsStr}
 			format: "json",
 		});
 
-		const resultText = response.message.content;
+		if (!response.success) {
+			return { success: false, error: response.error };
+		}
+
+		const resultText = response.content;
 		console.log(resultText);
-		const promptTokens = response.prompt_eval_count;
-		const evalTokens = response.eval_count;
+		const promptTokens = response.promptTokens;
+		const evalTokens = response.completionTokens;
 		console.log(
 			`[LLM Usage] Prompt tokens (Context used): ${promptTokens}, Generated tokens: ${evalTokens}`,
 		);
