@@ -179,6 +179,24 @@ export async function generateControlsForParagraph(
 						.join("\n")
 				: "No ancestor paragraphs.";
 
+		// Find descendants
+		const descendants: { p: (typeof allParagraphs)[0]; depth: number }[] = [];
+		const getDescendants = (parentId: number, depth: number = 1) => {
+			const children = allParagraphs.filter((p) => p.parentParagraphId === parentId);
+			for (const child of children) {
+				descendants.push({ p: child, depth });
+				getDescendants(child.id, depth + 1);
+			}
+		};
+		getDescendants(focusParagraph.id);
+
+		const descendantsStr =
+			descendants.length > 0
+				? descendants
+						.map(({ p, depth }) => `${"  ".repeat(depth)}- ${p.marker ? `${p.marker} ` : ""}${p.text}`)
+						.join("\n")
+				: "No subordinate paragraphs.";
+
 		// Group all paragraphs by Document -> Section
 		const grouped: Record<string, Record<string, typeof allParagraphs>> = {};
 		for (const p of allParagraphs) {
@@ -260,6 +278,8 @@ SECTION: ${focusParagraph.section.title}
 ANCESTOR PARAGRAPHS (Context):
 ${ancestorsStr}
 FOCUS PARAGRAPH TEXT: ${focusParagraph.marker ? `${focusParagraph.marker} ` : ""}${focusParagraph.text}
+SUBORDINATE PARAGRAPHS (Context):
+${descendantsStr}
 
 EXISTING CONTROLS:
 ${existingControlsStr}
