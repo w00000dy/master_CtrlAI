@@ -127,6 +127,14 @@ export async function getControlsForParagraph(paragraphId: number) {
 			allParagraphs,
 		);
 
+		enrichedControls.sort((a, b) => {
+			const aIsDirect = a.paragraphs?.some((p) => p.id === paragraphId);
+			const bIsDirect = b.paragraphs?.some((p) => p.id === paragraphId);
+			if (aIsDirect && !bIsDirect) return -1;
+			if (!aIsDirect && bIsDirect) return 1;
+			return 0;
+		});
+
 		return { success: true, controls: enrichedControls };
 	} catch (error) {
 		console.error("Failed to fetch controls for paragraph:", error);
