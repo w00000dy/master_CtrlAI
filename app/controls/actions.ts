@@ -182,7 +182,9 @@ export async function generateControlsForParagraph(
 		// Find descendants
 		const descendants: { p: (typeof allParagraphs)[0]; depth: number }[] = [];
 		const getDescendants = (parentId: number, depth: number = 1) => {
-			const children = allParagraphs.filter((p) => p.parentParagraphId === parentId);
+			const children = allParagraphs.filter(
+				(p) => p.parentParagraphId === parentId,
+			);
 			for (const child of children) {
 				descendants.push({ p: child, depth });
 				getDescendants(child.id, depth + 1);
@@ -193,7 +195,10 @@ export async function generateControlsForParagraph(
 		const descendantsStr =
 			descendants.length > 0
 				? descendants
-						.map(({ p, depth }) => `${"  ".repeat(depth)}- ${p.marker ? `${p.marker} ` : ""}${p.text}`)
+						.map(
+							({ p, depth }) =>
+								`${"  ".repeat(depth)}- ${p.marker ? `${p.marker} ` : ""}${p.text}`,
+						)
 						.join("\n")
 				: "No subordinate paragraphs.";
 
