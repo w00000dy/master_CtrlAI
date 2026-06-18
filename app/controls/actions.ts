@@ -254,8 +254,7 @@ Return a JSON object containing a single key "controls" that holds an array of c
 
 Output ONLY valid JSON. No markdown formatting, no explanations outside the JSON.`;
 
-		const userPrompt = `
-FOCUS PARAGRAPH ID: ${focusParagraph.id}
+		const userPrompt = `FOCUS PARAGRAPH ID: ${focusParagraph.id}
 DOCUMENT: ${focusParagraph.section.document.title}
 SECTION: ${focusParagraph.section.title}
 ANCESTOR PARAGRAPHS (Context):
