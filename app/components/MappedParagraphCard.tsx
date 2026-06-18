@@ -40,7 +40,9 @@ export function MappedParagraphCard({
 							{p.section.marker}
 						</span>
 					)}
-					<span className="leading-relaxed">{p.section?.title || "Unknown Section"}</span>
+					<span className="leading-relaxed">
+						{p.section?.title || "Unknown Section"}
+					</span>
 				</div>
 			</div>
 
