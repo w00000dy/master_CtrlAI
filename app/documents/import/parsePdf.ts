@@ -109,12 +109,6 @@ Ensure all text is captured accurately and organized logically based on the docu
 		}
 
 		const resultText = response.content;
-		const promptTokens = response.promptTokens;
-		const evalTokens = response.completionTokens;
-		console.log(
-			`[LLM Usage] Prompt tokens (Context used): ${promptTokens}, Generated tokens: ${evalTokens}`,
-		);
-
 		let parsedJson: ParsedDocument;
 
 		try {

@@ -269,8 +269,6 @@ ALL PARAGRAPHS IN DATABASE:
 ${allParagraphsStr}
 `;
 
-		console.log(userPrompt);
-
 		const response = await generateChat({
 			model: model,
 			messages: [
@@ -285,13 +283,6 @@ ${allParagraphsStr}
 		}
 
 		const resultText = response.content;
-		console.log(resultText);
-		const promptTokens = response.promptTokens;
-		const evalTokens = response.completionTokens;
-		console.log(
-			`[LLM Usage] Prompt tokens (Context used): ${promptTokens}, Generated tokens: ${evalTokens}`,
-		);
-
 		let parsedJson: {
 			title?: string;
 			statement?: string;

@@ -52,6 +52,14 @@ export async function generateChat(options: {
 	const provider = getProvider();
 
 	try {
+		let result: {
+			success: boolean;
+			content: string;
+			promptTokens: number;
+			completionTokens: number;
+			error?: string;
+		};
+
 		if (provider === "openai") {
 			const response = await openai.chat.completions.create({
 				model: options.model,
@@ -60,7 +68,7 @@ export async function generateChat(options: {
 					options.format === "json" ? { type: "json_object" } : undefined,
 			});
 
-			return {
+			result = {
 				success: true,
 				content: response.choices[0].message.content || "",
 				promptTokens: response.usage?.prompt_tokens || 0,
@@ -73,13 +81,28 @@ export async function generateChat(options: {
 				format: options.format === "json" ? "json" : undefined,
 			});
 
-			return {
+			result = {
 				success: true,
 				content: response.message.content,
 				promptTokens: response.prompt_eval_count || 0,
 				completionTokens: response.eval_count || 0,
 			};
 		}
+
+		console.log("\n=== LLM Request ===");
+		console.log(`Provider: ${provider} | Model: ${options.model}`);
+		console.log("Messages:");
+		options.messages.forEach((msg) => {
+			console.log(`[${msg.role.toUpperCase()}]:\n${msg.content}\n`);
+		});
+		console.log("=== LLM Response ===");
+		console.log(result.content);
+		console.log(
+			`[LLM Usage] Prompt tokens: ${result.promptTokens}, Generated tokens: ${result.completionTokens}`,
+		);
+		console.log("===================\n");
+
+		return result;
 	} catch (error) {
 		console.error(`${provider} Error:`, error);
 		return {
