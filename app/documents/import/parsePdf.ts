@@ -55,8 +55,9 @@ export async function structureTextWithLlm(rawText: string, model: string) {
 Your task is to take the provided raw text from a legal document and output a perfectly structured JSON object. 
 Extract the overall title, sections, and paragraphs. Paragraphs can have sub-paragraphs, which can themselves have sub-paragraphs, nested to any depth necessary.
 For each section, extract its number or identifier (e.g., "Part 1", "Section A", "Article 5") into the "marker" field if present, otherwise set the marker to null.
-For each paragraph, extract its number or letter (e.g., "1.", "a)", "I.") into the "marker" field if present, otherwise set the marker to null.
-Do NOT drop, skip, or summarize any text. Every single sentence from the raw text must be included somewhere (title, text, or paragraph).
+For each paragraph, extract ONLY its inner number or letter into the "marker" field if present. Strip any surrounding punctuation, brackets, or parentheses (e.g., for "1.", "(a)", or "[1]", extract "1", "a", or "1"). If no marker is present, set the marker to null.
+Do NOT drop, skip, or summarize any core legal text. Every single sentence from the actual document content must be included somewhere (title, text, or paragraph).
+Completely ignore and EXCLUDE any page headers, footers, pagination markers, or document metadata (e.g., text like page numbers or dates at the top/bottom of pages).
 If there is introductory text before a list of paragraphs (e.g., "Manufacturers of products with digital elements shall:"), treat this introductory text as a paragraph itself, and all the following list items as its sub-paragraphs.
 
 The output MUST strictly match this JSON schema and contain no markdown blocks or other text outside the JSON:
@@ -72,11 +73,11 @@ The output MUST strictly match this JSON schema and contain no markdown blocks o
           "text": "Unmarked text",
           "subParagraphs": [
             {
-              "marker": "1.",
+              "marker": "1",
               "text": "Paragraph 1 text",
               "subParagraphs": [
                 {
-                  "marker": "a)",
+                  "marker": "a",
                   "text": "Sub-paragraph a text",
                   "subParagraphs": []
                 }
