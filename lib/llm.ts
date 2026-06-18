@@ -51,6 +51,13 @@ export async function generateChat(options: {
 }) {
 	const provider = getProvider();
 
+	console.log("\n=== LLM Request ===");
+	console.log(`Provider: ${provider} | Model: ${options.model}`);
+	console.log("Messages:");
+	options.messages.forEach((msg) => {
+		console.log(`[${msg.role.toUpperCase()}]:\n${msg.content}\n`);
+	});
+
 	try {
 		let result: {
 			success: boolean;
@@ -89,13 +96,7 @@ export async function generateChat(options: {
 			};
 		}
 
-		console.log("\n=== LLM Request ===");
-		console.log(`Provider: ${provider} | Model: ${options.model}`);
-		console.log("Messages:");
-		options.messages.forEach((msg) => {
-			console.log(`[${msg.role.toUpperCase()}]:\n${msg.content}\n`);
-		});
-		console.log("=== LLM Response ===");
+		console.log("\n=== LLM Response ===");
 		console.log(result.content);
 		console.log(
 			`[LLM Usage] Prompt tokens: ${result.promptTokens}, Generated tokens: ${result.completionTokens}`,
