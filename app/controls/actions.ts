@@ -274,17 +274,18 @@ export async function generateControlsForParagraph(
 			allParagraphsStr += "\n";
 		}
 
-		const systemPrompt = `You are a compliance and security expert. 
-Your task is to generate actionable, technical implementation controls for a specific legal paragraph.
-You will be given:
-1. FOCUS PARAGRAPH: The paragraph you must write controls for.
-2. EXISTING CONTROLS: Controls already in the database. DO NOT generate duplicates or overly similar controls.
-3. ALL PARAGRAPHS: A list of all paragraphs in the database with their IDs.
+		const systemPrompt = `Instructions:
+You are a compliance and security expert. Your task is to generate actionable, technical implementation controls for a specific legal paragraph.
 
-Instructions:
-Write as many specific, actionable controls as necessary to completely fulfill the requirements of the FOCUS PARAGRAPH. Do not limit yourself to a specific number, but avoid redundancies and irrelevant points.
-For each control, determine if it also helps fulfill any OTHER paragraphs from the ALL PARAGRAPHS list. When mapping to paragraphs, YOU MUST USE THE EXACT ID specified inside the [ID: ...] brackets.
-Return a JSON object containing a single key "controls" that holds an array of control objects. Each object must strictly follow this structure:
+You will be given:
+- FOCUS PARAGRAPH: The paragraph you must write controls for.
+- EXISTING CONTROLS: Controls already in the database.
+- ALL PARAGRAPHS: A list of all paragraphs in the database with their IDs.
+
+1. Write as many specific, actionable controls as necessary to completely fulfill the requirements of the FOCUS PARAGRAPH. Do not limit yourself to a specific number, but avoid redundancies and irrelevant points.
+2. For each control, determine if it also helps fulfill any OTHER paragraphs from the ALL PARAGRAPHS list. When mapping to paragraphs, YOU MUST USE THE EXACT ID specified inside the [ID: ...] brackets.
+3. DO NOT generate duplicates or overly similar controls to the EXISTING CONTROLS provided in the context.
+4. Return a JSON object containing a single key "controls" that holds an array of control objects. Each object must strictly follow this structure:
 {
   "controls": [
     {
@@ -295,15 +296,18 @@ Return a JSON object containing a single key "controls" that holds an array of c
     }
   ]
 }
+5. Output ONLY valid JSON. No markdown formatting, no explanations outside the JSON.`;
 
-Output ONLY valid JSON. No markdown formatting, no explanations outside the JSON.`;
+		const userPrompt = `### Context:
 
-		const userPrompt = `FOCUS PARAGRAPH ID: ${focusParagraph.id}
+FOCUS PARAGRAPH ID: ${focusParagraph.id}
 DOCUMENT: ${focusParagraph.section.document.title}
 SECTION: ${focusParagraph.section.title}
+FOCUS PARAGRAPH TEXT: ${focusParagraph.marker ? `${focusParagraph.marker} ` : ""}${focusParagraph.text}
+
 ANCESTOR PARAGRAPHS (Context):
 ${ancestorsStr}
-FOCUS PARAGRAPH TEXT: ${focusParagraph.marker ? `${focusParagraph.marker} ` : ""}${focusParagraph.text}
+
 SUBORDINATE PARAGRAPHS (Context):
 ${descendantsStr}
 
