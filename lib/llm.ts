@@ -5,6 +5,8 @@ import { Agent, setGlobalDispatcher } from "undici";
 // Disable fetch timeout for long-running LLM calls
 setGlobalDispatcher(new Agent({ headersTimeout: 0 }));
 
+const DEFAULT_TEMPERATURE = 0;
+
 const ollama = new Ollama({
 	host: process.env.OLLAMA_HOST,
 });
@@ -44,17 +46,23 @@ export type ChatMessage = {
 	content: string;
 };
 
-export async function generateChat(options: {
+export async function generateChat({
+	model,
+	messages,
+	format,
+	temperature = DEFAULT_TEMPERATURE,
+}: {
 	model: string;
 	messages: ChatMessage[];
 	format?: "json";
+	temperature?: number;
 }) {
 	const provider = getProvider();
 
 	console.log("\n=== LLM Request ===");
-	console.log(`Provider: ${provider} | Model: ${options.model}`);
+	console.log(`Provider: ${provider} | Model: ${model}`);
 	console.log("Messages:");
-	options.messages.forEach((msg) => {
+	messages.forEach((msg) => {
 		console.log(`[${msg.role.toUpperCase()}]:\n${msg.content}\n`);
 	});
 
@@ -69,10 +77,11 @@ export async function generateChat(options: {
 
 		if (provider === "openai") {
 			const response = await openai.chat.completions.create({
-				model: options.model,
-				messages: options.messages,
+				model: model,
+				messages: messages,
 				response_format:
-					options.format === "json" ? { type: "json_object" } : undefined,
+					format === "json" ? { type: "json_object" } : undefined,
+				temperature: temperature,
 			});
 
 			result = {
@@ -83,9 +92,10 @@ export async function generateChat(options: {
 			};
 		} else {
 			const response = await ollama.chat({
-				model: options.model,
-				messages: options.messages,
-				format: options.format === "json" ? "json" : undefined,
+				model: model,
+				messages: messages,
+				format: format === "json" ? "json" : undefined,
+				options: { temperature: temperature },
 			});
 
 			result = {
