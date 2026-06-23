@@ -219,6 +219,23 @@ export default function BenchmarkPage() {
 										Which controls from existing guidelines (e.g., BSI) does
 										this generated control cover?
 									</p>
+									<details className="mt-2 group">
+										<summary className="text-xs text-blue-500 cursor-pointer hover:text-blue-600 font-medium list-none flex items-center">
+											<span className="mr-1">View mapping criteria</span>
+											<svg className="w-4 h-4 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+												<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+											</svg>
+										</summary>
+										<div className="mt-2 p-3 bg-blue-50 dark:bg-blue-900/20 text-xs text-blue-800 dark:text-blue-200 rounded-md border border-blue-100 dark:border-blue-800/50 space-y-2">
+											<p className="font-semibold">Check a technical control if ANY of the following apply:</p>
+											<ul className="list-disc pl-4 space-y-1">
+												<li><strong>Direct Match:</strong> The generated control explicitly covers the core technical requirement of the guideline control.</li>
+												<li><strong>Substantial Contribution:</strong> Implementing the generated control fulfills a significant portion of the technical control.</li>
+												<li><strong>Specific Implementation:</strong> The generated control acts as a concrete technical implementation for a broader guideline requirement.</li>
+											</ul>
+											<p className="italic text-zinc-500 dark:text-zinc-400 mt-2">Do NOT check if the connection is only vaguely related or tangentially addresses the topic without fulfilling the actual requirement.</p>
+										</div>
+									</details>
 								</div>
 								<div className="flex-1 overflow-y-auto min-h-0 border border-zinc-200 dark:border-zinc-800 rounded-lg divide-y divide-zinc-200 dark:divide-zinc-800">
 									{technicalControls.map((tc) => (
