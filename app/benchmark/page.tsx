@@ -1,5 +1,6 @@
 "use client";
 
+import { ChevronDownIcon } from "lucide-animated";
 import { useCallback, useEffect, useState } from "react";
 
 import type { Control, Guideline } from "../../generated/prisma/client";
@@ -220,22 +221,13 @@ export default function BenchmarkPage() {
 										this generated control cover?
 									</p>
 									<details className="mt-2 group">
-										<summary className="text-xs text-blue-500 cursor-pointer hover:text-blue-600 font-medium list-none flex items-center">
-											<span className="mr-1">View criteria</span>
-											<svg
-												className="w-4 h-4 transition-transform group-open:rotate-180"
-												fill="none"
-												viewBox="0 0 24 24"
-												stroke="currentColor"
+										<summary className="text-xs text-blue-500 cursor-pointer hover:text-blue-600 font-medium list-none inline-flex items-center">
+											<span className="mr-1 leading-none">View criteria</span>
+											<ChevronDownIcon
+												className="transition-transform group-open:rotate-180"
+												size={14}
 												aria-hidden="true"
-											>
-												<path
-													strokeLinecap="round"
-													strokeLinejoin="round"
-													strokeWidth={2}
-													d="M19 9l-7 7-7-7"
-												/>
-											</svg>
+											/>
 										</summary>
 										<div className="mt-2 p-3 bg-blue-50 dark:bg-blue-900/20 text-xs text-blue-800 dark:text-blue-200 rounded-md border border-blue-100 dark:border-blue-800/50 space-y-2">
 											<p className="font-semibold">
@@ -304,22 +296,13 @@ export default function BenchmarkPage() {
 											(Select paragraphs where the control is relevant)
 										</p>
 										<details className="mb-3 group">
-											<summary className="text-xs text-blue-500 cursor-pointer hover:text-blue-600 font-medium list-none flex items-center">
-												<span className="mr-1">View criteria</span>
-												<svg
-													className="w-4 h-4 transition-transform group-open:rotate-180"
-													fill="none"
-													viewBox="0 0 24 24"
-													stroke="currentColor"
+											<summary className="text-xs text-blue-500 cursor-pointer hover:text-blue-600 font-medium list-none inline-flex items-center">
+												<span className="mr-1 leading-none">View criteria</span>
+												<ChevronDownIcon
+													className="transition-transform group-open:rotate-180"
+													size={14}
 													aria-hidden="true"
-												>
-													<path
-														strokeLinecap="round"
-														strokeLinejoin="round"
-														strokeWidth={2}
-														d="M19 9l-7 7-7-7"
-													/>
-												</svg>
+												/>
 											</summary>
 											<div className="mt-2 p-3 bg-blue-50 dark:bg-blue-900/20 text-xs text-blue-800 dark:text-blue-200 rounded-md border border-blue-100 dark:border-blue-800/50 space-y-2">
 												<p className="font-semibold">
@@ -372,22 +355,13 @@ export default function BenchmarkPage() {
 											engineers can implement it directly?
 										</p>
 										<details className="mb-3 group">
-											<summary className="text-xs text-blue-500 cursor-pointer hover:text-blue-600 font-medium list-none flex items-center">
-												<span className="mr-1">View criteria</span>
-												<svg
-													className="w-4 h-4 transition-transform group-open:rotate-180"
-													fill="none"
-													viewBox="0 0 24 24"
-													stroke="currentColor"
+											<summary className="text-xs text-blue-500 cursor-pointer hover:text-blue-600 font-medium list-none inline-flex items-center">
+												<span className="mr-1 leading-none">View criteria</span>
+												<ChevronDownIcon
+													className="transition-transform group-open:rotate-180"
+													size={14}
 													aria-hidden="true"
-												>
-													<path
-														strokeLinecap="round"
-														strokeLinejoin="round"
-														strokeWidth={2}
-														d="M19 9l-7 7-7-7"
-													/>
-												</svg>
+												/>
 											</summary>
 											<div className="mt-2 p-3 bg-blue-50 dark:bg-blue-900/20 text-xs text-blue-800 dark:text-blue-200 rounded-md border border-blue-100 dark:border-blue-800/50 space-y-2">
 												<p className="font-semibold">
@@ -448,22 +422,13 @@ export default function BenchmarkPage() {
 											technically correct and state-of-the-art?
 										</p>
 										<details className="mb-3 group">
-											<summary className="text-xs text-blue-500 cursor-pointer hover:text-blue-600 font-medium list-none flex items-center">
-												<span className="mr-1">View criteria</span>
-												<svg
-													className="w-4 h-4 transition-transform group-open:rotate-180"
-													fill="none"
-													viewBox="0 0 24 24"
-													stroke="currentColor"
+											<summary className="text-xs text-blue-500 cursor-pointer hover:text-blue-600 font-medium list-none inline-flex items-center">
+												<span className="mr-1 leading-none">View criteria</span>
+												<ChevronDownIcon
+													className="transition-transform group-open:rotate-180"
+													size={14}
 													aria-hidden="true"
-												>
-													<path
-														strokeLinecap="round"
-														strokeLinejoin="round"
-														strokeWidth={2}
-														d="M19 9l-7 7-7-7"
-													/>
-												</svg>
+												/>
 											</summary>
 											<div className="mt-2 p-3 bg-blue-50 dark:bg-blue-900/20 text-xs text-blue-800 dark:text-blue-200 rounded-md border border-blue-100 dark:border-blue-800/50 space-y-2">
 												<p className="font-semibold">
