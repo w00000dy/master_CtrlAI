@@ -1,10 +1,35 @@
 "use client";
 
 import { ChevronDownIcon } from "lucide-animated";
-import { useCallback, useEffect, useState } from "react";
+import { type ReactNode, useCallback, useEffect, useState } from "react";
 
 import type { Control, Guideline } from "../../generated/prisma/client";
 import { CompactControlCard } from "../components/CompactControlCard";
+
+function CriteriaDetails({
+	children,
+	className = "mt-2 group",
+}: {
+	children: ReactNode;
+	className?: string;
+}) {
+	return (
+		<details className={className}>
+			<summary className="text-xs text-blue-500 cursor-pointer hover:text-blue-600 font-medium list-none inline-flex items-center">
+				<span className="mr-1 leading-none">View criteria</span>
+				<ChevronDownIcon
+					className="transition-transform group-open:rotate-180"
+					size={14}
+					aria-hidden="true"
+				/>
+			</summary>
+			<div className="mt-2 p-3 bg-blue-50 dark:bg-blue-900/20 text-xs text-blue-800 dark:text-blue-200 rounded-md border border-blue-100 dark:border-blue-800/50 space-y-2">
+				{children}
+			</div>
+		</details>
+	);
+}
+
 import { ControlCard, type ControlData } from "../components/ControlCard";
 import {
 	MappedParagraphCard,
@@ -220,43 +245,33 @@ export default function BenchmarkPage() {
 										Which controls from existing guidelines (e.g., BSI) does
 										this generated control cover?
 									</p>
-									<details className="mt-2 group">
-										<summary className="text-xs text-blue-500 cursor-pointer hover:text-blue-600 font-medium list-none inline-flex items-center">
-											<span className="mr-1 leading-none">View criteria</span>
-											<ChevronDownIcon
-												className="transition-transform group-open:rotate-180"
-												size={14}
-												aria-hidden="true"
-											/>
-										</summary>
-										<div className="mt-2 p-3 bg-blue-50 dark:bg-blue-900/20 text-xs text-blue-800 dark:text-blue-200 rounded-md border border-blue-100 dark:border-blue-800/50 space-y-2">
-											<p className="font-semibold">
-												Check a technical control if ANY of the following apply:
-											</p>
-											<ul className="list-disc pl-4 space-y-1">
-												<li>
-													<strong>Direct Match:</strong> The generated control
-													explicitly covers the core technical requirement of
-													the guideline control.
-												</li>
-												<li>
-													<strong>Substantial Contribution:</strong>{" "}
-													Implementing the generated control fulfills a
-													significant portion of the technical control.
-												</li>
-												<li>
-													<strong>Specific Implementation:</strong> The
-													generated control acts as a concrete technical
-													implementation for a broader guideline requirement.
-												</li>
-											</ul>
-											<p className="italic text-zinc-500 dark:text-zinc-400 mt-2">
-												Do NOT check if the connection is only vaguely related
-												or tangentially addresses the topic without fulfilling
-												the actual requirement.
-											</p>
-										</div>
-									</details>
+									<CriteriaDetails className="mt-2 group">
+										<p className="font-semibold">
+											Check a technical control if ANY of the following apply:
+										</p>
+										<ul className="list-disc pl-4 space-y-1">
+											<li>
+												<strong>Direct Match:</strong> The generated control
+												explicitly covers the core technical requirement of the
+												guideline control.
+											</li>
+											<li>
+												<strong>Substantial Contribution:</strong> Implementing
+												the generated control fulfills a significant portion of
+												the technical control.
+											</li>
+											<li>
+												<strong>Specific Implementation:</strong> The generated
+												control acts as a concrete technical implementation for
+												a broader guideline requirement.
+											</li>
+										</ul>
+										<p className="italic text-zinc-500 dark:text-zinc-400 mt-2">
+											Do NOT check if the connection is only vaguely related or
+											tangentially addresses the topic without fulfilling the
+											actual requirement.
+										</p>
+									</CriteriaDetails>
 								</div>
 								<div className="flex-1 overflow-y-auto min-h-0 border border-zinc-200 dark:border-zinc-800 rounded-lg divide-y divide-zinc-200 dark:divide-zinc-800">
 									{technicalControls.map((tc) => (
@@ -295,40 +310,30 @@ export default function BenchmarkPage() {
 											or is the LLM &apos;hallucinating&apos; requirements?
 											(Select paragraphs where the control is relevant)
 										</p>
-										<details className="mb-3 group">
-											<summary className="text-xs text-blue-500 cursor-pointer hover:text-blue-600 font-medium list-none inline-flex items-center">
-												<span className="mr-1 leading-none">View criteria</span>
-												<ChevronDownIcon
-													className="transition-transform group-open:rotate-180"
-													size={14}
-													aria-hidden="true"
-												/>
-											</summary>
-											<div className="mt-2 p-3 bg-blue-50 dark:bg-blue-900/20 text-xs text-blue-800 dark:text-blue-200 rounded-md border border-blue-100 dark:border-blue-800/50 space-y-2">
-												<p className="font-semibold">
-													Select a paragraph checkbox if ALL of the following
-													apply:
-												</p>
-												<ul className="list-disc pl-4 space-y-1">
-													<li>
-														<strong>Relevance:</strong> The control logically
-														derives from this specific text. It does not
-														introduce arbitrary constraints that are absent from
-														the legal text.
-													</li>
-													<li>
-														<strong>Direct Support:</strong> The paragraph
-														directly mandates or strongly implies the technical
-														requirement generated.
-													</li>
-												</ul>
-												<p className="italic text-zinc-500 dark:text-zinc-400 mt-2">
-													Do NOT select a paragraph if it only mentions the
-													general topic but does not actually support the
-													specific generated requirement.
-												</p>
-											</div>
-										</details>
+										<CriteriaDetails className="mb-3 group">
+											<p className="font-semibold">
+												Select a paragraph checkbox if ALL of the following
+												apply:
+											</p>
+											<ul className="list-disc pl-4 space-y-1">
+												<li>
+													<strong>Relevance:</strong> The control logically
+													derives from this specific text. It does not introduce
+													arbitrary constraints that are absent from the legal
+													text.
+												</li>
+												<li>
+													<strong>Direct Support:</strong> The paragraph
+													directly mandates or strongly implies the technical
+													requirement generated.
+												</li>
+											</ul>
+											<p className="italic text-zinc-500 dark:text-zinc-400 mt-2">
+												Do NOT select a paragraph if it only mentions the
+												general topic but does not actually support the specific
+												generated requirement.
+											</p>
+										</CriteriaDetails>
 										<div className="flex flex-col gap-2">
 											{task.control.paragraphs.map((p) => (
 												<label key={p.id} className="flex items-start">
@@ -354,44 +359,33 @@ export default function BenchmarkPage() {
 											Is the control formulated so that developers or security
 											engineers can implement it directly?
 										</p>
-										<details className="mb-3 group">
-											<summary className="text-xs text-blue-500 cursor-pointer hover:text-blue-600 font-medium list-none inline-flex items-center">
-												<span className="mr-1 leading-none">View criteria</span>
-												<ChevronDownIcon
-													className="transition-transform group-open:rotate-180"
-													size={14}
-													aria-hidden="true"
-												/>
-											</summary>
-											<div className="mt-2 p-3 bg-blue-50 dark:bg-blue-900/20 text-xs text-blue-800 dark:text-blue-200 rounded-md border border-blue-100 dark:border-blue-800/50 space-y-2">
-												<p className="font-semibold">
-													Select &apos;Yes (Actionable)&apos; if ALL of the
-													following apply:
-												</p>
-												<ul className="list-disc pl-4 space-y-1">
-													<li>
-														<strong>Specificity:</strong> The control specifies
-														exactly <em>what</em> needs to be done, avoiding
-														vague statements like &quot;ensure security&quot;.
-													</li>
-													<li>
-														<strong>Implementability:</strong> A developer can
-														translate the control into a tangible technical
-														feature, configuration, or process.
-													</li>
-													<li>
-														<strong>Testability:</strong> It is possible to
-														verify whether the control has been successfully
-														implemented.
-													</li>
-												</ul>
-												<p className="italic text-zinc-500 dark:text-zinc-400 mt-2">
-													Select &apos;No (Too vague)&apos; if the control only
-													contains generic advice or lacks concrete technical
-													steps.
-												</p>
-											</div>
-										</details>
+										<CriteriaDetails className="mb-3 group">
+											<p className="font-semibold">
+												Select &apos;Yes (Actionable)&apos; if ALL of the
+												following apply:
+											</p>
+											<ul className="list-disc pl-4 space-y-1">
+												<li>
+													<strong>Specificity:</strong> The control specifies
+													exactly <em>what</em> needs to be done, avoiding vague
+													statements like &quot;ensure security&quot;.
+												</li>
+												<li>
+													<strong>Implementability:</strong> A developer can
+													translate the control into a tangible technical
+													feature, configuration, or process.
+												</li>
+												<li>
+													<strong>Testability:</strong> It is possible to verify
+													whether the control has been successfully implemented.
+												</li>
+											</ul>
+											<p className="italic text-zinc-500 dark:text-zinc-400 mt-2">
+												Select &apos;No (Too vague)&apos; if the control only
+												contains generic advice or lacks concrete technical
+												steps.
+											</p>
+										</CriteriaDetails>
 										<div className="flex gap-4">
 											<label className="flex items-center">
 												<input
@@ -421,45 +415,34 @@ export default function BenchmarkPage() {
 											Is the technical interpretation of the legal text
 											technically correct and state-of-the-art?
 										</p>
-										<details className="mb-3 group">
-											<summary className="text-xs text-blue-500 cursor-pointer hover:text-blue-600 font-medium list-none inline-flex items-center">
-												<span className="mr-1 leading-none">View criteria</span>
-												<ChevronDownIcon
-													className="transition-transform group-open:rotate-180"
-													size={14}
-													aria-hidden="true"
-												/>
-											</summary>
-											<div className="mt-2 p-3 bg-blue-50 dark:bg-blue-900/20 text-xs text-blue-800 dark:text-blue-200 rounded-md border border-blue-100 dark:border-blue-800/50 space-y-2">
-												<p className="font-semibold">
-													Select &apos;Yes (Correct)&apos; if ALL of the
-													following apply:
-												</p>
-												<ul className="list-disc pl-4 space-y-1">
-													<li>
-														<strong>Accuracy:</strong> The control uses correct
-														technical terminology and reflects valid security
-														concepts.
-													</li>
-													<li>
-														<strong>Modern Standards:</strong> The solution
-														aligns with current industry best practices (e.g.,
-														modern encryption, standard protocols) and is not
-														outdated.
-													</li>
-													<li>
-														<strong>Interpretation:</strong> The technical
-														implementation correctly reflects the spirit of the
-														legal requirement without weakening it.
-													</li>
-												</ul>
-												<p className="italic text-zinc-500 dark:text-zinc-400 mt-2">
-													Select &apos;No (Incorrect)&apos; if the control
-													proposes outdated technology, uses incorrect technical
-													concepts, or misinterprets the legal requirement.
-												</p>
-											</div>
-										</details>
+										<CriteriaDetails className="mb-3 group">
+											<p className="font-semibold">
+												Select &apos;Yes (Correct)&apos; if ALL of the following
+												apply:
+											</p>
+											<ul className="list-disc pl-4 space-y-1">
+												<li>
+													<strong>Accuracy:</strong> The control uses correct
+													technical terminology and reflects valid security
+													concepts.
+												</li>
+												<li>
+													<strong>Modern Standards:</strong> The solution aligns
+													with current industry best practices (e.g., modern
+													encryption, standard protocols) and is not outdated.
+												</li>
+												<li>
+													<strong>Interpretation:</strong> The technical
+													implementation correctly reflects the spirit of the
+													legal requirement without weakening it.
+												</li>
+											</ul>
+											<p className="italic text-zinc-500 dark:text-zinc-400 mt-2">
+												Select &apos;No (Incorrect)&apos; if the control
+												proposes outdated technology, uses incorrect technical
+												concepts, or misinterprets the legal requirement.
+											</p>
+										</CriteriaDetails>
 										<div className="flex gap-4">
 											<label className="flex items-center">
 												<input
