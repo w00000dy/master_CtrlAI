@@ -274,7 +274,7 @@ export async function generateControlsForParagraph(
 			allParagraphsStr += "\n";
 		}
 
-		const systemPrompt = `Instructions:
+		const systemPrompt = `### Instruction ###
 You are a compliance and security expert. Your task is to generate actionable, technical implementation controls for a specific legal paragraph.
 
 You will be given:
@@ -282,10 +282,10 @@ You will be given:
 - EXISTING CONTROLS: Controls already in the database.
 - ALL PARAGRAPHS: A list of all paragraphs in the database with their IDs.
 
-1. Write as many specific, actionable controls as necessary to completely fulfill the requirements of the FOCUS PARAGRAPH. Do not limit yourself to a specific number, but avoid redundancies and irrelevant points.
-2. For each control, determine if it also helps fulfill any OTHER paragraphs from the ALL PARAGRAPHS list. When mapping to paragraphs, YOU MUST USE THE EXACT ID specified inside the [ID: ...] brackets.
-3. DO NOT generate duplicates or overly similar controls to the EXISTING CONTROLS provided in the context.
-4. Return a JSON object containing a single key "controls" that holds an array of control objects. Each object must strictly follow this structure:
+Write as many specific, actionable controls as necessary to completely fulfill the requirements of the FOCUS PARAGRAPH. Do not limit yourself to a specific number, but avoid redundancies and irrelevant points.
+For each control, determine if it also helps fulfill any OTHER paragraphs from the ALL PARAGRAPHS list. When mapping to paragraphs, YOU MUST USE THE EXACT ID specified inside the [ID: ...] brackets.
+DO NOT generate duplicates or overly similar controls to the EXISTING CONTROLS provided in the context.
+Return a JSON object containing a single key "controls" that holds an array of control objects. Each object must strictly follow this structure:
 {
   "controls": [
     {
@@ -296,10 +296,9 @@ You will be given:
     }
   ]
 }
-5. Output ONLY valid JSON. No markdown formatting, no explanations outside the JSON.`;
+Output ONLY valid JSON. No markdown formatting, no explanations outside the JSON.`;
 
-		const userPrompt = `### Context:
-
+		const userPrompt = `### Context ###
 FOCUS PARAGRAPH ID: ${focusParagraph.id}
 DOCUMENT: ${focusParagraph.section.document.title}
 SECTION: ${focusParagraph.section.title}
