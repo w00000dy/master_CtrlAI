@@ -589,6 +589,11 @@ export default function BenchmarkPage() {
 													<strong>Repetition:</strong> The same requirement is
 													stated multiple times in slightly different words.
 												</li>
+												<li>
+													<strong>Broader Coverage:</strong> Multiple specific
+													controls are already covered by another more broadly
+													formulated control.
+												</li>
 											</ul>
 											<p className="italic text-zinc-500 dark:text-zinc-400 mt-2">
 												Select &apos;No (No redundancies)&apos; if each control
