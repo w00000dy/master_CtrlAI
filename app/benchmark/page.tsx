@@ -221,19 +221,48 @@ export default function BenchmarkPage() {
 									</p>
 									<details className="mt-2 group">
 										<summary className="text-xs text-blue-500 cursor-pointer hover:text-blue-600 font-medium list-none flex items-center">
-											<span className="mr-1">View mapping criteria</span>
-											<svg className="w-4 h-4 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-												<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+											<span className="mr-1">View criteria</span>
+											<svg
+												className="w-4 h-4 transition-transform group-open:rotate-180"
+												fill="none"
+												viewBox="0 0 24 24"
+												stroke="currentColor"
+												aria-hidden="true"
+											>
+												<path
+													strokeLinecap="round"
+													strokeLinejoin="round"
+													strokeWidth={2}
+													d="M19 9l-7 7-7-7"
+												/>
 											</svg>
 										</summary>
 										<div className="mt-2 p-3 bg-blue-50 dark:bg-blue-900/20 text-xs text-blue-800 dark:text-blue-200 rounded-md border border-blue-100 dark:border-blue-800/50 space-y-2">
-											<p className="font-semibold">Check a technical control if ANY of the following apply:</p>
+											<p className="font-semibold">
+												Check a technical control if ANY of the following apply:
+											</p>
 											<ul className="list-disc pl-4 space-y-1">
-												<li><strong>Direct Match:</strong> The generated control explicitly covers the core technical requirement of the guideline control.</li>
-												<li><strong>Substantial Contribution:</strong> Implementing the generated control fulfills a significant portion of the technical control.</li>
-												<li><strong>Specific Implementation:</strong> The generated control acts as a concrete technical implementation for a broader guideline requirement.</li>
+												<li>
+													<strong>Direct Match:</strong> The generated control
+													explicitly covers the core technical requirement of
+													the guideline control.
+												</li>
+												<li>
+													<strong>Substantial Contribution:</strong>{" "}
+													Implementing the generated control fulfills a
+													significant portion of the technical control.
+												</li>
+												<li>
+													<strong>Specific Implementation:</strong> The
+													generated control acts as a concrete technical
+													implementation for a broader guideline requirement.
+												</li>
 											</ul>
-											<p className="italic text-zinc-500 dark:text-zinc-400 mt-2">Do NOT check if the connection is only vaguely related or tangentially addresses the topic without fulfilling the actual requirement.</p>
+											<p className="italic text-zinc-500 dark:text-zinc-400 mt-2">
+												Do NOT check if the connection is only vaguely related
+												or tangentially addresses the topic without fulfilling
+												the actual requirement.
+											</p>
 										</div>
 									</details>
 								</div>
@@ -269,11 +298,54 @@ export default function BenchmarkPage() {
 
 								<div className="space-y-4 flex-1 overflow-y-auto min-h-0 pr-2 pb-4">
 									<div className="bg-zinc-50 dark:bg-zinc-800/50 p-4 rounded-lg">
-										<p className="font-medium mb-3">
+										<p className="font-medium mb-1">
 											Is the generated control truly relevant to the legal text,
 											or is the LLM &apos;hallucinating&apos; requirements?
 											(Select paragraphs where the control is relevant)
 										</p>
+										<details className="mb-3 group">
+											<summary className="text-xs text-blue-500 cursor-pointer hover:text-blue-600 font-medium list-none flex items-center">
+												<span className="mr-1">View criteria</span>
+												<svg
+													className="w-4 h-4 transition-transform group-open:rotate-180"
+													fill="none"
+													viewBox="0 0 24 24"
+													stroke="currentColor"
+													aria-hidden="true"
+												>
+													<path
+														strokeLinecap="round"
+														strokeLinejoin="round"
+														strokeWidth={2}
+														d="M19 9l-7 7-7-7"
+													/>
+												</svg>
+											</summary>
+											<div className="mt-2 p-3 bg-blue-50 dark:bg-blue-900/20 text-xs text-blue-800 dark:text-blue-200 rounded-md border border-blue-100 dark:border-blue-800/50 space-y-2">
+												<p className="font-semibold">
+													Select a paragraph checkbox if ALL of the following
+													apply:
+												</p>
+												<ul className="list-disc pl-4 space-y-1">
+													<li>
+														<strong>Relevance:</strong> The control logically
+														derives from this specific text. It does not
+														introduce arbitrary constraints that are absent from
+														the legal text.
+													</li>
+													<li>
+														<strong>Direct Support:</strong> The paragraph
+														directly mandates or strongly implies the technical
+														requirement generated.
+													</li>
+												</ul>
+												<p className="italic text-zinc-500 dark:text-zinc-400 mt-2">
+													Do NOT select a paragraph if it only mentions the
+													general topic but does not actually support the
+													specific generated requirement.
+												</p>
+											</div>
+										</details>
 										<div className="flex flex-col gap-2">
 											{task.control.paragraphs.map((p) => (
 												<label key={p.id} className="flex items-start">
@@ -295,10 +367,57 @@ export default function BenchmarkPage() {
 									</div>
 
 									<div className="bg-zinc-50 dark:bg-zinc-800/50 p-4 rounded-lg">
-										<p className="font-medium mb-3">
+										<p className="font-medium mb-1">
 											Is the control formulated so that developers or security
 											engineers can implement it directly?
 										</p>
+										<details className="mb-3 group">
+											<summary className="text-xs text-blue-500 cursor-pointer hover:text-blue-600 font-medium list-none flex items-center">
+												<span className="mr-1">View criteria</span>
+												<svg
+													className="w-4 h-4 transition-transform group-open:rotate-180"
+													fill="none"
+													viewBox="0 0 24 24"
+													stroke="currentColor"
+													aria-hidden="true"
+												>
+													<path
+														strokeLinecap="round"
+														strokeLinejoin="round"
+														strokeWidth={2}
+														d="M19 9l-7 7-7-7"
+													/>
+												</svg>
+											</summary>
+											<div className="mt-2 p-3 bg-blue-50 dark:bg-blue-900/20 text-xs text-blue-800 dark:text-blue-200 rounded-md border border-blue-100 dark:border-blue-800/50 space-y-2">
+												<p className="font-semibold">
+													Select &apos;Yes (Actionable)&apos; if ALL of the
+													following apply:
+												</p>
+												<ul className="list-disc pl-4 space-y-1">
+													<li>
+														<strong>Specificity:</strong> The control specifies
+														exactly <em>what</em> needs to be done, avoiding
+														vague statements like &quot;ensure security&quot;.
+													</li>
+													<li>
+														<strong>Implementability:</strong> A developer can
+														translate the control into a tangible technical
+														feature, configuration, or process.
+													</li>
+													<li>
+														<strong>Testability:</strong> It is possible to
+														verify whether the control has been successfully
+														implemented.
+													</li>
+												</ul>
+												<p className="italic text-zinc-500 dark:text-zinc-400 mt-2">
+													Select &apos;No (Too vague)&apos; if the control only
+													contains generic advice or lacks concrete technical
+													steps.
+												</p>
+											</div>
+										</details>
 										<div className="flex gap-4">
 											<label className="flex items-center">
 												<input
@@ -324,10 +443,58 @@ export default function BenchmarkPage() {
 									</div>
 
 									<div className="bg-zinc-50 dark:bg-zinc-800/50 p-4 rounded-lg">
-										<p className="font-medium mb-3">
+										<p className="font-medium mb-1">
 											Is the technical interpretation of the legal text
 											technically correct and state-of-the-art?
 										</p>
+										<details className="mb-3 group">
+											<summary className="text-xs text-blue-500 cursor-pointer hover:text-blue-600 font-medium list-none flex items-center">
+												<span className="mr-1">View criteria</span>
+												<svg
+													className="w-4 h-4 transition-transform group-open:rotate-180"
+													fill="none"
+													viewBox="0 0 24 24"
+													stroke="currentColor"
+													aria-hidden="true"
+												>
+													<path
+														strokeLinecap="round"
+														strokeLinejoin="round"
+														strokeWidth={2}
+														d="M19 9l-7 7-7-7"
+													/>
+												</svg>
+											</summary>
+											<div className="mt-2 p-3 bg-blue-50 dark:bg-blue-900/20 text-xs text-blue-800 dark:text-blue-200 rounded-md border border-blue-100 dark:border-blue-800/50 space-y-2">
+												<p className="font-semibold">
+													Select &apos;Yes (Correct)&apos; if ALL of the
+													following apply:
+												</p>
+												<ul className="list-disc pl-4 space-y-1">
+													<li>
+														<strong>Accuracy:</strong> The control uses correct
+														technical terminology and reflects valid security
+														concepts.
+													</li>
+													<li>
+														<strong>Modern Standards:</strong> The solution
+														aligns with current industry best practices (e.g.,
+														modern encryption, standard protocols) and is not
+														outdated.
+													</li>
+													<li>
+														<strong>Interpretation:</strong> The technical
+														implementation correctly reflects the spirit of the
+														legal requirement without weakening it.
+													</li>
+												</ul>
+												<p className="italic text-zinc-500 dark:text-zinc-400 mt-2">
+													Select &apos;No (Incorrect)&apos; if the control
+													proposes outdated technology, uses incorrect technical
+													concepts, or misinterprets the legal requirement.
+												</p>
+											</div>
+										</details>
 										<div className="flex gap-4">
 											<label className="flex items-center">
 												<input
