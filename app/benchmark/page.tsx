@@ -518,10 +518,32 @@ export default function BenchmarkPage() {
 							<div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6 flex flex-col h-full min-h-0">
 								<div className="space-y-6 flex-1 overflow-y-auto min-h-0 pr-2 pb-4">
 									<div className="bg-zinc-50 dark:bg-zinc-800/50 p-4 rounded-lg">
-										<p className="font-medium mb-3">
+										<p className="font-medium mb-1">
 											<strong>Completeness:</strong> Do all generated controls
 											completely cover the intention of this paragraph?
 										</p>
+										<CriteriaDetails className="mb-3 group">
+											<p className="font-semibold">
+												Select &apos;Yes&apos; if ALL of the following apply:
+											</p>
+											<ul className="list-disc pl-4 space-y-1">
+												<li>
+													<strong>Full Coverage:</strong> The generated controls
+													address every distinct technical requirement mandated
+													by the paragraph.
+												</li>
+												<li>
+													<strong>No Gaps:</strong> There are no missing
+													security measures that a developer would need to infer
+													to fully comply with the text.
+												</li>
+											</ul>
+											<p className="italic text-zinc-500 dark:text-zinc-400 mt-2">
+												Select &apos;No&apos; if the controls only partially
+												address the paragraph or if important aspects are
+												missing.
+											</p>
+										</CriteriaDetails>
 										<div className="flex gap-4">
 											<label className="flex items-center">
 												<input
@@ -547,11 +569,32 @@ export default function BenchmarkPage() {
 									</div>
 
 									<div className="bg-zinc-50 dark:bg-zinc-800/50 p-4 rounded-lg">
-										<p className="font-medium mb-3">
+										<p className="font-medium mb-1">
 											<strong>Redundancy:</strong> Are there unnecessary
 											overlaps or content repetitions among the generated
 											controls for this paragraph?
 										</p>
+										<CriteriaDetails className="mb-3 group">
+											<p className="font-semibold">
+												Select &apos;Yes (There are redundancies)&apos; if ANY
+												of the following apply:
+											</p>
+											<ul className="list-disc pl-4 space-y-1">
+												<li>
+													<strong>Overlap:</strong> Multiple controls
+													essentially demand the exact same technical
+													implementation.
+												</li>
+												<li>
+													<strong>Repetition:</strong> The same requirement is
+													stated multiple times in slightly different words.
+												</li>
+											</ul>
+											<p className="italic text-zinc-500 dark:text-zinc-400 mt-2">
+												Select &apos;No (No redundancies)&apos; if each control
+												provides a distinct, non-overlapping requirement.
+											</p>
+										</CriteriaDetails>
 										<div className="flex gap-4">
 											<label className="flex items-center">
 												<input
