@@ -246,31 +246,22 @@ export default function BenchmarkPage() {
 										this generated control cover?
 									</p>
 									<CriteriaDetails className="mt-2 group">
-										<p className="font-semibold">
-											Check a technical control if ANY of the following apply:
+										<p className="font-semibold text-emerald-700 dark:text-emerald-400">
+											✅ DO check the box if the generated control:
 										</p>
-										<ul className="list-disc pl-4 space-y-1">
-											<li>
-												<strong>Direct Match:</strong> The generated control
-												explicitly covers the core technical requirement of the
-												guideline control.
-											</li>
-											<li>
-												<strong>Substantial Contribution:</strong> Implementing
-												the generated control fulfills a significant portion of
-												the technical control.
-											</li>
-											<li>
-												<strong>Specific Implementation:</strong> The generated
-												control acts as a concrete technical implementation for
-												a broader guideline requirement.
-											</li>
+										<ul className="list-disc pl-4 space-y-1 mt-1 mb-3">
+											<li>Is a <strong>direct match</strong> to the guideline.</li>
+											<li>Provides a <strong>substantial contribution</strong> to fulfilling it.</li>
+											<li>Is a <strong>specific, concrete implementation</strong> of a broader guideline.</li>
+											<li className="text-zinc-600 dark:text-zinc-400"><em>Note: A single control can cover multiple guidelines!</em></li>
 										</ul>
-										<p className="italic text-zinc-500 dark:text-zinc-400 mt-2">
-											Do NOT check if the connection is only vaguely related or
-											tangentially addresses the topic without fulfilling the
-											actual requirement.
+										<p className="font-semibold text-rose-700 dark:text-rose-400 border-t border-blue-200 dark:border-blue-800/50 pt-2 mt-2">
+											❌ Do NOT check the box if:
 										</p>
+										<ul className="list-disc pl-4 space-y-1 mt-1">
+											<li>It is only <strong>vaguely related</strong> to the guideline.</li>
+											<li>It just shares the <strong>same topic</strong> without actually fulfilling the requirement.</li>
+										</ul>
 									</CriteriaDetails>
 								</div>
 								<div className="flex-1 overflow-y-auto min-h-0 border border-zinc-200 dark:border-zinc-800 rounded-lg divide-y divide-zinc-200 dark:divide-zinc-800">
