@@ -250,17 +250,35 @@ export default function BenchmarkPage() {
 											✅ DO check the box if the generated control:
 										</p>
 										<ul className="list-disc pl-4 space-y-1 mt-1 mb-3">
-											<li>Is a <strong>direct match</strong> to the guideline.</li>
-											<li>Provides a <strong>substantial contribution</strong> to fulfilling it.</li>
-											<li>Is a <strong>specific, concrete implementation</strong> of a broader guideline.</li>
-											<li className="text-zinc-600 dark:text-zinc-400"><em>Note: A single control can cover multiple guidelines!</em></li>
+											<li>
+												Is a <strong>direct match</strong> to the guideline.
+											</li>
+											<li>
+												Provides a <strong>substantial contribution</strong> to
+												fulfilling it.
+											</li>
+											<li>
+												Is a <strong>specific, concrete implementation</strong>{" "}
+												of a broader guideline.
+											</li>
+											<li className="text-zinc-600 dark:text-zinc-400">
+												<em>
+													Note: A single control can cover multiple guidelines!
+												</em>
+											</li>
 										</ul>
 										<p className="font-semibold text-rose-700 dark:text-rose-400 border-t border-blue-200 dark:border-blue-800/50 pt-2 mt-2">
 											❌ Do NOT check the box if:
 										</p>
 										<ul className="list-disc pl-4 space-y-1 mt-1">
-											<li>It is only <strong>vaguely related</strong> to the guideline.</li>
-											<li>It just shares the <strong>same topic</strong> without actually fulfilling the requirement.</li>
+											<li>
+												It is only <strong>vaguely related</strong> to the
+												guideline.
+											</li>
+											<li>
+												It just shares the <strong>same topic</strong> without
+												actually fulfilling the requirement.
+											</li>
 										</ul>
 									</CriteriaDetails>
 								</div>
@@ -306,15 +324,28 @@ export default function BenchmarkPage() {
 												✅ DO check the paragraph if:
 											</p>
 											<ul className="list-disc pl-4 space-y-1 mt-1 mb-3">
-												<li>The control <strong>logically derives</strong> from it without arbitrary constraints.</li>
-												<li>It <strong>directly mandates</strong> or strongly implies the technical requirement.</li>
+												<li>
+													The control <strong>logically derives</strong> from it
+													without arbitrary constraints.
+												</li>
+												<li>
+													It <strong>directly mandates</strong> or strongly
+													implies the technical requirement.
+												</li>
 											</ul>
 											<p className="font-semibold text-rose-700 dark:text-rose-400 border-t border-blue-200 dark:border-blue-800/50 pt-2 mt-2">
 												❌ Do NOT check the paragraph if:
 											</p>
 											<ul className="list-disc pl-4 space-y-1 mt-1">
-												<li>It only mentions the <strong>general topic</strong> without supporting the specific requirement.</li>
-												<li>The control demands something that is <strong>not necessary</strong> or goes far beyond what the legal text actually requires.</li>
+												<li>
+													It only mentions the <strong>general topic</strong>{" "}
+													without supporting the specific requirement.
+												</li>
+												<li>
+													The control demands something that is{" "}
+													<strong>not necessary</strong> or goes far beyond what
+													the legal text actually requires.
+												</li>
 											</ul>
 										</CriteriaDetails>
 										<div className="flex flex-col gap-2">
@@ -347,15 +378,28 @@ export default function BenchmarkPage() {
 												✅ DO select &apos;Yes (Actionable)&apos; if:
 											</p>
 											<ul className="list-disc pl-4 space-y-1 mt-1 mb-3">
-												<li>It is <strong>highly specific</strong> (no vague &quot;ensure security&quot; statements).</li>
-												<li>A developer can directly <strong>implement</strong> it as a tangible feature/config.</li>
-												<li>It is clear how to <strong>test/verify</strong> its successful implementation.</li>
+												<li>
+													It is <strong>highly specific</strong> (no vague
+													&quot;ensure security&quot; statements).
+												</li>
+												<li>
+													A developer can directly <strong>implement</strong> it
+													as a tangible feature/config.
+												</li>
+												<li>
+													It is clear how to <strong>test/verify</strong> its
+													successful implementation.
+												</li>
 											</ul>
 											<p className="font-semibold text-rose-700 dark:text-rose-400 border-t border-blue-200 dark:border-blue-800/50 pt-2 mt-2">
-												❌ Do NOT select &apos;Yes&apos; (select &apos;No&apos;) if:
+												❌ Do NOT select &apos;Yes&apos; (select &apos;No&apos;)
+												if:
 											</p>
 											<ul className="list-disc pl-4 space-y-1 mt-1">
-												<li>It only contains <strong>generic advice</strong> or lacks concrete technical steps.</li>
+												<li>
+													It only contains <strong>generic advice</strong> or
+													lacks concrete technical steps.
+												</li>
 											</ul>
 										</CriteriaDetails>
 										<div className="flex gap-4">
@@ -392,16 +436,32 @@ export default function BenchmarkPage() {
 												✅ DO select &apos;Yes (Correct)&apos; if:
 											</p>
 											<ul className="list-disc pl-4 space-y-1 mt-1 mb-3">
-												<li>It uses <strong>accurate</strong> technical terminology and valid security concepts.</li>
-												<li>It aligns with <strong>modern standards</strong> and industry best practices.</li>
-												<li>It <strong>correctly interprets</strong> the spirit of the legal requirement.</li>
+												<li>
+													It uses <strong>accurate</strong> technical
+													terminology and valid security concepts.
+												</li>
+												<li>
+													It aligns with <strong>modern standards</strong> and
+													industry best practices.
+												</li>
+												<li>
+													It <strong>correctly interprets</strong> the spirit of
+													the legal requirement.
+												</li>
 											</ul>
 											<p className="font-semibold text-rose-700 dark:text-rose-400 border-t border-blue-200 dark:border-blue-800/50 pt-2 mt-2">
-												❌ Do NOT select &apos;Yes&apos; (select &apos;No&apos;) if:
+												❌ Do NOT select &apos;Yes&apos; (select &apos;No&apos;)
+												if:
 											</p>
 											<ul className="list-disc pl-4 space-y-1 mt-1">
-												<li>It proposes <strong>outdated technology</strong> or incorrect concepts.</li>
-												<li>It <strong>misinterprets</strong> or weakens the legal requirement.</li>
+												<li>
+													It proposes <strong>outdated technology</strong> or
+													incorrect concepts.
+												</li>
+												<li>
+													It <strong>misinterprets</strong> or weakens the legal
+													requirement.
+												</li>
 											</ul>
 										</CriteriaDetails>
 										<div className="flex gap-4">
@@ -488,15 +548,27 @@ export default function BenchmarkPage() {
 												✅ DO select &apos;Yes&apos; if:
 											</p>
 											<ul className="list-disc pl-4 space-y-1 mt-1 mb-3">
-												<li>The controls provide <strong>full coverage</strong> of all technical requirements.</li>
-												<li>There are <strong>no missing gaps</strong> that a developer would need to infer.</li>
+												<li>
+													The controls provide <strong>full coverage</strong> of
+													all technical requirements.
+												</li>
+												<li>
+													There are <strong>no missing gaps</strong> that a
+													developer would need to infer.
+												</li>
 											</ul>
 											<p className="font-semibold text-rose-700 dark:text-rose-400 border-t border-blue-200 dark:border-blue-800/50 pt-2 mt-2">
-												❌ Do NOT select &apos;Yes&apos; (select &apos;No&apos;) if:
+												❌ Do NOT select &apos;Yes&apos; (select &apos;No&apos;)
+												if:
 											</p>
 											<ul className="list-disc pl-4 space-y-1 mt-1">
-												<li>The controls only <strong>partially address</strong> the paragraph.</li>
-												<li>Important aspects are <strong>missing</strong>.</li>
+												<li>
+													The controls only <strong>partially address</strong>{" "}
+													the paragraph.
+												</li>
+												<li>
+													Important aspects are <strong>missing</strong>.
+												</li>
 											</ul>
 										</CriteriaDetails>
 										<div className="flex gap-4">
@@ -531,18 +603,34 @@ export default function BenchmarkPage() {
 										</p>
 										<CriteriaDetails className="mb-3 group">
 											<p className="font-semibold text-emerald-700 dark:text-emerald-400">
-												✅ DO select &apos;Yes (There are redundancies)&apos; if:
+												✅ DO select &apos;Yes (There are redundancies)&apos;
+												if:
 											</p>
 											<ul className="list-disc pl-4 space-y-1 mt-1 mb-3">
-												<li>Multiple controls <strong>overlap</strong> (demand the exact same technical implementation).</li>
-												<li>The same requirement is <strong>repeated</strong> in slightly different words.</li>
-												<li>Specific controls are already <strong>fully covered</strong> by another broader control.</li>
+												<li>
+													Multiple controls <strong>overlap</strong> (demand the
+													exact same technical implementation).
+												</li>
+												<li>
+													The same requirement is <strong>repeated</strong> in
+													slightly different words.
+												</li>
+												<li>
+													Specific controls are already{" "}
+													<strong>fully covered</strong> by another broader
+													control.
+												</li>
 											</ul>
 											<p className="font-semibold text-rose-700 dark:text-rose-400 border-t border-blue-200 dark:border-blue-800/50 pt-2 mt-2">
-												❌ Do NOT select &apos;Yes&apos; (select &apos;No&apos;) if:
+												❌ Do NOT select &apos;Yes&apos; (select &apos;No&apos;)
+												if:
 											</p>
 											<ul className="list-disc pl-4 space-y-1 mt-1">
-												<li>Each generated control provides a <strong>distinct, non-overlapping</strong> requirement.</li>
+												<li>
+													Each generated control provides a{" "}
+													<strong>distinct, non-overlapping</strong>{" "}
+													requirement.
+												</li>
 											</ul>
 										</CriteriaDetails>
 										<div className="flex gap-4">
