@@ -242,8 +242,8 @@ export default function BenchmarkPage() {
 										1. Mapping to Technical Guidelines
 									</h3>
 									<p className="text-sm text-zinc-500">
-										Which controls from existing guidelines (e.g., BSI) does
-										this generated control cover?
+										Which controls from existing guidelines does this generated
+										control cover?
 									</p>
 									<CriteriaDetails className="mt-2 group">
 										<p className="font-semibold text-emerald-700 dark:text-emerald-400">
@@ -315,9 +315,7 @@ export default function BenchmarkPage() {
 								<div className="space-y-4 flex-1 overflow-y-auto min-h-0 pr-2 pb-4">
 									<div className="bg-zinc-50 dark:bg-zinc-800/50 p-4 rounded-lg">
 										<p className="font-medium mb-1">
-											Is the generated control truly relevant to the legal text,
-											or is the LLM &apos;hallucinating&apos; requirements?
-											(Select paragraphs where the control is relevant)
+											Select the paragraphs where this control is relevant:
 										</p>
 										<CriteriaDetails className="mb-3 group">
 											<p className="font-semibold text-emerald-700 dark:text-emerald-400">
