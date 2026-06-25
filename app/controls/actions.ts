@@ -145,6 +145,7 @@ export async function getControlsForParagraph(paragraphId: number) {
 export async function generateControlsForParagraph(
 	paragraphId: number,
 	model: string,
+	useCoT: boolean = true,
 ) {
 	try {
 		const focusParagraph = await prisma.paragraph.findUnique({
@@ -274,6 +275,21 @@ export async function generateControlsForParagraph(
 			allParagraphsStr += "\n";
 		}
 
+		const reasoningField = useCoT
+			? `\n      "reasoning": "Step-by-step rationale for why this control is needed, how it fulfills the focus paragraph, how it differs from existing controls, and why it maps to the specified other paragraphs.",`
+			: "";
+
+		const jsonSchema = `{
+  "controls": [
+    {${reasoningField}
+      "title": "Short title of the control (e.g. Password Policy)",
+      "statement": "Detailed, actionable statement defining the control requirement.",
+      "implementationGuidance": "Practical guidance or steps on how to implement this control. If there is no specific guidance to provide, this value MUST be null.",
+      "mappedParagraphIds": [focus-paragraph-id, other-paragraph-id-1, other-paragraph-id-2] // MUST BE INTEGERS, NOT STRINGS
+    }
+  ]
+}`;
+
 		const systemPrompt = `### Instruction ###
 You are a compliance and security expert. Your task is to generate actionable, technical implementation controls for a specific legal paragraph.
 
@@ -286,16 +302,7 @@ Write as many specific, actionable controls as necessary to completely fulfill t
 For each control, determine if it also helps fulfill any OTHER paragraphs from the ALL PARAGRAPHS list. When mapping to paragraphs, YOU MUST USE THE EXACT ID specified inside the [ID: ...] brackets.
 DO NOT generate duplicates or overly similar controls to the EXISTING CONTROLS provided in the context.
 Return a JSON object containing a single key "controls" that holds an array of control objects. Each object must strictly follow this structure:
-{
-  "controls": [
-    {
-      "title": "Short title of the control (e.g. Password Policy)",
-      "statement": "Detailed, actionable statement defining the control requirement.",
-      "implementationGuidance": "Practical guidance or steps on how to implement this control. If there is no specific guidance to provide, this value MUST be null.",
-      "mappedParagraphIds": [focus-paragraph-id, other-paragraph-id-1, other-paragraph-id-2] // MUST BE INTEGERS, NOT STRINGS
-    }
-  ]
-}
+${jsonSchema}
 Output ONLY valid JSON. No markdown formatting, no explanations outside the JSON.`;
 
 		const userPrompt = `### Context ###
@@ -332,6 +339,7 @@ ${allParagraphsStr}
 
 		const resultText = response.content;
 		let parsedJson: {
+			reasoning?: string;
 			title?: string;
 			statement?: string;
 			implementationGuidance?: string;
