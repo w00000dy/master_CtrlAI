@@ -51,7 +51,8 @@ export async function extractPdfText(formData: FormData) {
 
 export async function structureTextWithLlm(rawText: string, model: string) {
 	try {
-		const systemPrompt = `You are a legal text structuring assistant. 
+		const systemPrompt = `### Instruction ###
+You are a legal text structuring assistant. 
 Your task is to take the provided raw text from a legal document and output a perfectly structured JSON object. 
 Extract the overall title, sections, and paragraphs. Paragraphs can have sub-paragraphs, which can themselves have sub-paragraphs, nested to any depth necessary.
 For each section, extract its number or identifier (e.g., "Part 1", "Section A", "Article 5") into the "marker" field if present, otherwise set the marker to null.
