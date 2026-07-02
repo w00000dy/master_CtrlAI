@@ -23,7 +23,7 @@
 		"lucide-animated": "^1.0.4",
 		"next": "^16.2.9",
 		"ollama": "^0.6.3",
-		"openai": "^6.44.0",
+		"openai": "^6.45.0",
 		"pdf-parse": "^2.4.5",
 		"react": "19.2.7",
 		"react-dom": "19.2.7",
