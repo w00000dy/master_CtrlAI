@@ -94,7 +94,7 @@ export async function generateChat({
 			const response = await ollama.chat({
 				model: model,
 				messages: messages,
-				format: format === "json" ? "json" : undefined,
+				format: format,
 				options: { temperature: temperature },
 			});
 
