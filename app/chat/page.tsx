@@ -80,7 +80,7 @@ export default function ChatPage() {
 	};
 
 	return (
-		<div className="flex flex-col flex-1 overflow-hidden">
+		<div className="flex flex-col flex-1 overflow-hidden bg-zinc-50 dark:bg-zinc-950">
 			<main className="flex-1 overflow-y-auto p-4 w-full max-w-3xl mx-auto flex flex-col gap-4">
 				{messages.map((msg) => (
 					<MessageBubble key={msg.id} sender={msg.role} content={msg.content} />

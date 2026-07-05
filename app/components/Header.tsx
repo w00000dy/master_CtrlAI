@@ -1,7 +1,13 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useModel } from "./ModelContext";
+
+const ThemeToggle = dynamic(() => import("./ThemeToggle"), {
+	ssr: false,
+	loading: () => <div className="w-9 h-9" />,
+});
 
 export default function Header() {
 	const { models, selectedModel, setSelectedModel } = useModel();
@@ -74,6 +80,7 @@ export default function Header() {
 						</option>
 					))}
 				</select>
+				<ThemeToggle />
 			</div>
 		</header>
 	);
