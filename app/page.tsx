@@ -1,16 +1,16 @@
 "use client";
 
-import { useRef } from "react";
 import {
 	ActivityIcon,
 	BookTextIcon,
-	TerminalIcon,
 	ChevronRightIcon,
 	FileTextIcon,
 	SettingsIcon,
 	ShieldCheckIcon,
+	TerminalIcon,
 } from "lucide-animated";
 import Link from "next/link";
+import { useRef } from "react";
 
 export default function Home() {
 	type IconHandle = { startAnimation: () => void; stopAnimation: () => void };
