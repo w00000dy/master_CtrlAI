@@ -39,16 +39,16 @@ export default function Header() {
 						Documents
 					</Link>
 					<Link
-						href="/controls"
-						className="text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
-					>
-						Controls
-					</Link>
-					<Link
 						href="/guidelines"
 						className="text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
 					>
 						Guidelines
+					</Link>
+					<Link
+						href="/controls"
+						className="text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
+					>
+						Controls
 					</Link>
 					<Link
 						href="/benchmark"
