@@ -30,7 +30,7 @@ export default function Home() {
 					</h1>
 					<p className="text-lg text-zinc-500 dark:text-zinc-400 max-w-2xl">
 						Follow the steps below to import your documents, extract guidelines,
-						generate controls, and run automated compliance benchmarks.
+						generate controls, and run compliance benchmarks.
 					</p>
 				</header>
 
