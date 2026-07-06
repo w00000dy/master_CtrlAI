@@ -52,7 +52,8 @@ export default function Home() {
 			Icon: ShieldCheckIcon,
 			stepLabel: "Step 3",
 			title: "Controls",
-			description: "Add or review specific controls and map them to paragraphs.",
+			description:
+				"Add or review specific controls and map them to paragraphs.",
 			hoverBorderClass: "hover:border-purple-500 dark:hover:border-purple-500",
 			gradientClass: "from-purple-400 to-purple-600",
 			iconBgClass: "bg-purple-100 dark:bg-purple-900/30",
@@ -96,9 +97,13 @@ export default function Home() {
 							onMouseLeave={() => step.iconRef.current?.stopAnimation?.()}
 							className={`group relative flex flex-col justify-between p-6 rounded-3xl bg-white dark:bg-zinc-900 shadow-sm border border-zinc-200 dark:border-zinc-800 hover:shadow-md transition-all overflow-hidden ${step.hoverBorderClass}`}
 						>
-							<div className={`absolute top-0 left-0 w-full h-1 bg-gradient-to-r opacity-0 group-hover:opacity-100 transition-opacity ${step.gradientClass}`} />
+							<div
+								className={`absolute top-0 left-0 w-full h-1 bg-gradient-to-r opacity-0 group-hover:opacity-100 transition-opacity ${step.gradientClass}`}
+							/>
 							<div className="flex justify-between items-start mb-12">
-								<div className={`p-3 rounded-2xl ${step.iconBgClass} ${step.iconTextClass}`}>
+								<div
+									className={`p-3 rounded-2xl ${step.iconBgClass} ${step.iconTextClass}`}
+								>
 									<step.Icon ref={step.iconRef} size={28} />
 								</div>
 								<span className="text-xs font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
