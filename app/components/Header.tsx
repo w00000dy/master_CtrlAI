@@ -9,6 +9,16 @@ const ThemeToggle = dynamic(() => import("./ThemeToggle"), {
 	loading: () => <div className="w-9 h-9" />,
 });
 
+const NAV_LINKS = [
+	{ href: "/", label: "Menu" },
+	{ href: "/chat", label: "Chat" },
+	{ href: "/documents", label: "Documents" },
+	{ href: "/guidelines", label: "Guidelines" },
+	{ href: "/controls", label: "Controls" },
+	{ href: "/benchmark", label: "Benchmark" },
+	{ href: "/benchmark/results", label: "Results" },
+];
+
 export default function Header() {
 	const { models, selectedModel, setSelectedModel } = useModel();
 
@@ -19,49 +29,15 @@ export default function Header() {
 					Compliance LLM
 				</h1>
 				<nav className="flex gap-4">
-					<Link
-						href="/"
-						className="text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
-					>
-						Menu
-					</Link>
-					<Link
-						href="/chat"
-						className="text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
-					>
-						Chat
-					</Link>
-
-					<Link
-						href="/documents"
-						className="text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
-					>
-						Documents
-					</Link>
-					<Link
-						href="/guidelines"
-						className="text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
-					>
-						Guidelines
-					</Link>
-					<Link
-						href="/controls"
-						className="text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
-					>
-						Controls
-					</Link>
-					<Link
-						href="/benchmark"
-						className="text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
-					>
-						Benchmark
-					</Link>
-					<Link
-						href="/benchmark/results"
-						className="text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
-					>
-						Results
-					</Link>
+					{NAV_LINKS.map(({ href, label }) => (
+						<Link
+							key={href}
+							href={href}
+							className="text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
+						>
+							{label}
+						</Link>
+					))}
 				</nav>
 			</div>
 
