@@ -47,9 +47,8 @@ export default function Header() {
 					value={selectedModel}
 					onChange={(e) => setSelectedModel(e.target.value)}
 					className="rounded-md border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-1.5 text-sm text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm cursor-pointer"
-					disabled={!models.length}
 				>
-					{!models.length && <option value="">Loading models...</option>}
+					{models.length === 0 && <option value="">Loading models...</option>}
 					{models.map((model) => (
 						<option key={model} value={model}>
 							{model}
