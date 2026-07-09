@@ -11,7 +11,7 @@ import {
 } from "lucide-animated";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { Paragraph, Prisma } from "../../../generated/prisma/client";
 import { CompactControlCard } from "../../components/CompactControlCard";
 import type { ControlData } from "../../components/ControlCard";
