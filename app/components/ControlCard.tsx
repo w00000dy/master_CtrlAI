@@ -30,6 +30,7 @@ export function ControlCard({
 	variant?: "default" | "blue";
 }) {
 	const isMapped = control.paragraphs && control.paragraphs.length > 0;
+	const isFewShotExample = control.paragraphs?.some((p) => p.isFewShotExample);
 
 	return (
 		<div
@@ -78,6 +79,11 @@ export function ControlCard({
 								) : (
 									<span className="px-2 py-1 bg-purple-50 text-purple-700 dark:bg-purple-900/20 dark:text-purple-400 text-xs font-semibold rounded-md border border-purple-200 dark:border-purple-800/50">
 										LLM Generated
+									</span>
+								)}
+								{isFewShotExample && (
+									<span className="px-2 py-1 bg-fuchsia-50 text-fuchsia-700 dark:bg-fuchsia-900/20 dark:text-fuchsia-400 text-xs font-semibold rounded-md border border-fuchsia-200 dark:border-fuchsia-800/50">
+										Few-Shot Example
 									</span>
 								)}
 							</>
