@@ -20,6 +20,7 @@ export default function Home() {
 	const controlIconRef = useRef<IconHandle>(null);
 	const benchIconRef = useRef<IconHandle>(null);
 	const chatIconRef = useRef<IconHandle>(null);
+	const settingsIconRef = useRef<IconHandle>(null);
 
 	const STEPS = [
 		{
@@ -39,7 +40,7 @@ export default function Home() {
 			iconRef: guideIconRef,
 			Icon: BookTextIcon,
 			stepLabel: "Step 2",
-			title: "Guidelines",
+			title: "Technical Guidelines",
 			description: "Import technical guidelines and extract their controls.",
 			hoverBorderClass: "hover:border-indigo-500 dark:hover:border-indigo-500",
 			gradientClass: "from-indigo-400 to-indigo-600",
@@ -144,23 +145,24 @@ export default function Home() {
 						</div>
 					</Link>
 
-					<button
-						type="button"
-						disabled
-						className="flex items-center gap-4 p-4 rounded-2xl bg-zinc-100/30 dark:bg-zinc-900/30 opacity-50 cursor-not-allowed border border-dashed border-zinc-200 dark:border-zinc-800"
+					<Link
+						href="/settings"
+						onMouseEnter={() => settingsIconRef.current?.startAnimation?.()}
+						onMouseLeave={() => settingsIconRef.current?.stopAnimation?.()}
+						className="flex items-center gap-4 p-4 rounded-2xl bg-zinc-100/50 dark:bg-zinc-800/30 hover:bg-zinc-200/50 dark:hover:bg-zinc-800/60 transition-colors border border-dashed border-zinc-200 dark:border-zinc-800 group"
 					>
-						<div className="p-2 bg-zinc-200 dark:bg-zinc-800 rounded-xl text-zinc-500">
-							<SettingsIcon size={20} />
+						<div className="p-2 bg-zinc-200 dark:bg-zinc-800 rounded-xl text-zinc-500 dark:text-zinc-400 group-hover:text-blue-500 transition-colors">
+							<SettingsIcon ref={settingsIconRef} size={20} />
 						</div>
 						<div className="flex flex-col text-left">
 							<span className="font-medium text-sm text-zinc-700 dark:text-zinc-300">
 								Settings
 							</span>
 							<span className="text-xs text-zinc-500 dark:text-zinc-500">
-								Coming soon
+								Configure application settings
 							</span>
 						</div>
-					</button>
+					</Link>
 				</div>
 			</div>
 		</div>
