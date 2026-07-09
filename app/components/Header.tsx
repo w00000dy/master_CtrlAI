@@ -17,6 +17,7 @@ const NAV_LINKS = [
 	{ href: "/controls", label: "Controls" },
 	{ href: "/benchmark", label: "Benchmark" },
 	{ href: "/benchmark/results", label: "Results" },
+	{ href: "/settings", label: "Settings" },
 ];
 
 export default function Header() {

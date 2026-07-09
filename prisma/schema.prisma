@@ -45,6 +45,7 @@ model Paragraph {
   controls              Control[]
   benchmarkResult       ParagraphBenchmark?
   relevantForBenchmarks BenchmarkResult[]   @relation("RelevantBenchmarkParagraphs")
+  isFewShotExample      Boolean             @default(false)
 }
 
 model Control {

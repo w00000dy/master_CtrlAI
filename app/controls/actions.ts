@@ -162,6 +162,17 @@ export async function generateControlsForParagraph(
 			select: { title: true, statement: true, implementationGuidance: true },
 		});
 
+		const fewShotParagraphs = await prisma.paragraph.findMany({
+			where: { isFewShotExample: true },
+			include: {
+				section: { include: { document: true } },
+				controls: {
+					where: { guidelineId: { not: null } },
+					include: { guideline: true },
+				},
+			},
+		});
+
 		const allParagraphs = await prisma.paragraph.findMany({
 			include: { section: { include: { document: true } } },
 			orderBy: [
@@ -201,6 +212,47 @@ export async function generateControlsForParagraph(
 						.join("\n")
 				: "No ancestor paragraphs.";
 
+		let fewShotExamplesStr = "";
+		if (fewShotParagraphs.length > 0) {
+			fewShotExamplesStr = fewShotParagraphs
+				.map((p) => {
+					const pAncestors = [];
+					let pCurrentId = p.parentParagraphId;
+					while (pCurrentId) {
+						const parent = allParagraphs.find((ap) => ap.id === pCurrentId);
+						if (parent) {
+							pAncestors.unshift(parent);
+							pCurrentId = parent.parentParagraphId;
+						} else {
+							break;
+						}
+					}
+					const pAncestorsStr =
+						pAncestors.length > 0
+							? pAncestors
+									.map((ap) => `  - ${ap.marker ? `${ap.marker} ` : ""}${ap.text}`)
+									.join("\n")
+							: "  None";
+
+					const pText = `${p.marker ? `${p.marker} ` : ""}${p.text}`;
+					const pDoc = `${p.section.document.title} - ${p.section.title}`;
+					const pControls = p.controls
+						.map(
+							(c) =>
+								`  - Control: ${c.title}\n    Statement: ${c.statement}${
+									c.implementationGuidance
+										? `\n    Implementation Guidance: ${c.implementationGuidance}`
+										: ""
+								}`,
+						)
+						.join("\n");
+					return `Example Paragraph:\nDocument: ${pDoc}\nAncestor Paragraphs:\n${pAncestorsStr}\nText: ${pText}\nExpected Controls:\n${
+						pControls || "  None"
+					}`;
+				})
+				.join("\n\n");
+		}
+
 		// Find descendants
 		const descendants: { p: (typeof allParagraphs)[0]; depth: number }[] = [];
 		const getDescendants = (parentId: number, depth: number = 1) => {
@@ -227,6 +279,7 @@ export async function generateControlsForParagraph(
 		// Group all paragraphs by Document -> Section
 		const grouped: Record<string, Record<string, typeof allParagraphs>> = {};
 		for (const p of allParagraphs) {
+			if (p.isFewShotExample) continue;
 			const docTitle = p.section.document.title;
 			const secTitle = p.section.title;
 			if (!grouped[docTitle]) grouped[docTitle] = {};
@@ -290,12 +343,17 @@ export async function generateControlsForParagraph(
   ]
 }`;
 
+		const examplesInstruction =
+			fewShotParagraphs.length > 0
+				? "\n- EXAMPLES: Examples of paragraphs and the expected style/granularity of Controls mapped to them. Use these as a reference for quality and format."
+				: "";
+
 		const systemPrompt = `### Instruction ###
 You are a compliance and security expert. Your task is to generate actionable, technical implementation controls for a specific legal paragraph.
 
 You will be given:
 - FOCUS PARAGRAPH: The paragraph you must write controls for.
-- EXISTING CONTROLS: Controls already in the database.
+- EXISTING CONTROLS: Controls already in the database.${examplesInstruction}
 - ALL PARAGRAPHS: A list of all paragraphs in the database with their IDs.
 
 Write as many specific, actionable controls as necessary to completely fulfill the requirements of the FOCUS PARAGRAPH. Do not limit yourself to a specific number, but avoid redundancies and irrelevant points.
@@ -319,7 +377,7 @@ ${descendantsStr}
 
 EXISTING CONTROLS:
 ${existingControlsStr}
-
+${fewShotParagraphs.length > 0 ? `\nEXAMPLES:\n${fewShotExamplesStr}\n` : ""}
 ALL PARAGRAPHS IN DATABASE:
 ${allParagraphsStr}
 `;

@@ -48,28 +48,24 @@ export async function getNextBenchmarkTask(
 				},
 			);
 
-			// We need to return a 'paragraph' as context.
-			// Let's just use the first mapped paragraph, or if none, a dummy.
 			const primaryParagraph = enrichedControlParagraphs[0] || null;
 
 			return {
 				type: "CONTROL" as const,
-				paragraph: primaryParagraph, // The UI uses this for context, but it actually maps over control.paragraphs. So it's fine.
+				paragraph: primaryParagraph,
 				control: {
 					...unevaluatedControl,
 					paragraphs: enrichedControlParagraphs,
 				},
 			};
 		} else {
-			// Find the first paragraph that hasn't been evaluated yet
-			// For relevance, maybe only paragraphs that actually have LLM controls mapped?
-			// The original logic did that.
 			const unevaluatedParagraph = await prisma.paragraph.findFirst({
 				where: {
 					controls: {
 						some: { guidelineId: null },
 					},
 					benchmarkResult: null,
+					isFewShotExample: false,
 				},
 				include: {
 					controls: {
@@ -125,6 +121,9 @@ export async function getTechnicalControls(paragraphIds?: number[]) {
 		const controls = await prisma.control.findMany({
 			where: {
 				guidelineId: { not: null },
+				paragraphs: {
+					none: { isFewShotExample: true },
+				},
 				...(paragraphIds && paragraphIds.length > 0
 					? { paragraphs: { some: { id: { in: paragraphIds } } } }
 					: {}),
