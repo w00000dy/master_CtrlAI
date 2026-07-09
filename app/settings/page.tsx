@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { PageLayout } from "@/app/components/PageLayout";
+import { getParagraphsForSelection } from "@/app/controls/actions";
 import type { Prisma } from "../../generated/prisma/client";
-import { getSettingsData, toggleFewShotExample } from "./actions";
+import { toggleFewShotExample } from "./actions";
 
 type DocumentWithParagraphs = Prisma.DocumentGetPayload<{
 	include: {
@@ -24,7 +25,7 @@ export default function SettingsPage() {
 	useEffect(() => {
 		let active = true;
 		const init = async () => {
-			const res = await getSettingsData();
+			const res = await getParagraphsForSelection();
 			if (!active) return;
 			if (res.success && res.documents) {
 				setDocsWithParagraphs(res.documents);
@@ -40,35 +41,25 @@ export default function SettingsPage() {
 	const handleToggle = async (paragraphId: number, currentValue: boolean) => {
 		const newValue = !currentValue;
 
-		// Optimistic update
-		setDocsWithParagraphs((prevDocs) =>
-			prevDocs.map((doc) => ({
-				...doc,
-				sections: doc.sections.map((sec) => ({
-					...sec,
-					paragraphs: sec.paragraphs.map((p) =>
-						p.id === paragraphId ? { ...p, isFewShotExample: newValue } : p,
-					),
-				})),
-			})),
-		);
-
-		const res = await toggleFewShotExample(paragraphId, newValue);
-		if (!res.success) {
-			// Revert on failure
+		const updateParagraphState = (value: boolean) => {
 			setDocsWithParagraphs((prevDocs) =>
 				prevDocs.map((doc) => ({
 					...doc,
 					sections: doc.sections.map((sec) => ({
 						...sec,
 						paragraphs: sec.paragraphs.map((p) =>
-							p.id === paragraphId
-								? { ...p, isFewShotExample: currentValue }
-								: p,
+							p.id === paragraphId ? { ...p, isFewShotExample: value } : p,
 						),
 					})),
 				})),
 			);
+		};
+
+		updateParagraphState(newValue);
+
+		const res = await toggleFewShotExample(paragraphId, newValue);
+		if (!res.success) {
+			updateParagraphState(currentValue);
 			console.error("Failed to toggle setting:", res.error);
 		}
 	};
