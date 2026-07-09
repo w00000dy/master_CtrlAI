@@ -11,7 +11,7 @@ import {
 } from "lucide-animated";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import type { Paragraph, Prisma } from "../../../generated/prisma/client";
 import { CompactControlCard } from "../../components/CompactControlCard";
 import type { ControlData } from "../../components/ControlCard";
@@ -19,10 +19,7 @@ import { useGenerationContext } from "../../components/GenerationContext";
 import { useModel } from "../../components/ModelContext";
 import { ParagraphRenderer } from "../../components/ParagraphRenderer";
 import { SectionHeader } from "../../components/SectionHeader";
-import {
-	generateControlsForParagraph,
-	getControlsForParagraph,
-} from "../../controls/actions";
+import { getControlsForParagraph } from "../../controls/actions";
 import {
 	deleteDocument,
 	getDocumentById,
@@ -44,7 +41,7 @@ export default function DocumentViewPage() {
 	const router = useRouter();
 	const id = params.id as string;
 	const { selectedModel } = useModel();
-	const { enqueueTasks } = useGenerationContext();
+	const { enqueueTasks, completedTasks } = useGenerationContext();
 
 	const [document, setDocument] = useState<DocumentData | null>(null);
 	const [savedAt, setSavedAt] = useState<string | null>(null);
@@ -62,7 +59,6 @@ export default function DocumentViewPage() {
 	);
 	const [controls, setControls] = useState<ControlData[]>([]);
 	const [isLoadingControls, setIsLoadingControls] = useState(false);
-	const [isGenerating, setIsGenerating] = useState(false);
 
 	useEffect(() => {
 		if (!id) return;
@@ -119,26 +115,31 @@ export default function DocumentViewPage() {
 		setIsLoadingControls(false);
 	};
 
-	const handleGenerateControls = async () => {
+	const handleGenerateControls = () => {
 		if (!selectedParagraph || !selectedModel) {
 			alert("Please ensure an LLM model is selected in the header.");
 			return;
 		}
-		setIsGenerating(true);
-		const res = await generateControlsForParagraph(
-			selectedParagraph.id,
-			selectedModel,
-		);
-		if (res.success) {
-			const reloadRes = await getControlsForParagraph(selectedParagraph.id);
-			if (reloadRes.success && reloadRes.controls) {
-				setControls(reloadRes.controls);
-			}
-		} else {
-			alert(`Error generating controls: ${res.error}`);
-		}
-		setIsGenerating(false);
+		enqueueTasks([
+			{
+				paragraphId: selectedParagraph.id,
+				model: selectedModel,
+			},
+		]);
 	};
+
+	// Refresh sidebar controls when background tasks complete
+	const prevCompletedTasksRef = useRef(completedTasks);
+	useEffect(() => {
+		if (completedTasks > prevCompletedTasksRef.current && selectedParagraph) {
+			getControlsForParagraph(selectedParagraph.id).then((res) => {
+				if (res.success && res.controls) {
+					setControls(res.controls);
+				}
+			});
+		}
+		prevCompletedTasksRef.current = completedTasks;
+	}, [completedTasks, selectedParagraph]);
 
 	const handleGenerateAll = () => {
 		if (!document || !selectedModel) {
@@ -419,11 +420,11 @@ export default function DocumentViewPage() {
 									<button
 										type="button"
 										onClick={handleGenerateControls}
-										disabled={isGenerating || !selectedModel}
+										disabled={!selectedModel}
 										className="flex items-center gap-2 text-xs font-semibold px-3 py-1.5 bg-zinc-900 hover:bg-zinc-800 dark:bg-zinc-100 dark:hover:bg-white text-white dark:text-zinc-900 rounded-lg transition-all disabled:opacity-50 shadow-sm"
 									>
 										<BotIcon size={14} />
-										{isGenerating ? "Generating..." : "Generate AI Controls"}
+										Generate AI Controls
 									</button>
 								</div>
 
