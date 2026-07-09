@@ -230,7 +230,9 @@ export async function generateControlsForParagraph(
 					const pAncestorsStr =
 						pAncestors.length > 0
 							? pAncestors
-									.map((ap) => `  - ${ap.marker ? `${ap.marker} ` : ""}${ap.text}`)
+									.map(
+										(ap) => `  - ${ap.marker ? `${ap.marker} ` : ""}${ap.text}`,
+									)
 									.join("\n")
 							: "  None";
 

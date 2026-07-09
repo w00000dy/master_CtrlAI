@@ -32,9 +32,9 @@
 		"yaml": "^2.9.0"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "^2.5.1",
+		"@biomejs/biome": "^2.5.3",
 		"@tailwindcss/postcss": "^4",
-		"@types/node": "^26.0.0",
+		"@types/node": "^26.1.1",
 		"@types/react": "^19",
 		"@types/react-dom": "^19",
 		"dotenv": "^17.4.2",
@@ -51,6 +51,6 @@
 	},
 	"overrides": {
 		"@hono/node-server": "^1.19.14",
-		"postcss": "^8.5.15"
+		"postcss": "^8.5.16"
 	}
 }
