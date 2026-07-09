@@ -17,6 +17,7 @@ import { CompactControlCard } from "../../components/CompactControlCard";
 import type { ControlData } from "../../components/ControlCard";
 import { useModel } from "../../components/ModelContext";
 import { ParagraphRenderer } from "../../components/ParagraphRenderer";
+import { SectionHeader } from "../../components/SectionHeader";
 import {
 	generateControlsForParagraph,
 	getControlsForParagraph,
@@ -274,15 +275,11 @@ export default function DocumentViewPage() {
 								<div className="absolute -left-[54px] top-7 w-3.5 h-3.5 rounded-full bg-white dark:bg-zinc-950 border-2 border-blue-400 dark:border-blue-500 shadow-sm hidden md:block group-hover/section:scale-125 group-hover/section:bg-blue-50 dark:group-hover/section:bg-blue-900/30 transition-all duration-300"></div>
 
 								<div className="bg-zinc-50/50 dark:bg-zinc-900/30 px-8 py-5 border-b border-zinc-100 dark:border-zinc-800/50">
-									<h3 className="text-xl font-bold text-zinc-900 dark:text-zinc-100 tracking-tight flex items-start gap-3">
-										<span className="w-1.5 h-6 bg-blue-500/80 rounded-full inline-block shrink-0 mt-0.5"></span>
-										{section.marker && (
-											<span className="whitespace-nowrap shrink-0 text-blue-600 dark:text-blue-400 font-medium">
-												{section.marker}
-											</span>
-										)}
-										<span>{section.title}</span>
-									</h3>
+									<SectionHeader
+										marker={section.marker}
+										title={section.title}
+										size="large"
+									/>
 								</div>
 								<div className="p-8 space-y-6">
 									{section.paragraphs && section.paragraphs.length > 0 ? (

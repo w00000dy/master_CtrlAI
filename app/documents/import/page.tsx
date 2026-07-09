@@ -6,6 +6,7 @@ import { PageLayout } from "@/app/components/PageLayout";
 import { FileUploadArea } from "../../components/FileUploadArea";
 import { useModel } from "../../components/ModelContext";
 import { ParagraphRenderer } from "../../components/ParagraphRenderer";
+import { SectionHeader } from "../../components/SectionHeader";
 import { saveDocument } from "../actions";
 import {
 	extractPdfText,
@@ -225,14 +226,11 @@ export default function ImportPage() {
 								className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-hidden shadow-sm"
 							>
 								<div className="bg-zinc-50 dark:bg-zinc-900/50 px-6 py-4 border-b border-zinc-200 dark:border-zinc-800">
-									<h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 flex items-start gap-2">
-										{section.marker && (
-											<span className="whitespace-nowrap shrink-0 text-blue-600 dark:text-blue-400 font-medium">
-												{section.marker}
-											</span>
-										)}
-										<span>{section.title}</span>
-									</h3>
+									<SectionHeader
+										marker={section.marker}
+										title={section.title}
+										size="normal"
+									/>
 								</div>
 								<div className="p-6 space-y-6">
 									{section.paragraphs && section.paragraphs.length > 0 && (
