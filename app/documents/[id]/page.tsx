@@ -15,6 +15,7 @@ import { useEffect, useState } from "react";
 import type { Paragraph, Prisma } from "../../../generated/prisma/client";
 import { CompactControlCard } from "../../components/CompactControlCard";
 import type { ControlData } from "../../components/ControlCard";
+import { useGenerationContext } from "../../components/GenerationContext";
 import { useModel } from "../../components/ModelContext";
 import { ParagraphRenderer } from "../../components/ParagraphRenderer";
 import { SectionHeader } from "../../components/SectionHeader";
@@ -43,6 +44,7 @@ export default function DocumentViewPage() {
 	const router = useRouter();
 	const id = params.id as string;
 	const { selectedModel } = useModel();
+	const { enqueueTasks } = useGenerationContext();
 
 	const [document, setDocument] = useState<DocumentData | null>(null);
 	const [savedAt, setSavedAt] = useState<string | null>(null);
@@ -138,6 +140,25 @@ export default function DocumentViewPage() {
 		setIsGenerating(false);
 	};
 
+	const handleGenerateAll = () => {
+		if (!document || !selectedModel) {
+			alert("Please ensure an LLM model is selected in the header.");
+			return;
+		}
+		const allParagraphs = document.sections?.flatMap((s) => s.paragraphs) || [];
+		if (allParagraphs.length === 0) {
+			alert("No paragraphs found in this document.");
+			return;
+		}
+
+		enqueueTasks(
+			allParagraphs.map((p) => ({
+				paragraphId: p.id,
+				model: selectedModel,
+			})),
+		);
+	};
+
 	if (isLoading) {
 		return (
 			<div className="flex-1 min-h-0 bg-zinc-50 dark:bg-zinc-950 p-8 flex items-center justify-center">
@@ -186,6 +207,15 @@ export default function DocumentViewPage() {
 						</Link>
 
 						<div className="flex items-center gap-3">
+							<button
+								type="button"
+								onClick={handleGenerateAll}
+								disabled={isDeleting || !document}
+								className="text-sm font-medium px-4 py-2 rounded-xl bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-all shadow-sm hover:shadow-md flex items-center gap-1.5 disabled:opacity-50"
+							>
+								<BotIcon size={16} />
+								Generate All Controls
+							</button>
 							<button
 								type="button"
 								onClick={handleDelete}

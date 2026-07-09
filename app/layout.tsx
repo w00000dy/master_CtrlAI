@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { GenerationProvider } from "./components/GenerationContext";
 import Header from "./components/Header";
 import { ModelProvider } from "./components/ModelContext";
 import { ThemeProvider } from "./components/ThemeProvider";
@@ -34,8 +35,10 @@ export default function RootLayout({
 			<body className="h-full flex flex-col bg-zinc-50 dark:bg-zinc-950 font-sans">
 				<ThemeProvider>
 					<ModelProvider>
-						<Header />
-						{children}
+						<GenerationProvider>
+							<Header />
+							{children}
+						</GenerationProvider>
 					</ModelProvider>
 				</ThemeProvider>
 			</body>
