@@ -142,199 +142,226 @@ export async function getControlsForParagraph(paragraphId: number) {
 	}
 }
 
+// Global map to hold promises for ongoing generations to prevent duplicates on reload
+type GenerationResult = {
+	success: boolean;
+	controls?: unknown[];
+	error?: string;
+};
+const generationPromises =
+	(
+		globalThis as {
+			generationPromises?: Map<number, Promise<GenerationResult>>;
+		}
+	).generationPromises || new Map<number, Promise<GenerationResult>>();
+(
+	globalThis as {
+		generationPromises?: Map<number, Promise<GenerationResult>>;
+	}
+).generationPromises = generationPromises;
+
 export async function generateControlsForParagraph(
 	paragraphId: number,
 	model: string,
 	useCoT: boolean = true,
 ) {
-	try {
-		const focusParagraph = await prisma.paragraph.findUnique({
-			where: { id: paragraphId },
-			include: { section: { include: { document: true } } },
-		});
+	if (generationPromises.has(paragraphId)) {
+		console.log(
+			`[RAM-Lock] Re-attaching to ongoing generation for paragraph ${paragraphId}`,
+		);
+		return await generationPromises.get(paragraphId);
+	}
 
-		if (!focusParagraph) {
-			return { success: false, error: "Paragraph not found." };
-		}
+	const promise = (async () => {
+		try {
+			const focusParagraph = await prisma.paragraph.findUnique({
+				where: { id: paragraphId },
+				include: { section: { include: { document: true } } },
+			});
 
-		const existingControls = await prisma.control.findMany({
-			where: { guidelineId: null },
-			select: { title: true, statement: true, implementationGuidance: true },
-		});
-
-		const fewShotParagraphs = await prisma.paragraph.findMany({
-			where: { isFewShotExample: true },
-			include: {
-				section: { include: { document: true } },
-				controls: {
-					where: { guidelineId: { not: null } },
-					include: { guideline: true },
-				},
-			},
-		});
-
-		const allParagraphs = await prisma.paragraph.findMany({
-			include: { section: { include: { document: true } } },
-			orderBy: [
-				{ section: { document: { title: "asc" } } },
-				{ section: { marker: "asc" } },
-				{ marker: "asc" },
-			],
-		});
-
-		// Formatting context for LLM
-		const existingControlsStr =
-			existingControls.length > 0
-				? existingControls
-						.map(
-							(c) =>
-								`- ${c.title}: ${c.statement}${c.implementationGuidance ? ` (Implementation Guidance: ${c.implementationGuidance})` : ""}`,
-						)
-						.join("\n")
-				: "No existing controls.";
-
-		// Find ancestors
-		const ancestors = [];
-		let currentId = focusParagraph.parentParagraphId;
-		while (currentId) {
-			const parent = allParagraphs.find((p) => p.id === currentId);
-			if (parent) {
-				ancestors.unshift(parent);
-				currentId = parent.parentParagraphId;
-			} else {
-				break;
+			if (!focusParagraph) {
+				return { success: false, error: "Paragraph not found." };
 			}
-		}
-		const ancestorsStr =
-			ancestors.length > 0
-				? ancestors
-						.map((p) => `- ${p.marker ? `${p.marker} ` : ""}${p.text}`)
-						.join("\n")
-				: "No ancestor paragraphs.";
 
-		let fewShotExamplesStr = "";
-		if (fewShotParagraphs.length > 0) {
-			fewShotExamplesStr = fewShotParagraphs
-				.map((p) => {
-					const pAncestors = [];
-					let pCurrentId = p.parentParagraphId;
-					while (pCurrentId) {
-						const parent = allParagraphs.find((ap) => ap.id === pCurrentId);
-						if (parent) {
-							pAncestors.unshift(parent);
-							pCurrentId = parent.parentParagraphId;
-						} else {
-							break;
+			const existingControls = await prisma.control.findMany({
+				where: { guidelineId: null },
+				select: { title: true, statement: true, implementationGuidance: true },
+			});
+
+			const fewShotParagraphs = await prisma.paragraph.findMany({
+				where: { isFewShotExample: true },
+				include: {
+					section: { include: { document: true } },
+					controls: {
+						where: { guidelineId: { not: null } },
+						include: { guideline: true },
+					},
+				},
+			});
+
+			const allParagraphs = await prisma.paragraph.findMany({
+				include: { section: { include: { document: true } } },
+				orderBy: [
+					{ section: { document: { title: "asc" } } },
+					{ section: { marker: "asc" } },
+					{ marker: "asc" },
+				],
+			});
+
+			// Formatting context for LLM
+			const existingControlsStr =
+				existingControls.length > 0
+					? existingControls
+							.map(
+								(c) =>
+									`- ${c.title}: ${c.statement}${c.implementationGuidance ? ` (Implementation Guidance: ${c.implementationGuidance})` : ""}`,
+							)
+							.join("\n")
+					: "No existing controls.";
+
+			// Find ancestors
+			const ancestors = [];
+			let currentId = focusParagraph.parentParagraphId;
+			while (currentId) {
+				const parent = allParagraphs.find((p) => p.id === currentId);
+				if (parent) {
+					ancestors.unshift(parent);
+					currentId = parent.parentParagraphId;
+				} else {
+					break;
+				}
+			}
+			const ancestorsStr =
+				ancestors.length > 0
+					? ancestors
+							.map((p) => `- ${p.marker ? `${p.marker} ` : ""}${p.text}`)
+							.join("\n")
+					: "No ancestor paragraphs.";
+
+			let fewShotExamplesStr = "";
+			if (fewShotParagraphs.length > 0) {
+				fewShotExamplesStr = fewShotParagraphs
+					.map((p) => {
+						const pAncestors = [];
+						let pCurrentId = p.parentParagraphId;
+						while (pCurrentId) {
+							const parent = allParagraphs.find((ap) => ap.id === pCurrentId);
+							if (parent) {
+								pAncestors.unshift(parent);
+								pCurrentId = parent.parentParagraphId;
+							} else {
+								break;
+							}
+						}
+						const pAncestorsStr =
+							pAncestors.length > 0
+								? pAncestors
+										.map(
+											(ap) =>
+												`  - ${ap.marker ? `${ap.marker} ` : ""}${ap.text}`,
+										)
+										.join("\n")
+								: "  None";
+
+						const pText = `${p.marker ? `${p.marker} ` : ""}${p.text}`;
+						const pDoc = `${p.section.document.title} - ${p.section.title}`;
+						const pControls = p.controls
+							.map(
+								(c) =>
+									`  - Control: ${c.title}\n    Statement: ${c.statement}${
+										c.implementationGuidance
+											? `\n    Implementation Guidance: ${c.implementationGuidance}`
+											: ""
+									}`,
+							)
+							.join("\n");
+						return `Example Paragraph:\nDocument: ${pDoc}\nAncestor Paragraphs:\n${pAncestorsStr}\nText: ${pText}\nExpected Controls:\n${
+							pControls || "  None"
+						}`;
+					})
+					.join("\n\n");
+			}
+
+			// Find descendants
+			const descendants: { p: (typeof allParagraphs)[0]; depth: number }[] = [];
+			const getDescendants = (parentId: number, depth: number = 1) => {
+				const children = allParagraphs.filter(
+					(p) => p.parentParagraphId === parentId,
+				);
+				for (const child of children) {
+					descendants.push({ p: child, depth });
+					getDescendants(child.id, depth + 1);
+				}
+			};
+			getDescendants(focusParagraph.id);
+
+			const descendantsStr =
+				descendants.length > 0
+					? descendants
+							.map(
+								({ p, depth }) =>
+									`${"  ".repeat(depth)}- ${p.marker ? `${p.marker} ` : ""}${p.text}`,
+							)
+							.join("\n")
+					: "No subordinate paragraphs.";
+
+			// Group all paragraphs by Document -> Section
+			const grouped: Record<string, Record<string, typeof allParagraphs>> = {};
+			for (const p of allParagraphs) {
+				if (p.isFewShotExample) continue;
+				const docTitle = p.section.document.title;
+				const secTitle = p.section.title;
+				if (!grouped[docTitle]) grouped[docTitle] = {};
+				if (!grouped[docTitle][secTitle]) grouped[docTitle][secTitle] = [];
+				grouped[docTitle][secTitle].push(p);
+			}
+
+			let allParagraphsStr = "";
+
+			const docTitles = Object.keys(grouped);
+			for (const docTitle of docTitles) {
+				allParagraphsStr += `Document: ${docTitle}\n`;
+				const secTitles = Object.keys(grouped[docTitle]);
+				for (const secTitle of secTitles) {
+					allParagraphsStr += `  Section: ${secTitle}\n`;
+
+					const secParas = grouped[docTitle][secTitle];
+					const roots = secParas.filter(
+						(p) =>
+							!p.parentParagraphId ||
+							!secParas.some((sp) => sp.id === p.parentParagraphId),
+					);
+
+					const childrenMap = new Map<number, typeof allParagraphs>();
+					for (const p of secParas) {
+						if (p.parentParagraphId) {
+							if (!childrenMap.has(p.parentParagraphId))
+								childrenMap.set(p.parentParagraphId, []);
+							childrenMap.get(p.parentParagraphId)?.push(p);
 						}
 					}
-					const pAncestorsStr =
-						pAncestors.length > 0
-							? pAncestors
-									.map(
-										(ap) => `  - ${ap.marker ? `${ap.marker} ` : ""}${ap.text}`,
-									)
-									.join("\n")
-							: "  None";
 
-					const pText = `${p.marker ? `${p.marker} ` : ""}${p.text}`;
-					const pDoc = `${p.section.document.title} - ${p.section.title}`;
-					const pControls = p.controls
-						.map(
-							(c) =>
-								`  - Control: ${c.title}\n    Statement: ${c.statement}${
-									c.implementationGuidance
-										? `\n    Implementation Guidance: ${c.implementationGuidance}`
-										: ""
-								}`,
-						)
-						.join("\n");
-					return `Example Paragraph:\nDocument: ${pDoc}\nAncestor Paragraphs:\n${pAncestorsStr}\nText: ${pText}\nExpected Controls:\n${
-						pControls || "  None"
-					}`;
-				})
-				.join("\n\n");
-		}
+					const printPara = (p: (typeof allParagraphs)[0], depth: number) => {
+						const indent = `    ${"  ".repeat(depth)}`;
+						allParagraphsStr += `${indent}- [ID: ${p.id}] ${p.marker ? `${p.marker} ` : ""}${p.text}\n`;
+						const children = childrenMap.get(p.id) || [];
+						for (const child of children) {
+							printPara(child, depth + 1);
+						}
+					};
 
-		// Find descendants
-		const descendants: { p: (typeof allParagraphs)[0]; depth: number }[] = [];
-		const getDescendants = (parentId: number, depth: number = 1) => {
-			const children = allParagraphs.filter(
-				(p) => p.parentParagraphId === parentId,
-			);
-			for (const child of children) {
-				descendants.push({ p: child, depth });
-				getDescendants(child.id, depth + 1);
-			}
-		};
-		getDescendants(focusParagraph.id);
-
-		const descendantsStr =
-			descendants.length > 0
-				? descendants
-						.map(
-							({ p, depth }) =>
-								`${"  ".repeat(depth)}- ${p.marker ? `${p.marker} ` : ""}${p.text}`,
-						)
-						.join("\n")
-				: "No subordinate paragraphs.";
-
-		// Group all paragraphs by Document -> Section
-		const grouped: Record<string, Record<string, typeof allParagraphs>> = {};
-		for (const p of allParagraphs) {
-			if (p.isFewShotExample) continue;
-			const docTitle = p.section.document.title;
-			const secTitle = p.section.title;
-			if (!grouped[docTitle]) grouped[docTitle] = {};
-			if (!grouped[docTitle][secTitle]) grouped[docTitle][secTitle] = [];
-			grouped[docTitle][secTitle].push(p);
-		}
-
-		let allParagraphsStr = "";
-
-		const docTitles = Object.keys(grouped);
-		for (const docTitle of docTitles) {
-			allParagraphsStr += `Document: ${docTitle}\n`;
-			const secTitles = Object.keys(grouped[docTitle]);
-			for (const secTitle of secTitles) {
-				allParagraphsStr += `  Section: ${secTitle}\n`;
-
-				const secParas = grouped[docTitle][secTitle];
-				const roots = secParas.filter(
-					(p) =>
-						!p.parentParagraphId ||
-						!secParas.some((sp) => sp.id === p.parentParagraphId),
-				);
-
-				const childrenMap = new Map<number, typeof allParagraphs>();
-				for (const p of secParas) {
-					if (p.parentParagraphId) {
-						if (!childrenMap.has(p.parentParagraphId))
-							childrenMap.set(p.parentParagraphId, []);
-						childrenMap.get(p.parentParagraphId)?.push(p);
+					for (const root of roots) {
+						printPara(root, 0);
 					}
 				}
-
-				const printPara = (p: (typeof allParagraphs)[0], depth: number) => {
-					const indent = `    ${"  ".repeat(depth)}`;
-					allParagraphsStr += `${indent}- [ID: ${p.id}] ${p.marker ? `${p.marker} ` : ""}${p.text}\n`;
-					const children = childrenMap.get(p.id) || [];
-					for (const child of children) {
-						printPara(child, depth + 1);
-					}
-				};
-
-				for (const root of roots) {
-					printPara(root, 0);
-				}
+				allParagraphsStr += "\n";
 			}
-			allParagraphsStr += "\n";
-		}
 
-		const reasoningField = useCoT
-			? `\n      "reasoning": "Step-by-step rationale for why this control is needed, how it fulfills the focus paragraph, how it differs from existing controls, and why it maps to the specified other paragraphs.",`
-			: "";
+			const reasoningField = useCoT
+				? `\n      "reasoning": "Step-by-step rationale for why this control is needed, how it fulfills the focus paragraph, how it differs from existing controls, and why it maps to the specified other paragraphs.",`
+				: "";
 
-		const jsonSchema = `{
+			const jsonSchema = `{
   "controls": [
     {${reasoningField}
       "title": "Short title of the control (e.g. Password Policy)",
@@ -345,12 +372,12 @@ export async function generateControlsForParagraph(
   ]
 }`;
 
-		const examplesInstruction =
-			fewShotParagraphs.length > 0
-				? "\n- EXAMPLES: Examples of paragraphs and the expected style/granularity of Controls mapped to them. Use these as a reference for quality and format."
-				: "";
+			const examplesInstruction =
+				fewShotParagraphs.length > 0
+					? "\n- EXAMPLES: Examples of paragraphs and the expected style/granularity of Controls mapped to them. Use these as a reference for quality and format."
+					: "";
 
-		const systemPrompt = `### Instruction ###
+			const systemPrompt = `### Instruction ###
 You are a compliance and security expert. Your task is to generate actionable, technical implementation controls for a specific legal paragraph.
 
 You will be given:
@@ -365,7 +392,7 @@ Return a JSON object containing a single key "controls" that holds an array of c
 ${jsonSchema}
 Output ONLY valid JSON. No markdown formatting, no explanations outside the JSON.`;
 
-		const userPrompt = `### Context ###
+			const userPrompt = `### Context ###
 FOCUS PARAGRAPH ID: ${focusParagraph.id}
 DOCUMENT: ${focusParagraph.section.document.title}
 SECTION: ${focusParagraph.section.title}
@@ -384,103 +411,109 @@ ALL PARAGRAPHS IN DATABASE:
 ${allParagraphsStr}
 `;
 
-		const response = await generateChat({
-			model: model,
-			messages: [
-				{ role: "system", content: systemPrompt },
-				{ role: "user", content: userPrompt },
-			],
-			format: "json",
-		});
+			const response = await generateChat({
+				model: model,
+				messages: [
+					{ role: "system", content: systemPrompt },
+					{ role: "user", content: userPrompt },
+				],
+				format: "json",
+			});
 
-		if (!response.success) {
-			return { success: false, error: response.error };
-		}
-
-		const resultText = response.content;
-		let parsedJson: {
-			reasoning?: string;
-			title?: string;
-			statement?: string;
-			implementationGuidance?: string;
-			mappedParagraphIds?: number[];
-		}[];
-
-		try {
-			const rawJson = JSON.parse(resultText);
-			if (rawJson && Array.isArray(rawJson.controls)) {
-				parsedJson = rawJson.controls;
-			} else if (Array.isArray(rawJson)) {
-				// Fallback in case it directly returned an array
-				parsedJson = rawJson;
-			} else {
-				throw new Error(
-					"Invalid format: Expected an object with a 'controls' array.",
-				);
-			}
-		} catch (error) {
-			console.error("Failed to parse JSON from LLM:", resultText, error);
-			return { success: false, error: "LLM returned invalid format." };
-		}
-
-		const createdControls = [];
-		for (const ctrl of parsedJson) {
-			const mappedArray = Array.isArray(ctrl.mappedParagraphIds)
-				? ctrl.mappedParagraphIds
-				: [];
-			const pIds = new Set<number>(mappedArray);
-
-			if (!pIds.has(focusParagraph.id)) {
-				console.warn(
-					`[LLM Mapping Warning] LLM forgot to include the focus paragraph ID for control "${ctrl.title}". Adding it automatically.`,
-				);
-				pIds.add(focusParagraph.id);
+			if (!response.success) {
+				return { success: false, error: response.error };
 			}
 
-			const invalidIds: number[] = [];
-			const validIds = Array.from(pIds).filter((id) => {
-				const isValid = allParagraphs.some((p) => p.id === id);
-				if (!isValid) {
-					invalidIds.push(id);
+			const resultText = response.content;
+			let parsedJson: {
+				reasoning?: string;
+				title?: string;
+				statement?: string;
+				implementationGuidance?: string;
+				mappedParagraphIds?: number[];
+			}[];
+
+			try {
+				const rawJson = JSON.parse(resultText);
+				if (rawJson && Array.isArray(rawJson.controls)) {
+					parsedJson = rawJson.controls;
+				} else if (Array.isArray(rawJson)) {
+					// Fallback in case it directly returned an array
+					parsedJson = rawJson;
+				} else {
+					throw new Error(
+						"Invalid format: Expected an object with a 'controls' array.",
+					);
 				}
-				return isValid;
-			});
-
-			if (invalidIds.length > 0) {
-				console.warn(
-					`[LLM Mapping Warning] LLM returned invalid paragraph IDs for control "${ctrl.title}":`,
-					invalidIds,
-				);
+			} catch (error) {
+				console.error("Failed to parse JSON from LLM:", resultText, error);
+				return { success: false, error: "LLM returned invalid format." };
 			}
 
-			if (validIds.length === 0) continue;
+			const createdControls = [];
+			for (const ctrl of parsedJson) {
+				const mappedArray = Array.isArray(ctrl.mappedParagraphIds)
+					? ctrl.mappedParagraphIds
+					: [];
+				const pIds = new Set<number>(mappedArray);
 
-			const dbControl = await prisma.control.create({
-				data: {
-					title: ctrl.title || "Untitled Control",
-					statement: ctrl.statement || "",
-					implementationGuidance: ctrl.implementationGuidance || null,
-					paragraphs: {
-						connect: validIds.map((id) => ({ id })),
+				if (!pIds.has(focusParagraph.id)) {
+					console.warn(
+						`[LLM Mapping Warning] LLM forgot to include the focus paragraph ID for control "${ctrl.title}". Adding it automatically.`,
+					);
+					pIds.add(focusParagraph.id);
+				}
+
+				const invalidIds: number[] = [];
+				const validIds = Array.from(pIds).filter((id) => {
+					const isValid = allParagraphs.some((p) => p.id === id);
+					if (!isValid) {
+						invalidIds.push(id);
+					}
+					return isValid;
+				});
+
+				if (invalidIds.length > 0) {
+					console.warn(
+						`[LLM Mapping Warning] LLM returned invalid paragraph IDs for control "${ctrl.title}":`,
+						invalidIds,
+					);
+				}
+
+				if (validIds.length === 0) continue;
+
+				const dbControl = await prisma.control.create({
+					data: {
+						title: ctrl.title || "Untitled Control",
+						statement: ctrl.statement || "",
+						implementationGuidance: ctrl.implementationGuidance || null,
+						paragraphs: {
+							connect: validIds.map((id) => ({ id })),
+						},
 					},
-				},
-				include: {
-					paragraphs: {
-						include: { section: { include: { document: true } } },
+					include: {
+						paragraphs: {
+							include: { section: { include: { document: true } } },
+						},
 					},
-				},
-			});
-			createdControls.push(dbControl);
+				});
+				createdControls.push(dbControl);
+			}
+
+			return { success: true, controls: createdControls };
+		} catch (error) {
+			console.error("Failed to generate controls:", error);
+			return {
+				success: false,
+				error: "An unexpected error occurred during LLM processing.",
+			};
+		} finally {
+			generationPromises.delete(paragraphId);
 		}
+	})();
 
-		return { success: true, controls: createdControls };
-	} catch (error) {
-		console.error("Failed to generate controls:", error);
-		return {
-			success: false,
-			error: "An unexpected error occurred during LLM processing.",
-		};
-	}
+	generationPromises.set(paragraphId, promise);
+	return await promise;
 }
 
 export async function updateControl(

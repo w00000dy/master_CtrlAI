@@ -5,6 +5,7 @@ import {
 	createContext,
 	useCallback,
 	useContext,
+	useEffect,
 	useRef,
 	useState,
 } from "react";
@@ -41,10 +42,12 @@ export function GenerationProvider({
 	const [queue, setQueue] = useState<GenerationTask[]>([]);
 	const [isProcessing, setIsProcessing] = useState(false);
 	const [totalTasks, setTotalTasks] = useState(0);
-	const [completedTasks, setCompletedTasks] = useState(0);
 
 	const queueRef = useRef<GenerationTask[]>([]);
 	const isProcessingRef = useRef(false);
+
+	const completedTasks =
+		totalTasks > 0 ? Math.max(0, totalTasks - queue.length) : 0;
 
 	const processQueue = useCallback(async () => {
 		if (isProcessingRef.current || queueRef.current.length === 0) return;
@@ -56,22 +59,29 @@ export function GenerationProvider({
 			const currentTask = queueRef.current[0];
 
 			try {
-				await generateControlsForParagraph(
+				const res = await generateControlsForParagraph(
 					currentTask.paragraphId,
 					currentTask.model,
 				);
+
+				if (!res?.success) {
+					console.warn("Task returned unsuccessful result", res);
+				}
 			} catch (error) {
 				console.error(
-					"Error generating controls for paragraph",
-					currentTask.paragraphId,
+					"Network or fatal error during generation (e.g. page reload). Stopping queue processing.",
 					error,
 				);
+				break;
 			}
 
 			if (queueRef.current[0] === currentTask) {
 				queueRef.current = queueRef.current.slice(1);
 				setQueue(queueRef.current);
-				setCompletedTasks((c) => c + 1);
+				localStorage.setItem(
+					"generationQueue",
+					JSON.stringify(queueRef.current),
+				);
 			}
 		}
 
@@ -82,7 +92,8 @@ export function GenerationProvider({
 			setTimeout(() => {
 				if (queueRef.current.length === 0) {
 					setTotalTasks(0);
-					setCompletedTasks(0);
+					localStorage.removeItem("generationQueue");
+					localStorage.removeItem("generationTotalTasks");
 				}
 			}, 2000);
 		}
@@ -94,13 +105,18 @@ export function GenerationProvider({
 
 			queueRef.current = [...queueRef.current, ...tasks];
 			setQueue(queueRef.current);
+			localStorage.setItem("generationQueue", JSON.stringify(queueRef.current));
 
 			if (wasEmpty && !isProcessingRef.current) {
 				setTotalTasks(tasks.length);
-				setCompletedTasks(0);
+				localStorage.setItem("generationTotalTasks", tasks.length.toString());
 				processQueue();
 			} else {
-				setTotalTasks((t) => t + tasks.length);
+				setTotalTasks((t) => {
+					const nextTotal = t + tasks.length;
+					localStorage.setItem("generationTotalTasks", nextTotal.toString());
+					return nextTotal;
+				});
 			}
 		},
 		[processQueue],
@@ -110,8 +126,39 @@ export function GenerationProvider({
 		queueRef.current = [];
 		setQueue([]);
 		setTotalTasks(0);
-		setCompletedTasks(0);
+		localStorage.removeItem("generationQueue");
+		localStorage.removeItem("generationTotalTasks");
 	}, []);
+
+	useEffect(() => {
+		try {
+			const savedQueue = localStorage.getItem("generationQueue");
+			if (savedQueue) {
+				const parsedQueue = JSON.parse(savedQueue);
+				if (Array.isArray(parsedQueue) && parsedQueue.length > 0) {
+					queueRef.current = parsedQueue;
+
+					const init = () => {
+						setQueue(parsedQueue);
+
+						const savedTotal = localStorage.getItem("generationTotalTasks");
+						if (savedTotal) setTotalTasks(parseInt(savedTotal, 10));
+						else setTotalTasks(parsedQueue.length);
+					};
+					init();
+
+					if (!isProcessingRef.current) {
+						processQueue();
+					}
+				}
+			}
+		} catch (error) {
+			console.error(
+				"Failed to parse generation queue from localStorage",
+				error,
+			);
+		}
+	}, [processQueue]);
 
 	return (
 		<GenerationContext.Provider
