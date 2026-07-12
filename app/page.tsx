@@ -11,6 +11,7 @@ import {
 } from "lucide-animated";
 import Link from "next/link";
 import { useRef } from "react";
+import Logo from "./components/Logo";
 
 export default function Home() {
 	type IconHandle = { startAnimation: () => void; stopAnimation: () => void };
@@ -78,8 +79,8 @@ export default function Home() {
 		<div className="flex flex-col items-center justify-center flex-1 p-6 md:p-12 bg-zinc-50 dark:bg-zinc-950">
 			<div className="max-w-5xl w-full">
 				<header className="mb-12 text-center md:text-left">
-					<h1 className="text-4xl font-bold text-zinc-900 dark:text-zinc-100 tracking-tight mb-3">
-						CtrlAI
+					<h1 className="mb-4 inline-block">
+						<Logo className="text-6xl md:text-7xl drop-shadow-sm" />
 					</h1>
 					<p className="text-lg text-zinc-500 dark:text-zinc-400 max-w-2xl">
 						Follow the steps below to import your documents, extract controls

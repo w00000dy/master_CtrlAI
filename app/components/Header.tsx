@@ -4,6 +4,7 @@ import { LoaderIcon, XIcon } from "lucide-animated";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useGenerationContext } from "./GenerationContext";
+import Logo from "./Logo";
 import { useModel } from "./ModelContext";
 
 const ThemeToggle = dynamic(() => import("./ThemeToggle"), {
@@ -29,9 +30,9 @@ export default function Header() {
 	return (
 		<header className="flex items-center justify-between p-4 border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm z-10 flex-shrink-0">
 			<div className="flex items-center gap-6">
-				<h1 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">
-					CtrlAI
-				</h1>
+				<div className="flex items-center gap-2">
+					<Logo className="text-2xl" />
+				</div>
 				<nav className="flex gap-4">
 					{NAV_LINKS.map(({ href, label }) => (
 						<Link
