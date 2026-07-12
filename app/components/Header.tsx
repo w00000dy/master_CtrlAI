@@ -30,7 +30,7 @@ export default function Header() {
 		<header className="flex items-center justify-between p-4 border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm z-10 flex-shrink-0">
 			<div className="flex items-center gap-6">
 				<h1 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">
-					Compliance LLM
+					CtrlAI
 				</h1>
 				<nav className="flex gap-4">
 					{NAV_LINKS.map(({ href, label }) => (

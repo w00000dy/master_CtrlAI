@@ -1,6 +1,6 @@
-# 🛡️ Compliance LLM
+# 🛡️ CtrlAI
 
-Welcome to **Compliance LLM**! 🚀
+Welcome to **CtrlAI**! 🚀
 
 This project is a Next.js application designed to streamline compliance workflows using AI. 📄✨
 

@@ -17,8 +17,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-	title: "Compliance LLM",
-	description: "Compliance LLM Tool",
+	title: "CtrlAI",
+	description: "CtrlAI Tool",
 };
 
 export default function RootLayout({

@@ -79,7 +79,7 @@ export default function Home() {
 			<div className="max-w-5xl w-full">
 				<header className="mb-12 text-center md:text-left">
 					<h1 className="text-4xl font-bold text-zinc-900 dark:text-zinc-100 tracking-tight mb-3">
-						Compliance Hub
+						CtrlAI
 					</h1>
 					<p className="text-lg text-zinc-500 dark:text-zinc-400 max-w-2xl">
 						Follow the steps below to import your documents, extract controls
