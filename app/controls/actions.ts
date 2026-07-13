@@ -380,6 +380,9 @@ export async function generateControlsForParagraph(
 			const systemPrompt = `### Instruction ###
 You are a compliance and security expert. Your task is to generate actionable, technical implementation controls for a specific legal paragraph.
 
+DEFINITION OF A CONTROL:
+A control is a specific technical, administrative, or physical safeguard, process, or policy put in place to satisfy legal or regulatory requirements. It must be an actionable, clear, and measurable directive that describes exactly what needs to be implemented or enforced.
+
 You will be given:
 - FOCUS PARAGRAPH: The paragraph you must write controls for.
 - EXISTING CONTROLS: Controls already in the database.${examplesInstruction}
