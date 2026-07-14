@@ -86,25 +86,25 @@ export const ParagraphRenderer = ({
 							{generationStatus === "processing" && (
 								<div
 									className="flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-medium rounded-md bg-purple-50 text-purple-600 border border-purple-100 dark:bg-purple-900/20 dark:text-purple-400 dark:border-purple-800/30"
-									title="Generiert aktuell Controls"
+									title="Generating Controls"
 								>
 									<LoaderIcon className="animate-spin" size={10} />
-									<span>Generiert...</span>
+									<span>Generating...</span>
 								</div>
 							)}
 							{generationStatus === "queued" && (
 								<div
 									className="flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-medium rounded-md bg-zinc-100 text-zinc-600 border border-zinc-200 dark:bg-zinc-800 dark:text-zinc-400 dark:border-zinc-700"
-									title="In Warteschlange für Generierung"
+									title="Queued for Generation"
 								>
 									<TimerIcon size={10} />
-									<span>Warteschlange</span>
+									<span>Queued</span>
 								</div>
 							)}
 							{paragraph.isFewShotExample && (
 								<div
 									className="flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-medium rounded-md bg-amber-50 text-amber-600 border border-amber-100 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-800/30"
-									title="Wird für Few-Shot Prompting verwendet"
+									title="Used for Few-Shot Prompting"
 								>
 									<SparklesIcon size={10} />
 									<span>Few-Shot</span>
@@ -113,7 +113,7 @@ export const ParagraphRenderer = ({
 							{guidelineControlsCount > 0 && (
 								<div
 									className="flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-medium rounded-md bg-blue-50 text-blue-600 border border-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800/30"
-									title={`${guidelineControlsCount} Technische Richtlinien Controls`}
+									title={`${guidelineControlsCount} Technical Guideline Controls`}
 								>
 									<BookTextIcon size={10} />
 									<span>{guidelineControlsCount}</span>
@@ -122,7 +122,7 @@ export const ParagraphRenderer = ({
 							{llmControlsCount > 0 && (
 								<div
 									className="flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-medium rounded-md bg-green-50 text-green-600 border border-green-100 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800/30"
-									title={`${llmControlsCount} LLM generierte Controls`}
+									title={`${llmControlsCount} LLM Generated Controls`}
 								>
 									<BotIcon size={10} />
 									<span>{llmControlsCount}</span>
