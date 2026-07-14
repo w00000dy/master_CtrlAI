@@ -43,6 +43,7 @@ model Paragraph {
   parentParagraph       Paragraph?          @relation("SubParagraphs", fields: [parentParagraphId], references: [id], onDelete: Cascade)
   subParagraphs         Paragraph[]         @relation("SubParagraphs")
   controls              Control[]
+  generatedControls     Control[]           @relation("GeneratedForParagraph")
   benchmarkResult       ParagraphBenchmark?
   relevantForBenchmarks BenchmarkResult[]   @relation("RelevantBenchmarkParagraphs")
   isFewShotExample      Boolean             @default(false)
@@ -56,6 +57,9 @@ model Control {
   guidelineId            Int?
   guideline              Guideline?  @relation(fields: [guidelineId], references: [id], onDelete: Cascade)
   paragraphs             Paragraph[]
+
+  generatedForId         Int?
+  generatedFor           Paragraph?  @relation("GeneratedForParagraph", fields: [generatedForId], references: [id], onDelete: SetNull)
 
   benchmarkResult     BenchmarkResult?  @relation("LlmControlBenchmark")
   coveredByBenchmarks BenchmarkResult[] @relation("CoveredByBenchmark")

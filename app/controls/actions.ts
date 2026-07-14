@@ -490,6 +490,7 @@ ${allParagraphsStr}
 						title: ctrl.title || "Untitled Control",
 						statement: ctrl.statement || "",
 						implementationGuidance: ctrl.implementationGuidance || null,
+						generatedForId: paragraphId,
 						paragraphs: {
 							connect: validIds.map((id) => ({ id })),
 						},
