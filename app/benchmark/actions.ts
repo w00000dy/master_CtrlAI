@@ -202,3 +202,64 @@ export async function saveParagraphBenchmark(data: {
 		return { success: false, error: "Failed to save benchmark result" };
 	}
 }
+
+export async function getBenchmarkProgress(mode: "CONTROL" | "PARAGRAPH") {
+	try {
+		if (mode === "CONTROL") {
+			const total = await prisma.control.count({
+				where: {
+					guidelineId: null,
+					OR: [
+						{ generatedForId: null },
+						{ generatedFor: { isFewShotExample: false } },
+					],
+				},
+			});
+			const evaluated = await prisma.control.count({
+				where: {
+					guidelineId: null,
+					benchmarkResult: { isNot: null },
+					OR: [
+						{ generatedForId: null },
+						{ generatedFor: { isFewShotExample: false } },
+					],
+				},
+			});
+			return { success: true, total, evaluated };
+		} else {
+			const total = await prisma.paragraph.count({
+				where: {
+					controls: {
+						some: {
+							guidelineId: null,
+							OR: [
+								{ generatedForId: null },
+								{ generatedFor: { isFewShotExample: false } },
+							],
+						},
+					},
+					isFewShotExample: false,
+				},
+			});
+			const evaluated = await prisma.paragraph.count({
+				where: {
+					controls: {
+						some: {
+							guidelineId: null,
+							OR: [
+								{ generatedForId: null },
+								{ generatedFor: { isFewShotExample: false } },
+							],
+						},
+					},
+					isFewShotExample: false,
+					benchmarkResult: { isNot: null },
+				},
+			});
+			return { success: true, total, evaluated };
+		}
+	} catch (error) {
+		console.error("Failed to get benchmark progress:", error);
+		return { success: false, total: 0, evaluated: 0 };
+	}
+}

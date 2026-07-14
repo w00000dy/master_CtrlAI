@@ -36,6 +36,7 @@ import {
 	type ParagraphWithContext,
 } from "../components/MappedParagraphCard";
 import {
+	getBenchmarkProgress,
 	getNextBenchmarkTask,
 	getTechnicalControls,
 	saveControlBenchmark,
@@ -64,6 +65,10 @@ export default function BenchmarkPage() {
 	>([]);
 	const [loading, setLoading] = useState(true);
 	const [mode, setMode] = useState<"CONTROL" | "PARAGRAPH">("CONTROL");
+	const [progress, setProgress] = useState<{
+		total: number;
+		evaluated: number;
+	} | null>(null);
 
 	// Form State for Control
 	const [relevantParagraphs, setRelevantParagraphs] = useState<Set<number>>(
@@ -86,6 +91,15 @@ export default function BenchmarkPage() {
 		try {
 			const nextTask = await getNextBenchmarkTask(mode);
 			setTask(nextTask);
+
+			const progRes = await getBenchmarkProgress(mode);
+			if (progRes.success) {
+				setProgress({
+					total: progRes.total ?? 0,
+					evaluated: progRes.evaluated ?? 0,
+				});
+			}
+
 			if (nextTask.type === "CONTROL") {
 				const techControls = await getTechnicalControls(
 					nextTask.control.paragraphs.map((p) => p.id),
@@ -176,8 +190,9 @@ export default function BenchmarkPage() {
 
 	return (
 		<div className="flex-1 min-h-0 bg-zinc-50 dark:bg-zinc-950 flex flex-col">
-			<div className="bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 py-2 px-4 shrink-0 flex justify-center">
-				<div className="flex bg-zinc-100 dark:bg-zinc-800 p-1 rounded-lg">
+			<div className="bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 py-2 px-4 shrink-0 flex justify-between items-center">
+				<div className="w-48 flex-shrink-0 hidden md:block"></div>
+				<div className="flex bg-zinc-100 dark:bg-zinc-800 p-1 rounded-lg shrink-0">
 					<button
 						type="button"
 						onClick={() => setMode("CONTROL")}
@@ -192,6 +207,21 @@ export default function BenchmarkPage() {
 					>
 						Paragraph Benchmark
 					</button>
+				</div>
+				<div className="w-48 flex-shrink-0 text-sm text-zinc-600 dark:text-zinc-400 font-medium text-right hidden md:flex items-center justify-end gap-2">
+					{progress && (
+						<>
+							<span>
+								{progress.evaluated} / {progress.total}
+							</span>
+							<span className="text-xs px-2 py-0.5 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full border border-blue-100 dark:border-blue-800">
+								{progress.total > 0
+									? Math.round((progress.evaluated / progress.total) * 100)
+									: 0}
+								%
+							</span>
+						</>
+					)}
 				</div>
 			</div>
 			<main className="w-full px-4 md:px-8 lg:px-12 py-8 flex-1 min-h-0 flex flex-col">
