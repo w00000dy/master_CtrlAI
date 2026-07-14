@@ -470,17 +470,68 @@ export default function DocumentViewPage() {
 										</p>
 									</div>
 								) : (
-									<div className="space-y-4">
-										{controls
-											.filter((c) => c.guidelineId === null)
-											.map((ctrl) => (
-												<CompactControlCard
-													key={ctrl.id}
-													ctrl={ctrl}
-													selectedParagraphId={selectedParagraph.id}
-													colorClass="bg-green-500"
-												/>
-											))}
+									<div className="space-y-6">
+										{(() => {
+											const llmControls = controls.filter(
+												(c) => c.guidelineId === null,
+											);
+											const directControls = llmControls.filter(
+												(c) =>
+													c.generatedForId === selectedParagraph.id ||
+													c.generatedForId === null,
+											);
+											const mappedControls = llmControls.filter(
+												(c) =>
+													c.generatedForId !== selectedParagraph.id &&
+													c.generatedForId !== null,
+											);
+
+											return (
+												<>
+													{directControls.length > 0 && (
+														<div className="space-y-4">
+															<div className="flex items-center gap-2 mb-2">
+																<h4 className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+																	Direct Controls
+																</h4>
+																<span className="text-[10px] text-zinc-400 bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 rounded-full">
+																	Generated for this paragraph
+																</span>
+															</div>
+															{directControls.map((ctrl) => (
+																<CompactControlCard
+																	key={ctrl.id}
+																	ctrl={ctrl}
+																	selectedParagraphId={selectedParagraph.id}
+																	colorClass="bg-green-500"
+																/>
+															))}
+														</div>
+													)}
+
+													{mappedControls.length > 0 && (
+														<div className="space-y-4 mt-6 pt-4 border-t border-zinc-100 dark:border-zinc-800/50">
+															<div className="flex items-center gap-2 mb-2">
+																<h4 className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+																	Mapped Controls
+																</h4>
+																<span className="text-[10px] text-zinc-400 bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 rounded-full">
+																	Generated for other paragraphs
+																</span>
+															</div>
+															{mappedControls.map((ctrl) => (
+																<CompactControlCard
+																	key={ctrl.id}
+																	ctrl={ctrl}
+																	selectedParagraphId={selectedParagraph.id}
+																	colorClass="bg-zinc-400 dark:bg-zinc-600"
+																/>
+															))}
+														</div>
+													)}
+												</>
+											);
+										})()}
 									</div>
 								)}
 							</div>
