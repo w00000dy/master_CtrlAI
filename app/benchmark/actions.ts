@@ -10,11 +10,14 @@ export async function getNextBenchmarkTask(
 		const paraMap = new Map(allParagraphs.map((p) => [p.id, p]));
 
 		if (mode === "CONTROL") {
-			// Find the first LLM control that hasn't been evaluated yet
 			const unevaluatedControl = await prisma.control.findFirst({
 				where: {
 					guidelineId: null,
 					benchmarkResult: null,
+					OR: [
+						{ generatedForId: null },
+						{ generatedFor: { isFewShotExample: false } },
+					],
 				},
 				include: {
 					paragraphs: {
@@ -62,14 +65,26 @@ export async function getNextBenchmarkTask(
 			const unevaluatedParagraph = await prisma.paragraph.findFirst({
 				where: {
 					controls: {
-						some: { guidelineId: null },
+						some: {
+							guidelineId: null,
+							OR: [
+								{ generatedForId: null },
+								{ generatedFor: { isFewShotExample: false } },
+							],
+						},
 					},
 					benchmarkResult: null,
 					isFewShotExample: false,
 				},
 				include: {
 					controls: {
-						where: { guidelineId: null },
+						where: {
+							guidelineId: null,
+							OR: [
+								{ generatedForId: null },
+								{ generatedFor: { isFewShotExample: false } },
+							],
+						},
 						include: {
 							benchmarkResult: true,
 						},
