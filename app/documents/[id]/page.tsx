@@ -12,12 +12,15 @@ import {
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import type { Paragraph, Prisma } from "../../../generated/prisma/client";
+import type { Prisma } from "../../../generated/prisma/client";
 import { CompactControlCard } from "../../components/CompactControlCard";
 import type { ControlData } from "../../components/ControlCard";
 import { useGenerationContext } from "../../components/GenerationContext";
 import { useModel } from "../../components/ModelContext";
-import { ParagraphRenderer } from "../../components/ParagraphRenderer";
+import {
+	ParagraphRenderer,
+	type ParagraphWithControls,
+} from "../../components/ParagraphRenderer";
 import { SectionHeader } from "../../components/SectionHeader";
 import { getControlsForParagraph } from "../../controls/actions";
 import {
@@ -30,7 +33,15 @@ export type DocumentData = Prisma.DocumentGetPayload<{
 	include: {
 		sections: {
 			include: {
-				paragraphs: true;
+				paragraphs: {
+					include: {
+						controls: {
+							select: {
+								guidelineId: true;
+							};
+						};
+					};
+				};
 			};
 		};
 	};
@@ -54,9 +65,8 @@ export default function DocumentViewPage() {
 	const [isDeleting, setIsDeleting] = useState(false);
 
 	// Side Panel State
-	const [selectedParagraph, setSelectedParagraph] = useState<Paragraph | null>(
-		null,
-	);
+	const [selectedParagraph, setSelectedParagraph] =
+		useState<ParagraphWithControls | null>(null);
 	const [controls, setControls] = useState<ControlData[]>([]);
 	const [isLoadingControls, setIsLoadingControls] = useState(false);
 
@@ -105,7 +115,7 @@ export default function DocumentViewPage() {
 		}
 	};
 
-	const handleParagraphClick = async (p: Paragraph) => {
+	const handleParagraphClick = async (p: ParagraphWithControls) => {
 		setSelectedParagraph(p);
 		setIsLoadingControls(true);
 		const res = await getControlsForParagraph(p.id);
@@ -322,10 +332,9 @@ export default function DocumentViewPage() {
 												): React.ReactNode[] =>
 													section.paragraphs
 														.filter(
-															(p: Paragraph) =>
-																(p.parentParagraphId || null) === parentId,
+															(p) => (p.parentParagraphId || null) === parentId,
 														)
-														.flatMap((p: Paragraph) => [
+														.flatMap((p) => [
 															<ParagraphRenderer
 																key={p.id}
 																paragraph={p}

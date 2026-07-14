@@ -98,6 +98,11 @@ export async function getDocumentById(id: number) {
 					include: {
 						paragraphs: {
 							orderBy: { marker: "asc" },
+							include: {
+								controls: {
+									select: { guidelineId: true },
+								},
+							},
 						},
 					},
 				},

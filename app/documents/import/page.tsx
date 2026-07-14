@@ -249,7 +249,7 @@ export default function ImportPage() {
 															<ParagraphRenderer
 																key={currentPath}
 																paragraph={
-																	p as unknown as import("../../../generated/prisma/client").Paragraph
+																	p as unknown as import("../../components/ParagraphRenderer").ParagraphWithControls
 																}
 																depth={depth}
 															/>,
