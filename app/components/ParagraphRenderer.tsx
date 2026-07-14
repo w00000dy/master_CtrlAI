@@ -1,4 +1,4 @@
-import { BookTextIcon, BotIcon } from "lucide-animated";
+import { BookTextIcon, BotIcon, SparklesIcon } from "lucide-animated";
 import type { Prisma } from "../../generated/prisma/client";
 
 export type ParagraphWithControls = Prisma.ParagraphGetPayload<{
@@ -67,11 +67,22 @@ export const ParagraphRenderer = ({
 						</div>
 					</div>
 
-					{/* Controls Indicators */}
-					{(guidelineControlsCount > 0 || llmControlsCount > 0) && (
+					{/* Controls Indicators & Few-Shot */}
+					{(guidelineControlsCount > 0 ||
+						llmControlsCount > 0 ||
+						paragraph.isFewShotExample) && (
 						<div
 							className={`flex items-center gap-2 mt-1.5 ${!paragraph.marker ? "" : "ml-10"}`}
 						>
+							{paragraph.isFewShotExample && (
+								<div
+									className="flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-medium rounded-md bg-amber-50 text-amber-600 border border-amber-100 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-800/30"
+									title="Wird für Few-Shot Prompting verwendet"
+								>
+									<SparklesIcon size={10} />
+									<span>Few-Shot</span>
+								</div>
+							)}
 							{guidelineControlsCount > 0 && (
 								<div
 									className="flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-medium rounded-md bg-blue-50 text-blue-600 border border-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800/30"
