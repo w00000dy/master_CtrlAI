@@ -52,7 +52,8 @@ export default function DocumentViewPage() {
 	const router = useRouter();
 	const id = params.id as string;
 	const { selectedModel } = useModel();
-	const { enqueueTasks, completedTasks } = useGenerationContext();
+	const { enqueueTasks, completedTasks, queue, isProcessing } =
+		useGenerationContext();
 
 	const [document, setDocument] = useState<DocumentData | null>(null);
 	const [savedAt, setSavedAt] = useState<string | null>(null);
@@ -334,16 +335,29 @@ export default function DocumentViewPage() {
 														.filter(
 															(p) => (p.parentParagraphId || null) === parentId,
 														)
-														.flatMap((p) => [
-															<ParagraphRenderer
-																key={p.id}
-																paragraph={p}
-																depth={depth}
-																onClick={handleParagraphClick}
-																isSelected={selectedParagraph?.id === p.id}
-															/>,
-															...renderTree(p.id, depth + 1),
-														]);
+														.flatMap((p) => {
+															const taskIndex = queue.findIndex(
+																(t) => t.paragraphId === p.id,
+															);
+															const generationStatus =
+																taskIndex === 0 && isProcessing
+																	? "processing"
+																	: taskIndex !== -1
+																		? "queued"
+																		: "none";
+
+															return [
+																<ParagraphRenderer
+																	key={p.id}
+																	paragraph={p}
+																	depth={depth}
+																	onClick={handleParagraphClick}
+																	isSelected={selectedParagraph?.id === p.id}
+																	generationStatus={generationStatus}
+																/>,
+																...renderTree(p.id, depth + 1),
+															];
+														});
 												return renderTree();
 											})()}
 										</div>

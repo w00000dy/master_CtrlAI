@@ -1,4 +1,10 @@
-import { BookTextIcon, BotIcon, SparklesIcon } from "lucide-animated";
+import {
+	BookTextIcon,
+	BotIcon,
+	LoaderIcon,
+	SparklesIcon,
+	TimerIcon,
+} from "lucide-animated";
 import type { Prisma } from "../../generated/prisma/client";
 
 export type ParagraphWithControls = Prisma.ParagraphGetPayload<{
@@ -16,6 +22,7 @@ type ParagraphProps = {
 	depth?: number;
 	onClick?: (p: ParagraphWithControls) => void;
 	isSelected?: boolean;
+	generationStatus?: "queued" | "processing" | "none";
 };
 
 export const ParagraphRenderer = ({
@@ -23,6 +30,7 @@ export const ParagraphRenderer = ({
 	depth = 0,
 	onClick,
 	isSelected = false,
+	generationStatus = "none",
 }: ParagraphProps) => {
 	const guidelineControlsCount =
 		paragraph.controls?.filter((c) => c.guidelineId !== null).length || 0;
@@ -67,13 +75,32 @@ export const ParagraphRenderer = ({
 						</div>
 					</div>
 
-					{/* Controls Indicators & Few-Shot */}
+					{/* Controls Indicators & Few-Shot & Generation Status */}
 					{(guidelineControlsCount > 0 ||
 						llmControlsCount > 0 ||
-						paragraph.isFewShotExample) && (
+						paragraph.isFewShotExample ||
+						generationStatus !== "none") && (
 						<div
 							className={`flex items-center gap-2 mt-1.5 ${!paragraph.marker ? "" : "ml-10"}`}
 						>
+							{generationStatus === "processing" && (
+								<div
+									className="flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-medium rounded-md bg-purple-50 text-purple-600 border border-purple-100 dark:bg-purple-900/20 dark:text-purple-400 dark:border-purple-800/30"
+									title="Generiert aktuell Controls"
+								>
+									<LoaderIcon className="animate-spin" size={10} />
+									<span>Generiert...</span>
+								</div>
+							)}
+							{generationStatus === "queued" && (
+								<div
+									className="flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-medium rounded-md bg-zinc-100 text-zinc-600 border border-zinc-200 dark:bg-zinc-800 dark:text-zinc-400 dark:border-zinc-700"
+									title="In Warteschlange für Generierung"
+								>
+									<TimerIcon size={10} />
+									<span>Warteschlange</span>
+								</div>
+							)}
 							{paragraph.isFewShotExample && (
 								<div
 									className="flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-medium rounded-md bg-amber-50 text-amber-600 border border-amber-100 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-800/30"
