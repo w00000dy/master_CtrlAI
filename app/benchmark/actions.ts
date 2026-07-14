@@ -206,53 +206,42 @@ export async function saveParagraphBenchmark(data: {
 export async function getBenchmarkProgress(mode: "CONTROL" | "PARAGRAPH") {
 	try {
 		if (mode === "CONTROL") {
+			const whereClause = {
+				guidelineId: null,
+				OR: [
+					{ generatedForId: null },
+					{ generatedFor: { isFewShotExample: false } },
+				],
+			};
 			const total = await prisma.control.count({
-				where: {
-					guidelineId: null,
-					OR: [
-						{ generatedForId: null },
-						{ generatedFor: { isFewShotExample: false } },
-					],
-				},
+				where: whereClause,
 			});
 			const evaluated = await prisma.control.count({
 				where: {
-					guidelineId: null,
+					...whereClause,
 					benchmarkResult: { isNot: null },
-					OR: [
-						{ generatedForId: null },
-						{ generatedFor: { isFewShotExample: false } },
-					],
 				},
 			});
 			return { success: true, total, evaluated };
 		} else {
-			const total = await prisma.paragraph.count({
-				where: {
-					controls: {
-						some: {
-							guidelineId: null,
-							OR: [
-								{ generatedForId: null },
-								{ generatedFor: { isFewShotExample: false } },
-							],
-						},
+			const whereClause = {
+				controls: {
+					some: {
+						guidelineId: null,
+						OR: [
+							{ generatedForId: null },
+							{ generatedFor: { isFewShotExample: false } },
+						],
 					},
-					isFewShotExample: false,
 				},
+				isFewShotExample: false,
+			};
+			const total = await prisma.paragraph.count({
+				where: whereClause,
 			});
 			const evaluated = await prisma.paragraph.count({
 				where: {
-					controls: {
-						some: {
-							guidelineId: null,
-							OR: [
-								{ generatedForId: null },
-								{ generatedFor: { isFewShotExample: false } },
-							],
-						},
-					},
-					isFewShotExample: false,
+					...whereClause,
 					benchmarkResult: { isNot: null },
 				},
 			});
