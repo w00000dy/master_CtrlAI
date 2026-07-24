@@ -32,7 +32,7 @@ export default function ChatPage() {
 	const [messages, setMessages] = useState([
 		{
 			id: crypto.randomUUID(),
-			role: "bot",
+			role: "assistant",
 			content: "Hello! How can I help you today?",
 		},
 	]);
@@ -61,7 +61,7 @@ export default function ChatPage() {
 				...prev,
 				{
 					id: crypto.randomUUID(),
-					role: "bot",
+					role: "assistant",
 					content: success ? (message as string) : `Error: ${error}`,
 				},
 			]);
@@ -70,7 +70,7 @@ export default function ChatPage() {
 				...prev,
 				{
 					id: crypto.randomUUID(),
-					role: "bot",
+					role: "assistant",
 					content: "An unexpected error occurred.",
 				},
 			]);
@@ -85,7 +85,7 @@ export default function ChatPage() {
 				{messages.map((msg) => (
 					<MessageBubble key={msg.id} sender={msg.role} content={msg.content} />
 				))}
-				{isLoading && <MessageBubble sender="bot" content="..." />}
+				{isLoading && <MessageBubble sender="assistant" content="..." />}
 			</main>
 
 			<footer className="p-4 border-t border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 flex-shrink-0 mt-auto">

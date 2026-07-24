@@ -10,10 +10,7 @@ export async function generateChatResponse(
 	messages: { role: string; content: string }[],
 	model: string,
 ) {
-	const mappedMessages = messages.map((msg) => ({
-		role: msg.role === "bot" ? "assistant" : (msg.role as ChatMessage["role"]),
-		content: msg.content,
-	}));
+	const mappedMessages = [...messages] as ChatMessage[];
 	const promptMessage = mappedMessages.pop();
 
 	if (!promptMessage) {
