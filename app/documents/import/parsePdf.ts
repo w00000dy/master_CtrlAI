@@ -95,10 +95,8 @@ Ensure all text is captured accurately and organized logically based on the docu
 
 		const response = await generateChat({
 			model: model,
-			messages: [
-				{ role: "system", content: systemPrompt },
-				{ role: "user", content: rawText },
-			],
+			prompt: rawText,
+			systemPrompt: systemPrompt,
 			format: "json",
 		});
 

@@ -416,10 +416,8 @@ ${allParagraphsStr}
 
 			const response = await generateChat({
 				model: model,
-				messages: [
-					{ role: "system", content: systemPrompt },
-					{ role: "user", content: userPrompt },
-				],
+				prompt: userPrompt,
+				systemPrompt: systemPrompt,
 				format: "json",
 			});
 

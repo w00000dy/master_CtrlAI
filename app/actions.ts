@@ -10,13 +10,20 @@ export async function generateChatResponse(
 	messages: { role: string; content: string }[],
 	model: string,
 ) {
+	const mappedMessages = messages.map((msg) => ({
+		role: msg.role === "bot" ? "assistant" : (msg.role as ChatMessage["role"]),
+		content: msg.content,
+	}));
+	const promptMessage = mappedMessages.pop();
+
+	if (!promptMessage) {
+		return { success: false, error: "No prompt provided" };
+	}
+
 	const result = await generateChat({
 		model: model,
-		messages: messages.map((msg) => ({
-			role:
-				msg.role === "bot" ? "assistant" : (msg.role as ChatMessage["role"]),
-			content: msg.content,
-		})),
+		prompt: promptMessage.content,
+		chatHistory: mappedMessages.length > 0 ? mappedMessages : undefined,
 	});
 
 	if (!result.success) {
