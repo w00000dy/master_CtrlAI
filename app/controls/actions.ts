@@ -308,27 +308,6 @@ export async function generateControlsForParagraph(
 			if (fewShotParagraphs.length > 0) {
 				fewShotExamplesStr = fewShotParagraphs
 					.map((p) => {
-						const pAncestors = [];
-						let pCurrentId = p.parentParagraphId;
-						while (pCurrentId) {
-							const parent = allParagraphs.find((ap) => ap.id === pCurrentId);
-							if (parent) {
-								pAncestors.unshift(parent);
-								pCurrentId = parent.parentParagraphId;
-							} else {
-								break;
-							}
-						}
-						const pAncestorsStr =
-							pAncestors.length > 0
-								? pAncestors
-										.map(
-											(ap) =>
-												`  - ${ap.marker ? `${ap.marker} ` : ""}${ap.text}`,
-										)
-										.join("\n")
-								: "  None";
-
 						const pText = `${p.marker ? `${p.marker} ` : ""}${p.text}`;
 						const pDoc = `${p.section.document.title} - ${p.section.title}`;
 
@@ -351,7 +330,7 @@ export async function generateControlsForParagraph(
 							ExampleControlsArraySchema.parse(rawControlsObj);
 						const pControlsJson = JSON.stringify(validatedControls, null, 2);
 
-						return `Example Paragraph:\nDocument: ${pDoc}\nAncestor Paragraphs:\n${pAncestorsStr}\nText: ${pText}\nExpected Controls (JSON):\n${
+						return `Example Paragraph:\nDocument: ${pDoc}\nText: ${pText}\nExpected Controls (JSON):\n${
 							p.controls.length > 0 ? pControlsJson : "[]"
 						}`;
 					})
