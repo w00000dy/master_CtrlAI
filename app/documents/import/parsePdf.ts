@@ -1,7 +1,7 @@
 "use server";
 
 import { PDFParse } from "pdf-parse";
-import { generateChat } from "@/lib/llm";
+import { generateResponse } from "@/lib/llm";
 
 export type Paragraph = {
 	marker: string | null;
@@ -93,7 +93,7 @@ The output MUST strictly match this JSON schema and contain no markdown blocks o
 
 Ensure all text is captured accurately and organized logically based on the document's recursive structure.`;
 
-		const response = await generateChat({
+		const response = await generateResponse({
 			model: model,
 			prompt: rawText,
 			systemPrompt: systemPrompt,

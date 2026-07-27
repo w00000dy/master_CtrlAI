@@ -1,6 +1,6 @@
 "use server";
 
-import { type ChatMessage, generateChat, listModels } from "@/lib/llm";
+import { type ChatMessage, generateResponse, listModels } from "@/lib/llm";
 
 export async function getModels() {
 	return await listModels();
@@ -17,7 +17,7 @@ export async function generateChatResponse(
 		return { success: false, error: "No prompt provided" };
 	}
 
-	const result = await generateChat({
+	const result = await generateResponse({
 		model: model,
 		prompt: promptMessage.content,
 		chatHistory: mappedMessages.length > 0 ? mappedMessages : undefined,

@@ -41,7 +41,7 @@ export type ChatMessage = {
 	content: string;
 };
 
-export async function generateChat({
+export async function generateResponse({
 	model,
 	prompt,
 	systemPrompt,

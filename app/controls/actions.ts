@@ -1,7 +1,7 @@
 "use server";
 
 import { enrichControlsWithAncestors } from "@/lib/controls";
-import { generateChat } from "@/lib/llm";
+import { generateResponse } from "@/lib/llm";
 import { prisma } from "@/lib/prisma";
 
 export async function getControls() {
@@ -414,7 +414,7 @@ ALL PARAGRAPHS IN DATABASE:
 ${allParagraphsStr}
 `;
 
-			const response = await generateChat({
+			const response = await generateResponse({
 				model: model,
 				prompt: userPrompt,
 				systemPrompt: systemPrompt,
