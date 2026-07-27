@@ -359,7 +359,6 @@ export async function generateControlsForParagraph(
 			// Group all paragraphs by Document -> Section
 			const grouped: Record<string, Record<string, typeof allParagraphs>> = {};
 			for (const p of allParagraphs) {
-				if (p.isFewShotExample) continue;
 				const docTitle = p.section.document.title;
 				const secTitle = p.section.title;
 				if (!grouped[docTitle]) grouped[docTitle] = {};
