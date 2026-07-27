@@ -445,12 +445,15 @@ A control is a specific technical, administrative, or physical safeguard, proces
 
 You will be given:
 - FOCUS PARAGRAPH: The paragraph you must write controls for.
+- ANCESTOR PARAGRAPHS: Provide broader regulatory context from parent paragraphs. Use them ONLY to understand the overarching purpose and scope of the FOCUS PARAGRAPH.
+- SUBORDINATE PARAGRAPHS: Provide specific details and lower-level requirements. Use them ONLY to understand the boundaries of the FOCUS PARAGRAPH; do not generate controls for specific details that belong strictly to subordinate paragraphs unless required at the focus level.
 - EXISTING CONTROLS FOR FOCUS PARAGRAPH: Controls that are already mapped to this focus paragraph.
 - OTHER EXISTING CONTROLS IN DATABASE: Other controls already generated in the database.${examplesInstruction}
 - ALL PARAGRAPHS: A list of all paragraphs in the database with their IDs.
 
 Write as many specific, actionable controls as necessary to completely fulfill the requirements of the FOCUS PARAGRAPH. Do not limit yourself to a specific number, but avoid redundancies and irrelevant points.
-For each control, determine if it also helps fulfill any OTHER paragraphs from the ALL PARAGRAPHS list. When mapping to paragraphs, YOU MUST USE THE EXACT ID specified inside the [ID: ...] brackets.
+If the EXISTING CONTROLS FOR FOCUS PARAGRAPH already completely and exhaustively fulfill the requirements, or if the FOCUS PARAGRAPH is purely definitional/informational and requires no technical or administrative safeguards, return an empty array ([]). Do not generate forced or redundant controls.
+For each control, determine if it also helps fulfill any OTHER paragraphs from the ALL PARAGRAPHS list. When mapping to paragraphs in 'mappedParagraphIds', YOU MUST ALWAYS include the exact ID of the FOCUS PARAGRAPH itself, along with any additional related IDs from ALL PARAGRAPHS specified inside the [ID: ...] brackets.
 DO NOT generate duplicates or overly similar controls to the EXISTING CONTROLS FOR FOCUS PARAGRAPH or OTHER EXISTING CONTROLS IN DATABASE provided in the context.`;
 
 			const userPrompt = `### Context ###
