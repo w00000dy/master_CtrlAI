@@ -195,7 +195,10 @@ export async function generateControlsForParagraph(
 					section: { include: { document: true } },
 					controls: {
 						where: { guidelineId: { not: null } },
-						include: { guideline: true },
+						include: {
+							guideline: true,
+							paragraphs: { select: { id: true } },
+						},
 					},
 				},
 			});
@@ -239,6 +242,43 @@ export async function generateControlsForParagraph(
 							.join("\n")
 					: "No ancestor paragraphs.";
 
+			const ExampleControlSchema = z.object({
+				title: z
+					.string()
+					.describe("Short title of the control (e.g. Password Policy)"),
+				statement: z
+					.string()
+					.describe(
+						"Detailed, actionable statement defining the control requirement.",
+					),
+				implementationGuidance: z
+					.string()
+					.nullish()
+					.describe(
+						"Practical guidance or steps on how to implement this control. If there is no specific guidance to provide, this value MUST be null.",
+					),
+				mappedParagraphIds: z
+					.array(z.number().int())
+					.describe(
+						"Array of exact IDs of paragraphs this control helps fulfill.",
+					),
+			});
+
+			const ExampleControlsArraySchema = z.array(ExampleControlSchema);
+
+			const ControlSchema = useCoT
+				? z.object({
+						reasoning: z
+							.string()
+							.describe(
+								"Step-by-step rationale for why this control is needed, how it fulfills the focus paragraph, how it differs from existing controls, and why it maps to the specified other paragraphs.",
+							),
+						...ExampleControlSchema.shape,
+					})
+				: ExampleControlSchema;
+
+			const ControlsArraySchema = z.array(ControlSchema);
+
 			let fewShotExamplesStr = "";
 			if (fewShotParagraphs.length > 0) {
 				fewShotExamplesStr = fewShotParagraphs
@@ -266,18 +306,28 @@ export async function generateControlsForParagraph(
 
 						const pText = `${p.marker ? `${p.marker} ` : ""}${p.text}`;
 						const pDoc = `${p.section.document.title} - ${p.section.title}`;
-						const pControls = p.controls
-							.map(
-								(c) =>
-									`  - Control: ${c.title}\n    Statement: ${c.statement}${
-										c.implementationGuidance
-											? `\n    Implementation Guidance: ${c.implementationGuidance}`
-											: ""
-									}`,
-							)
-							.join("\n");
-						return `Example Paragraph:\nDocument: ${pDoc}\nAncestor Paragraphs:\n${pAncestorsStr}\nText: ${pText}\nExpected Controls:\n${
-							pControls || "  None"
+
+						const rawControlsObj = p.controls.map((c) => {
+							const mappedIds =
+								"paragraphs" in c &&
+								Array.isArray(c.paragraphs) &&
+								c.paragraphs.length > 0
+									? (c.paragraphs as { id: number }[]).map((mp) => mp.id)
+									: [p.id];
+							return {
+								title: c.title,
+								statement: c.statement,
+								implementationGuidance: c.implementationGuidance || null,
+								mappedParagraphIds: mappedIds,
+							};
+						});
+
+						const validatedControls =
+							ExampleControlsArraySchema.parse(rawControlsObj);
+						const pControlsJson = JSON.stringify(validatedControls, null, 2);
+
+						return `Example Paragraph:\nDocument: ${pDoc}\nAncestor Paragraphs:\n${pAncestorsStr}\nText: ${pText}\nExpected Controls (JSON):\n${
+							p.controls.length > 0 ? pControlsJson : "[]"
 						}`;
 					})
 					.join("\n\n");
@@ -357,39 +407,6 @@ export async function generateControlsForParagraph(
 				}
 				allParagraphsStr += "\n";
 			}
-
-			const ControlSchema = z.object({
-				...(useCoT
-					? {
-							reasoning: z
-								.string()
-								.describe(
-									"Step-by-step rationale for why this control is needed, how it fulfills the focus paragraph, how it differs from existing controls, and why it maps to the specified other paragraphs.",
-								),
-						}
-					: {}),
-				title: z
-					.string()
-					.describe("Short title of the control (e.g. Password Policy)"),
-				statement: z
-					.string()
-					.describe(
-						"Detailed, actionable statement defining the control requirement.",
-					),
-				implementationGuidance: z
-					.string()
-					.nullish()
-					.describe(
-						"Practical guidance or steps on how to implement this control. If there is no specific guidance to provide, this value MUST be null.",
-					),
-				mappedParagraphIds: z
-					.array(z.number().int())
-					.describe(
-						"Array of exact IDs (integers, not strings) of paragraphs this control helps fulfill.",
-					),
-			});
-
-			const ControlsArraySchema = z.array(ControlSchema);
 
 			const examplesInstruction =
 				fewShotParagraphs.length > 0
