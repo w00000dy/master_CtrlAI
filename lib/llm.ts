@@ -1,6 +1,8 @@
 import { Ollama } from "ollama";
 import OpenAI from "openai";
+import { zodTextFormat } from "openai/helpers/zod";
 import { Agent, setGlobalDispatcher } from "undici";
+import * as z from "zod";
 
 // Disable fetch timeout for long-running LLM calls
 setGlobalDispatcher(new Agent({ headersTimeout: 0 }));
@@ -46,14 +48,14 @@ export async function generateResponse({
 	prompt,
 	systemPrompt,
 	chatHistory,
-	format,
+	schema,
 	temperature = DEFAULT_TEMPERATURE,
 }: {
 	model: string;
 	prompt: string;
 	systemPrompt?: string;
 	chatHistory?: ChatMessage[];
-	format?: "json";
+	schema?: z.ZodType;
 	temperature?: number;
 }) {
 	const provider = getProvider();
@@ -87,12 +89,20 @@ export async function generateResponse({
 		}
 		messages.push({ role: "user", content: prompt });
 
-		const response = await openai.responses.create({
-			model: model,
-			input: messages,
-			text: format === "json" ? { format: { type: "json_object" } } : undefined,
-			temperature: temperature,
-		});
+		const response = schema
+			? await openai.responses.parse({
+					model: model,
+					input: messages,
+					text: {
+						format: zodTextFormat(schema, "output_schema"),
+					},
+					temperature: temperature,
+				})
+			: await openai.responses.create({
+					model: model,
+					input: messages,
+					temperature: temperature,
+				});
 
 		result = {
 			success: true,
@@ -101,6 +111,10 @@ export async function generateResponse({
 			completionTokens: response.usage?.output_tokens || 0,
 		};
 	} else {
+		const ollamaFormat = schema
+			? (z.toJSONSchema(schema) as Record<string, unknown>)
+			: undefined;
+
 		if (chatHistory && chatHistory.length > 0) {
 			const messages: ChatMessage[] = [];
 			messages.push(...chatHistory);
@@ -111,7 +125,7 @@ export async function generateResponse({
 			const response = await ollama.chat({
 				model: model,
 				messages: messages,
-				format: format,
+				format: ollamaFormat,
 				options: { temperature: temperature },
 			});
 
@@ -126,7 +140,7 @@ export async function generateResponse({
 				model: model,
 				prompt: prompt,
 				system: systemPrompt,
-				format: format,
+				format: ollamaFormat,
 				options: { temperature: temperature },
 			});
 

@@ -1,6 +1,7 @@
 "use server";
 
 import { PDFParse } from "pdf-parse";
+import * as z from "zod";
 import { generateResponse } from "@/lib/llm";
 
 export type Paragraph = {
@@ -9,14 +10,26 @@ export type Paragraph = {
 	subParagraphs?: Paragraph[];
 };
 
-export type ParsedDocument = {
-	title: string;
-	sections: {
-		marker: string | null;
-		title: string;
-		paragraphs: Paragraph[];
-	}[];
-};
+const ParagraphSchema: z.ZodType<Paragraph> = z.lazy(() =>
+	z.object({
+		marker: z.string().nullable(),
+		text: z.string(),
+		subParagraphs: z.array(ParagraphSchema).optional(),
+	}),
+);
+
+const ParsedDocumentSchema = z.object({
+	title: z.string(),
+	sections: z.array(
+		z.object({
+			marker: z.string().nullable(),
+			title: z.string(),
+			paragraphs: z.array(ParagraphSchema),
+		}),
+	),
+});
+
+export type ParsedDocument = z.infer<typeof ParsedDocumentSchema>;
 
 export async function extractPdfText(formData: FormData) {
 	try {
@@ -97,7 +110,7 @@ Ensure all text is captured accurately and organized logically based on the docu
 			model: model,
 			prompt: rawText,
 			systemPrompt: systemPrompt,
-			format: "json",
+			schema: ParsedDocumentSchema,
 		});
 
 		if (!response.success) {
@@ -111,7 +124,7 @@ Ensure all text is captured accurately and organized logically based on the docu
 		let parsedJson: ParsedDocument;
 
 		try {
-			parsedJson = JSON.parse(resultText);
+			parsedJson = ParsedDocumentSchema.parse(JSON.parse(resultText));
 		} catch (error) {
 			console.error("Failed to parse JSON from LLM:", resultText, error);
 			return {

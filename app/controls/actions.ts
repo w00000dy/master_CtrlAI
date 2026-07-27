@@ -1,5 +1,6 @@
 "use server";
 
+import * as z from "zod";
 import { enrichControlsWithAncestors } from "@/lib/controls";
 import { generateResponse } from "@/lib/llm";
 import { prisma } from "@/lib/prisma";
@@ -357,20 +358,38 @@ export async function generateControlsForParagraph(
 				allParagraphsStr += "\n";
 			}
 
-			const reasoningField = useCoT
-				? `\n      "reasoning": "Step-by-step rationale for why this control is needed, how it fulfills the focus paragraph, how it differs from existing controls, and why it maps to the specified other paragraphs.",`
-				: "";
+			const ControlSchema = z.object({
+				...(useCoT
+					? {
+							reasoning: z
+								.string()
+								.describe(
+									"Step-by-step rationale for why this control is needed, how it fulfills the focus paragraph, how it differs from existing controls, and why it maps to the specified other paragraphs.",
+								),
+						}
+					: {}),
+				title: z
+					.string()
+					.describe("Short title of the control (e.g. Password Policy)"),
+				statement: z
+					.string()
+					.describe(
+						"Detailed, actionable statement defining the control requirement.",
+					),
+				implementationGuidance: z
+					.string()
+					.nullish()
+					.describe(
+						"Practical guidance or steps on how to implement this control. If there is no specific guidance to provide, this value MUST be null.",
+					),
+				mappedParagraphIds: z
+					.array(z.number().int())
+					.describe(
+						"Array of exact IDs (integers, not strings) of paragraphs this control helps fulfill.",
+					),
+			});
 
-			const jsonSchema = `{
-  "controls": [
-    {${reasoningField}
-      "title": "Short title of the control (e.g. Password Policy)",
-      "statement": "Detailed, actionable statement defining the control requirement.",
-      "implementationGuidance": "Practical guidance or steps on how to implement this control. If there is no specific guidance to provide, this value MUST be null.",
-      "mappedParagraphIds": [focus-paragraph-id, other-paragraph-id-1, other-paragraph-id-2] // MUST BE INTEGERS, NOT STRINGS
-    }
-  ]
-}`;
+			const ControlsArraySchema = z.array(ControlSchema);
 
 			const examplesInstruction =
 				fewShotParagraphs.length > 0
@@ -390,10 +409,7 @@ You will be given:
 
 Write as many specific, actionable controls as necessary to completely fulfill the requirements of the FOCUS PARAGRAPH. Do not limit yourself to a specific number, but avoid redundancies and irrelevant points.
 For each control, determine if it also helps fulfill any OTHER paragraphs from the ALL PARAGRAPHS list. When mapping to paragraphs, YOU MUST USE THE EXACT ID specified inside the [ID: ...] brackets.
-DO NOT generate duplicates or overly similar controls to the EXISTING CONTROLS provided in the context.
-Return a JSON object containing a single key "controls" that holds an array of control objects. Each object must strictly follow this structure:
-${jsonSchema}
-Output ONLY valid JSON. No markdown formatting, no explanations outside the JSON.`;
+DO NOT generate duplicates or overly similar controls to the EXISTING CONTROLS provided in the context.`;
 
 			const userPrompt = `### Context ###
 FOCUS PARAGRAPH ID: ${focusParagraph.id}
@@ -418,7 +434,7 @@ ${allParagraphsStr}
 				model: model,
 				prompt: userPrompt,
 				systemPrompt: systemPrompt,
-				format: "json",
+				schema: ControlsArraySchema,
 			});
 
 			if (!response.success) {
@@ -426,26 +442,10 @@ ${allParagraphsStr}
 			}
 
 			const resultText = response.content;
-			let parsedJson: {
-				reasoning?: string;
-				title?: string;
-				statement?: string;
-				implementationGuidance?: string;
-				mappedParagraphIds?: number[];
-			}[];
+			let parsedJson: z.infer<typeof ControlsArraySchema>;
 
 			try {
-				const rawJson = JSON.parse(resultText);
-				if (rawJson && Array.isArray(rawJson.controls)) {
-					parsedJson = rawJson.controls;
-				} else if (Array.isArray(rawJson)) {
-					// Fallback in case it directly returned an array
-					parsedJson = rawJson;
-				} else {
-					throw new Error(
-						"Invalid format: Expected an object with a 'controls' array.",
-					);
-				}
+				parsedJson = ControlsArraySchema.parse(JSON.parse(resultText));
 			} catch (error) {
 				console.error("Failed to parse JSON from LLM:", resultText, error);
 				return { success: false, error: "LLM returned invalid format." };
