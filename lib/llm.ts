@@ -87,18 +87,18 @@ export async function generateChat({
 		}
 		messages.push({ role: "user", content: prompt });
 
-		const response = await openai.chat.completions.create({
+		const response = await openai.responses.create({
 			model: model,
-			messages: messages,
-			response_format: format === "json" ? { type: "json_object" } : undefined,
+			input: messages,
+			text: format === "json" ? { format: { type: "json_object" } } : undefined,
 			temperature: temperature,
 		});
 
 		result = {
 			success: true,
-			content: response.choices[0].message.content || "",
-			promptTokens: response.usage?.prompt_tokens || 0,
-			completionTokens: response.usage?.completion_tokens || 0,
+			content: response.output_text || "",
+			promptTokens: response.usage?.input_tokens || 0,
+			completionTokens: response.usage?.output_tokens || 0,
 		};
 	} else {
 		if (chatHistory && chatHistory.length > 0) {
