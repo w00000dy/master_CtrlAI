@@ -177,7 +177,17 @@ export async function generateControlsForParagraph(
 		try {
 			const focusParagraph = await prisma.paragraph.findUnique({
 				where: { id: paragraphId },
-				include: { section: { include: { document: true } } },
+				include: {
+					section: { include: { document: true } },
+					controls: {
+						where: { guidelineId: null },
+						select: {
+							title: true,
+							statement: true,
+							implementationGuidance: true,
+						},
+					},
+				},
 			});
 
 			if (!focusParagraph) {
@@ -185,7 +195,12 @@ export async function generateControlsForParagraph(
 			}
 
 			const existingControls = await prisma.control.findMany({
-				where: { guidelineId: null },
+				where: {
+					guidelineId: null,
+					paragraphs: {
+						none: { id: paragraphId },
+					},
+				},
 				select: { title: true, statement: true, implementationGuidance: true },
 			});
 
@@ -213,6 +228,16 @@ export async function generateControlsForParagraph(
 			});
 
 			// Formatting context for LLM
+			const focusControlsStr =
+				focusParagraph.controls.length > 0
+					? focusParagraph.controls
+							.map(
+								(c) =>
+									`- ${c.title}: ${c.statement}${c.implementationGuidance ? ` (Implementation Guidance: ${c.implementationGuidance})` : ""}`,
+							)
+							.join("\n")
+					: "No LLM-generated controls currently mapped to this paragraph.";
+
 			const existingControlsStr =
 				existingControls.length > 0
 					? existingControls
@@ -221,7 +246,7 @@ export async function generateControlsForParagraph(
 									`- ${c.title}: ${c.statement}${c.implementationGuidance ? ` (Implementation Guidance: ${c.implementationGuidance})` : ""}`,
 							)
 							.join("\n")
-					: "No existing controls.";
+					: "No other existing controls in database.";
 
 			// Find ancestors
 			const ancestors = [];
@@ -420,12 +445,13 @@ A control is a specific technical, administrative, or physical safeguard, proces
 
 You will be given:
 - FOCUS PARAGRAPH: The paragraph you must write controls for.
-- EXISTING CONTROLS: Controls already in the database.${examplesInstruction}
+- EXISTING CONTROLS FOR FOCUS PARAGRAPH: Controls that are already mapped to this focus paragraph.
+- OTHER EXISTING CONTROLS IN DATABASE: Other controls already generated in the database.${examplesInstruction}
 - ALL PARAGRAPHS: A list of all paragraphs in the database with their IDs.
 
 Write as many specific, actionable controls as necessary to completely fulfill the requirements of the FOCUS PARAGRAPH. Do not limit yourself to a specific number, but avoid redundancies and irrelevant points.
 For each control, determine if it also helps fulfill any OTHER paragraphs from the ALL PARAGRAPHS list. When mapping to paragraphs, YOU MUST USE THE EXACT ID specified inside the [ID: ...] brackets.
-DO NOT generate duplicates or overly similar controls to the EXISTING CONTROLS provided in the context.`;
+DO NOT generate duplicates or overly similar controls to the EXISTING CONTROLS FOR FOCUS PARAGRAPH or OTHER EXISTING CONTROLS IN DATABASE provided in the context.`;
 
 			const userPrompt = `### Context ###
 FOCUS PARAGRAPH ID: ${focusParagraph.id}
@@ -439,7 +465,10 @@ ${ancestorsStr}
 SUBORDINATE PARAGRAPHS (Context):
 ${descendantsStr}
 
-EXISTING CONTROLS:
+EXISTING CONTROLS FOR FOCUS PARAGRAPH:
+${focusControlsStr}
+
+OTHER EXISTING CONTROLS IN DATABASE:
 ${existingControlsStr}
 ${fewShotParagraphs.length > 0 ? `\nEXAMPLES:\n${fewShotExamplesStr}\n` : ""}
 ALL PARAGRAPHS IN DATABASE:
