@@ -278,23 +278,26 @@ export async function generateControlsForParagraph(
 			const ExampleControlSchema = z.object({
 				title: z
 					.string()
-					.describe("Short title of the control (e.g. Password Policy)"),
+					.meta({ description: "Short title of the control (e.g. Password Policy)" }),
 				statement: z
 					.string()
-					.describe(
-						"Detailed, actionable statement defining the control requirement.",
-					),
+					.meta({
+						description:
+							"Detailed, actionable statement defining the control requirement.",
+					}),
 				implementationGuidance: z
 					.string()
 					.nullish()
-					.describe(
-						"Practical guidance or steps on how to implement this control. If there is no specific guidance to provide, this value MUST be null.",
-					),
+					.meta({
+						description:
+							"Practical guidance or steps on how to implement this control. If there is no specific guidance to provide, this value MUST be null.",
+					}),
 				mappedParagraphIds: z
-					.array(z.number().int().min(minParagraphId).max(maxParagraphId))
-					.describe(
-						"Array of exact IDs of paragraphs this control helps fulfill.",
-					),
+					.array(z.number().min(minParagraphId).max(maxParagraphId))
+					.meta({
+						description:
+							"Array of exact IDs of paragraphs this control helps fulfill.",
+					}),
 			});
 
 			const ExampleControlsArraySchema = z.array(ExampleControlSchema);
@@ -303,9 +306,10 @@ export async function generateControlsForParagraph(
 				? z.object({
 						reasoning: z
 							.string()
-							.describe(
-								"Step-by-step rationale for why this control is needed, how it fulfills the focus paragraph, how it differs from existing controls, and why it maps to the specified other paragraphs.",
-							),
+							.meta({
+								description:
+									"Step-by-step rationale for why this control is needed, how it fulfills the focus paragraph, how it differs from existing controls, and why it maps to the specified other paragraphs.",
+							}),
 						...ExampleControlSchema.shape,
 					})
 				: ExampleControlSchema;
