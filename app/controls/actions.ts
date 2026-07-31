@@ -293,7 +293,7 @@ export async function generateControlsForParagraph(
 							"Practical guidance or steps on how to implement this control. If there is no specific guidance to provide, this value MUST be null.",
 					}),
 				mappedParagraphIds: z
-					.array(z.number().min(minParagraphId).max(maxParagraphId))
+					.array(z.int().min(minParagraphId).max(maxParagraphId))
 					.meta({
 						description:
 							"Array of exact IDs of paragraphs this control helps fulfill.",
