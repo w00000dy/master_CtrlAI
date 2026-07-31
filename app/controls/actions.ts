@@ -227,6 +227,11 @@ export async function generateControlsForParagraph(
 				],
 			});
 
+			const paragraphIdStats = await prisma.paragraph.aggregate({
+				_min: { id: true },
+				_max: { id: true },
+			});
+
 			// Formatting context for LLM
 			const focusControlsStr =
 				focusParagraph.controls.length > 0
@@ -267,6 +272,9 @@ export async function generateControlsForParagraph(
 							.join("\n")
 					: "No ancestor paragraphs.";
 
+			const minParagraphId = paragraphIdStats._min.id ?? 1;
+			const maxParagraphId = paragraphIdStats._max.id ?? 1;
+
 			const ExampleControlSchema = z.object({
 				title: z
 					.string()
@@ -283,7 +291,7 @@ export async function generateControlsForParagraph(
 						"Practical guidance or steps on how to implement this control. If there is no specific guidance to provide, this value MUST be null.",
 					),
 				mappedParagraphIds: z
-					.array(z.number().int())
+					.array(z.number().int().min(minParagraphId).max(maxParagraphId))
 					.describe(
 						"Array of exact IDs of paragraphs this control helps fulfill.",
 					),
@@ -496,23 +504,7 @@ ${allParagraphsStr}
 					pIds.add(focusParagraph.id);
 				}
 
-				const invalidIds: number[] = [];
-				const validIds = Array.from(pIds).filter((id) => {
-					const isValid = allParagraphs.some((p) => p.id === id);
-					if (!isValid) {
-						invalidIds.push(id);
-					}
-					return isValid;
-				});
-
-				if (invalidIds.length > 0) {
-					console.warn(
-						`[LLM Mapping Warning] LLM returned invalid paragraph IDs for control "${ctrl.title}":`,
-						invalidIds,
-					);
-				}
-
-				if (validIds.length === 0) continue;
+				const validIds = Array.from(pIds);
 
 				const dbControl = await prisma.control.create({
 					data: {
