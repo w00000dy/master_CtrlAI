@@ -571,11 +571,5 @@ export async function deleteControls(ids: number[]) {
 }
 
 export async function deleteAllControls() {
-	try {
-		await prisma.control.deleteMany();
-		return { success: true };
-	} catch (error) {
-		console.error("Failed to delete all controls:", error);
-		return { success: false, error: "Failed to delete all controls." };
-	}
+	return prisma.control.deleteMany();
 }

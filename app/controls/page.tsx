@@ -126,12 +126,9 @@ export default function ControlsPage() {
 			)
 		)
 			return;
-		const res = await deleteAllControls();
-		if (res.success) {
-			fetchControls();
-		} else {
-			alert("Failed to delete all controls.");
-		}
+
+		await deleteAllControls();
+		fetchControls();
 	};
 
 	const toggleParagraph = (id: number) => {
