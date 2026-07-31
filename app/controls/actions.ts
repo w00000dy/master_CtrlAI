@@ -294,9 +294,12 @@ export async function generateControlsForParagraph(
 					}),
 				mappedParagraphIds: z
 					.array(z.int().min(minParagraphId).max(maxParagraphId))
+					.refine((ids) => ids.includes(focusParagraph.id), {
+						error: "Must include the focus paragraph ID.",
+					})
 					.meta({
 						description:
-							"Array of exact IDs of paragraphs this control helps fulfill.",
+							"Array of exact IDs of paragraphs this control helps fulfill. MUST include the FOCUS PARAGRAPH ID.",
 					}),
 			});
 
@@ -485,30 +488,11 @@ ${allParagraphsStr}
 			}
 
 			const resultText = response.content;
-			let parsedJson: z.infer<typeof ControlsArraySchema>;
-
-			try {
-				parsedJson = ControlsArraySchema.parse(JSON.parse(resultText));
-			} catch (error) {
-				console.error("Failed to parse JSON from LLM:", resultText, error);
-				return { success: false, error: "LLM returned invalid format." };
-			}
+			const parsedJson = ControlsArraySchema.parse(JSON.parse(resultText));
 
 			const createdControls = [];
 			for (const ctrl of parsedJson) {
-				const mappedArray = Array.isArray(ctrl.mappedParagraphIds)
-					? ctrl.mappedParagraphIds
-					: [];
-				const pIds = new Set<number>(mappedArray);
-
-				if (!pIds.has(focusParagraph.id)) {
-					console.warn(
-						`[LLM Mapping Warning] LLM forgot to include the focus paragraph ID for control "${ctrl.title}". Adding it automatically.`,
-					);
-					pIds.add(focusParagraph.id);
-				}
-
-				const validIds = Array.from(pIds);
+				const validIds = Array.from(new Set(ctrl.mappedParagraphIds));
 
 				const dbControl = await prisma.control.create({
 					data: {
