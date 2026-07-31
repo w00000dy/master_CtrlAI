@@ -278,20 +278,17 @@ export async function generateControlsForParagraph(
 			const ExampleControlSchema = z.object({
 				title: z
 					.string()
-					.meta({ description: "Short title of the control (e.g. Password Policy)" }),
-				statement: z
-					.string()
 					.meta({
-						description:
-							"Detailed, actionable statement defining the control requirement.",
+						description: "Short title of the control (e.g. Password Policy)",
 					}),
-				implementationGuidance: z
-					.string()
-					.nullish()
-					.meta({
-						description:
-							"Practical guidance or steps on how to implement this control. If there is no specific guidance to provide, this value MUST be null.",
-					}),
+				statement: z.string().meta({
+					description:
+						"Detailed, actionable statement defining the control requirement.",
+				}),
+				implementationGuidance: z.string().nullish().meta({
+					description:
+						"Practical guidance or steps on how to implement this control. If there is no specific guidance to provide, this value MUST be null.",
+				}),
 				mappedParagraphIds: z
 					.array(z.int().min(minParagraphId).max(maxParagraphId))
 					.refine((ids) => ids.includes(focusParagraph.id), {
@@ -307,12 +304,10 @@ export async function generateControlsForParagraph(
 
 			const ControlSchema = useCoT
 				? z.object({
-						reasoning: z
-							.string()
-							.meta({
-								description:
-									"Step-by-step rationale for why this control is needed, how it fulfills the focus paragraph, how it differs from existing controls, and why it maps to the specified other paragraphs.",
-							}),
+						reasoning: z.string().meta({
+							description:
+								"Step-by-step rationale for why this control is needed, how it fulfills the focus paragraph, how it differs from existing controls, and why it maps to the specified other paragraphs.",
+						}),
 						...ExampleControlSchema.shape,
 					})
 				: ExampleControlSchema;
@@ -538,26 +533,21 @@ export async function updateControl(
 		paragraphIds?: number[];
 	},
 ) {
-	try {
-		const control = await prisma.control.update({
-			where: { id },
-			data: {
-				title: data.title,
-				statement: data.statement,
-				implementationGuidance: data.implementationGuidance,
-				...(data.paragraphIds && {
-					paragraphs: {
-						set: [], // clear existing
-						connect: data.paragraphIds.map((pid) => ({ id: pid })),
-					},
-				}),
-			},
-		});
-		return { success: true, control };
-	} catch (error) {
-		console.error("Failed to update control:", error);
-		return { success: false, error: "Failed to update control." };
-	}
+	const control = await prisma.control.update({
+		where: { id },
+		data: {
+			title: data.title,
+			statement: data.statement,
+			implementationGuidance: data.implementationGuidance,
+			...(data.paragraphIds && {
+				paragraphs: {
+					set: [],
+					connect: data.paragraphIds.map((pid) => ({ id: pid })),
+				},
+			}),
+		},
+	});
+	return { success: true, control };
 }
 
 export async function deleteControl(id: number) {
