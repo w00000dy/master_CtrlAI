@@ -276,11 +276,9 @@ export async function generateControlsForParagraph(
 			const maxParagraphId = paragraphIdStats._max.id ?? 1;
 
 			const ExampleControlSchema = z.object({
-				title: z
-					.string()
-					.meta({
-						description: "Short title of the control (e.g. Password Policy)",
-					}),
+				title: z.string().meta({
+					description: "Short title of the control (e.g. Password Policy)",
+				}),
 				statement: z.string().meta({
 					description:
 						"Detailed, actionable statement defining the control requirement.",
