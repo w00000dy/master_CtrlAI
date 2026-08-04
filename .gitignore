@@ -48,3 +48,5 @@ data/documents/*
 /generated/prisma
 
 /tr-03183-1/
+
+/prisma/ERD.*
