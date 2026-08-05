@@ -112,20 +112,6 @@ export function mapCraRefToParagraphs(
 		if (matchesMarker(p.section.marker, craRef)) score += 5;
 		if (matchesMarker(p.section.title, craRef)) score += 5;
 
-		// Fallback for strong text match if no markers matched at all
-		if (score === 0) {
-			const nQuery = craRef.toLowerCase().replace(/[^a-z0-9]/g, "");
-			if (
-				nQuery.length > 8 &&
-				p.text
-					.toLowerCase()
-					.replace(/[^a-z0-9]/g, "")
-					.includes(nQuery)
-			) {
-				score += 1;
-			}
-		}
-
 		if (score > 0) {
 			scoredParagraphs.push({ id: p.id, score });
 			if (score > bestScore) {
@@ -135,9 +121,6 @@ export function mapCraRefToParagraphs(
 	}
 
 	const matchedIds: number[] = [];
-	// Only add paragraphs that achieved the best score for this craRef.
-	// We require a minimum score of 10
-	// (meaning the paragraph or its parent must have been exactly matched).
 	const minRequiredScore = 10;
 	if (bestScore >= minRequiredScore) {
 		for (const sp of scoredParagraphs) {
