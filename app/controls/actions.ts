@@ -10,6 +10,7 @@ export async function getControls() {
 		const [controls, allParagraphs] = await Promise.all([
 			prisma.control.findMany({
 				include: {
+					guideline: true,
 					paragraphs: {
 						include: {
 							section: {
@@ -114,6 +115,7 @@ export async function getControlsForParagraph(paragraphId: number) {
 				},
 			},
 			include: {
+				guideline: true,
 				paragraphs: {
 					include: {
 						section: { include: { document: true } },

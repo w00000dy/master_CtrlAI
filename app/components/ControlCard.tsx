@@ -8,6 +8,7 @@ import {
 
 export type ControlData = Control & {
 	paragraphs: ParagraphWithContext[];
+	guideline?: { title: string } | null;
 };
 
 export function ControlCard({
@@ -73,8 +74,13 @@ export function ControlCard({
 									</span>
 								)}
 								{control.guidelineId ? (
-									<span className="px-2 py-1 bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400 text-xs font-semibold rounded-md border border-blue-200 dark:border-blue-800/50">
-										Guideline
+									<span
+										className="px-2 py-1 bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400 text-xs font-semibold rounded-md border border-blue-200 dark:border-blue-800/50"
+										title={control.guideline?.title || "Guideline"}
+									>
+										{control.guideline?.title
+											? `Guideline: ${control.guideline.title.substring(0, 30)}${control.guideline.title.length > 30 ? "..." : ""}`
+											: "Guideline"}
 									</span>
 								) : (
 									<span className="px-2 py-1 bg-purple-50 text-purple-700 dark:bg-purple-900/20 dark:text-purple-400 text-xs font-semibold rounded-md border border-purple-200 dark:border-purple-800/50">
