@@ -88,11 +88,16 @@ export default function BenchmarkResultsPage() {
 	const correctControls = controlResults.filter(
 		(r) => r.isTechnicallyCorrect,
 	).length;
+	const measurableControls = controlResults.filter(
+		(r) => r.isMeasurable,
+	).length;
 
 	const actionabilityScore =
 		totalControls > 0 ? (actionableControls / totalControls) * 100 : 0;
 	const correctnessScore =
 		totalControls > 0 ? (correctControls / totalControls) * 100 : 0;
+	const measurabilityScore =
+		totalControls > 0 ? (measurableControls / totalControls) * 100 : 0;
 
 	const relevanceScores = controlResults.map((r) => {
 		const totalMapped = r.llmControl.paragraphs.length;
@@ -132,10 +137,11 @@ export default function BenchmarkResultsPage() {
 			) : (
 				<div className="space-y-12">
 					{/* KPI Dashboard */}
-					<div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+					<div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
 						<Gauge value={avgRelevanceScore} label="Relevance Score" />
 						<Gauge value={actionabilityScore} label="Actionability Score" />
 						<Gauge value={correctnessScore} label="Technical Correctness" />
+						<Gauge value={measurabilityScore} label="Measurability Score" />
 						<Gauge value={completenessScore} label="Completeness Score" />
 						<Gauge value={efficiencyScore} label="Efficiency (No Redundancy)" />
 					</div>
@@ -171,6 +177,13 @@ export default function BenchmarkResultsPage() {
 												{result.isTechnicallyCorrect
 													? "✓ Correct"
 													: "✗ Incorrect"}
+											</span>
+											<span
+												className={`px-2 py-1 rounded-full ${result.isMeasurable ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"}`}
+											>
+												{result.isMeasurable
+													? "✓ Measurable"
+													: "✗ Not Measurable"}
 											</span>
 										</div>
 

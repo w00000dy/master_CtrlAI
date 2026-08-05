@@ -78,6 +78,7 @@ export default function BenchmarkPage() {
 	const [isTechnicallyCorrect, setIsTechnicallyCorrect] = useState<
 		boolean | null
 	>(null);
+	const [isMeasurable, setIsMeasurable] = useState<boolean | null>(null);
 	const [selectedCoveredControls, setSelectedCoveredControls] = useState<
 		Set<number>
 	>(new Set());
@@ -110,6 +111,7 @@ export default function BenchmarkPage() {
 				setRelevantParagraphs(new Set());
 				setIsActionable(null);
 				setIsTechnicallyCorrect(null);
+				setIsMeasurable(null);
 				setSelectedCoveredControls(new Set());
 			} else if (nextTask.type === "PARAGRAPH") {
 				// Reset paragraph form
@@ -154,7 +156,8 @@ export default function BenchmarkPage() {
 		if (
 			task?.type !== "CONTROL" ||
 			isActionable === null ||
-			isTechnicallyCorrect === null
+			isTechnicallyCorrect === null ||
+			isMeasurable === null
 		) {
 			return;
 		}
@@ -165,6 +168,7 @@ export default function BenchmarkPage() {
 			relevantParagraphIds: Array.from(relevantParagraphs),
 			isActionable,
 			isTechnicallyCorrect,
+			isMeasurable,
 		});
 
 		await loadTask();
@@ -515,6 +519,53 @@ export default function BenchmarkPage() {
 											</label>
 										</div>
 									</div>
+
+									<div className="bg-zinc-50 dark:bg-zinc-800/50 p-4 rounded-lg mt-4">
+										<p className="font-medium mb-1">
+											Is the control measurable?
+										</p>
+										<CriteriaDetails className="mb-3 group">
+											<p className="font-semibold text-emerald-700 dark:text-emerald-400">
+												✅ DO select &apos;Yes (Measurable)&apos; if:
+											</p>
+											<ul className="list-disc pl-4 space-y-1 mt-1 mb-3">
+												<li>
+													It is possible to objectively verify whether the control is implemented (e.g., via an automated test, a log entry, or a clear configuration check).
+												</li>
+											</ul>
+											<p className="font-semibold text-rose-700 dark:text-rose-400 border-t border-blue-200 dark:border-blue-800/50 pt-2 mt-2">
+												❌ Do NOT select &apos;Yes&apos; (select &apos;No&apos;)
+												if:
+											</p>
+											<ul className="list-disc pl-4 space-y-1 mt-1">
+												<li>
+													Verification relies purely on subjective judgment, vague statements, or manual assertion without concrete evidence.
+												</li>
+											</ul>
+										</CriteriaDetails>
+										<div className="flex gap-4">
+											<label className="flex items-center">
+												<input
+													type="radio"
+													name="measurable"
+													checked={isMeasurable === true}
+													onChange={() => setIsMeasurable(true)}
+													className="mr-2"
+												/>
+												Yes (Measurable)
+											</label>
+											<label className="flex items-center">
+												<input
+													type="radio"
+													name="measurable"
+													checked={isMeasurable === false}
+													onChange={() => setIsMeasurable(false)}
+													className="mr-2"
+												/>
+												No (Not measurable)
+											</label>
+										</div>
+									</div>
 								</div>
 							</div>
 
@@ -523,7 +574,7 @@ export default function BenchmarkPage() {
 									type="button"
 									onClick={submitControl}
 									disabled={
-										isActionable === null || isTechnicallyCorrect === null
+										isActionable === null || isTechnicallyCorrect === null || isMeasurable === null
 									}
 									className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
 								>

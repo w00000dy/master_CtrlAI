@@ -81,6 +81,7 @@ model BenchmarkResult {
 
   isActionable         Boolean
   isTechnicallyCorrect Boolean
+  isMeasurable         Boolean
 
   createdAt DateTime @default(now())
 }
