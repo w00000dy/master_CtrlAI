@@ -530,7 +530,9 @@ export default function BenchmarkPage() {
 											</p>
 											<ul className="list-disc pl-4 space-y-1 mt-1 mb-3">
 												<li>
-													It is possible to objectively verify whether the control is implemented (e.g., via an automated test, a log entry, or a clear configuration check).
+													It is possible to objectively verify whether the
+													control is implemented (e.g., via an automated test, a
+													log entry, or a clear configuration check).
 												</li>
 											</ul>
 											<p className="font-semibold text-rose-700 dark:text-rose-400 border-t border-blue-200 dark:border-blue-800/50 pt-2 mt-2">
@@ -539,7 +541,9 @@ export default function BenchmarkPage() {
 											</p>
 											<ul className="list-disc pl-4 space-y-1 mt-1">
 												<li>
-													Verification relies purely on subjective judgment, vague statements, or manual assertion without concrete evidence.
+													Verification relies purely on subjective judgment,
+													vague statements, or manual assertion without concrete
+													evidence.
 												</li>
 											</ul>
 										</CriteriaDetails>
@@ -574,7 +578,9 @@ export default function BenchmarkPage() {
 									type="button"
 									onClick={submitControl}
 									disabled={
-										isActionable === null || isTechnicallyCorrect === null || isMeasurable === null
+										isActionable === null ||
+										isTechnicallyCorrect === null ||
+										isMeasurable === null
 									}
 									className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
 								>
