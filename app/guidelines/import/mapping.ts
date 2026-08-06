@@ -10,13 +10,9 @@ export function matchesMarker(
 	// e.g., "Part I" should not match "Part II"
 	if (m.length > 5) {
 		const escapedM = m.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-		const regex = new RegExp(`(^|[^a-z0-9])(${escapedM})([^a-z0-9]|$)`, "i");
-		const match = ref.match(regex);
-		if (match && match.index !== undefined) {
-			let start = match.index;
-			if (match[1].length > 0) start += match[1].length;
-			return { start, end: start + match[2].length };
-		}
+		const regexStr = `(^|[^a-z0-9])(${escapedM})([^a-z0-9]|$)`;
+		const matchRange = getMatchRange(ref, regexStr);
+		if (matchRange) return matchRange;
 	}
 
 	// For short markers, extract the alphanumeric core to avoid punctuation mismatches
@@ -36,6 +32,13 @@ export function matchesMarker(
 		regexStr = `(^|[^a-z0-9])(\\(${escaped}\\)|${escaped}\\.|${escaped}\\))([^a-z0-9]|$)`;
 	}
 
+	return getMatchRange(ref, regexStr);
+}
+
+function getMatchRange(
+	ref: string,
+	regexStr: string,
+): { start: number; end: number } | null {
 	const regex = new RegExp(regexStr, "i");
 	const match = ref.match(regex);
 	if (match && match.index !== undefined) {
