@@ -173,7 +173,7 @@ describe("mapCraRefToParagraph - Basic", () => {
 	});
 
 	describe("returns null if order of parent paragraph and paragraph reference is wrong", () => {
-		const cases = ["10 a 2", "a 2 10"];
+		const cases = ["10 a 2", "a 2 10", "Article 10 (a)(2)"];
 		for (const ref of cases) {
 			test(`returns null for incorrect order "${ref}"`, () => {
 				assert.equal(mapCraRefToParagraph(ref, mockParagraphs), null);
@@ -239,6 +239,58 @@ describe("mapCraRefToParagraph - Basic", () => {
 		const result = mapCraRefToParagraph("Article 10(1)", nullSectionParagraphs);
 		assert.equal(result, null);
 	});
+
+	test("handles section markers with attached numbers (e.g. Title1)", () => {
+		const result = mapCraRefToParagraph("Title1 1 2", [
+			{
+				id: 99,
+				marker: "2",
+				section: { marker: "Title1" },
+				parentParagraph: null,
+			},
+		]);
+		assert.equal(result, null);
+	});
+
+	test("handles section markers with no numbers (e.g. Title)", () => {
+		const result = mapCraRefToParagraph("Title 2", [
+			{
+				id: 100,
+				marker: "2",
+				section: { marker: "Title" },
+				parentParagraph: null,
+			},
+		]);
+		assert.equal(result, 100);
+	});
+
+	test("returns null and logs error if match is ambiguous", () => {
+		const ambiguousParagraphs: ParagraphForMapping[] = [
+			{
+				id: 1,
+				marker: "1",
+				section: { marker: "Article 10" },
+				parentParagraph: null,
+			},
+			{
+				id: 2,
+				marker: "1",
+				section: { marker: "Article 10" },
+				parentParagraph: null,
+			},
+		];
+		const originalError = console.error;
+		let logged = false;
+		console.error = () => {
+			logged = true;
+		};
+
+		const result = mapCraRefToParagraph("Article 10(1)", ambiguousParagraphs);
+
+		console.error = originalError;
+		assert.equal(result, null);
+		assert.equal(logged, true);
+	});
 });
 
 describe("mapCraRefToParagraph - CRA", () => {
@@ -247,7 +299,11 @@ describe("mapCraRefToParagraph - CRA", () => {
 			{ ref: "CRA Annex I Part I (1)", expectedId: 25 },
 			{ ref: "CRA Annex I Part I (2) point (d)", expectedId: 30 },
 			{ ref: "CRA Annex I Part I (2) point (e)", expectedId: 31 },
-			{ ref: "CRA Annex I Part  I   (2)   point   (e)     ", expectedId: 31, desc: "with extra whitespace" },
+			{
+				ref: "CRA Annex I Part  I   (2)   point   (e)     ",
+				expectedId: 31,
+				desc: "with extra whitespace",
+			},
 			{ ref: "CRA Annex I Part II (2)", expectedId: 42 },
 		];
 		for (const { ref, expectedId, desc } of cases) {
@@ -260,7 +316,7 @@ describe("mapCraRefToParagraph - CRA", () => {
 	describe("returns null when no direct match is found", () => {
 		const cases = [
 			"CRA Article 13 (3) & (4)",
-			"CRA Annex I Part I (2) point (o)"
+			"CRA Annex I Part I (2) point (o)",
 		];
 		for (const ref of cases) {
 			test(`returns null for unmatched reference "${ref}"`, () => {
@@ -270,10 +326,7 @@ describe("mapCraRefToParagraph - CRA", () => {
 	});
 
 	describe("returns null when craRef is erroneous", () => {
-		const cases = [
-			"CRA Annex I (2) point (e)",
-			"CRA Annex II (2)"
-		];
+		const cases = ["CRA Annex I (2) point (e)", "CRA Annex II (2)"];
 		for (const ref of cases) {
 			test(`returns null for erroneous reference "${ref}"`, () => {
 				assert.equal(mapCraRefToParagraph(ref, craParagraphs), null);
