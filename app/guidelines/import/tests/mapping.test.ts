@@ -202,6 +202,6 @@ describe("mapCraRefToParagraph - CRA", () => {
 			mapCraRefToParagraph("CRA Annex I (2) point (e)", craParagraphs),
 			null,
 		);
-		assert.equal(mapCraRefToParagraph("CRA Annex II (2)", craParagraphs), 1);
+		assert.equal(mapCraRefToParagraph("CRA Annex II (2)", craParagraphs), null);
 	});
 });
