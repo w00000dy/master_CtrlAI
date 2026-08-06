@@ -137,13 +137,17 @@ export async function importGuidelineYaml(formData: FormData) {
 					matchedParagraphIds.add(matchedId);
 				} else {
 					console.warn(
-						`Could not map control "${ctrl.title}" (id: ${ctrl.id}) with CRA reference "${craRef}" to a paragraph in the database for guideline "${guidelineTitle}".`,
+						`Could not map CRA reference "${craRef}" to a paragraph.`,
 					);
 				}
 			}
 
 			if (matchedParagraphIds.size > 0) {
 				mappedCount++;
+			} else {
+				console.warn(
+					`Could not map control "${ctrl.title}" (id: ${ctrl.id}) with CRA reference "${craRefs.join(", ")}" to a paragraph in the database for guideline "${guidelineTitle}".`,
+				);
 			}
 
 			// Statements are usually an array of strings
