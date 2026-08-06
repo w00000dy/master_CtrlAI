@@ -84,7 +84,6 @@ function extractNumber(text: string | null | undefined): string | null {
 export type ParagraphForMapping = {
 	id: number;
 	marker: string | null;
-	text: string;
 	section: {
 		marker: string | null;
 	};

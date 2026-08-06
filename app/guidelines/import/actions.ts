@@ -107,7 +107,6 @@ export async function importGuidelineYaml(formData: FormData) {
 			select: {
 				id: true,
 				marker: true,
-				text: true,
 				section: {
 					select: {
 						marker: true,

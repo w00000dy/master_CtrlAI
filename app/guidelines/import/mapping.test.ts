@@ -8,28 +8,24 @@ describe("mapCraRefToParagraph", () => {
 		{
 			id: 1,
 			marker: "1",
-			text: "This is the first paragraph of Article 10.",
 			section: { marker: "Article 10" },
 			parentParagraph: null,
 		},
 		{
 			id: 2,
 			marker: "2",
-			text: "This is the second paragraph of Article 10.",
 			section: { marker: "Article 10" },
 			parentParagraph: null,
 		},
 		{
 			id: 3,
 			marker: "a",
-			text: "This is a subparagraph of paragraph 2.",
 			section: { marker: "Article 10" },
 			parentParagraph: { marker: "2" },
 		},
 		{
 			id: 4,
 			marker: "1",
-			text: "First paragraph of Article 11.",
 			section: { marker: "Article 11" },
 			parentParagraph: null,
 		},
@@ -100,7 +96,6 @@ describe("mapCraRefToParagraph", () => {
 			{
 				id: 5,
 				marker: "1",
-				text: "Text",
 				section: { marker: null },
 				parentParagraph: null,
 			},
