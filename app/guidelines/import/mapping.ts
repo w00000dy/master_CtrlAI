@@ -1,8 +1,8 @@
 export function matchesMarker(
 	marker: string | null | undefined,
 	craRef: string,
-): boolean {
-	if (!marker) return false;
+): { start: number; end: number } | null {
+	if (!marker) return null;
 	const m = marker.toLowerCase().trim();
 	const ref = craRef.toLowerCase();
 
@@ -10,16 +10,19 @@ export function matchesMarker(
 	// e.g., "Part I" should not match "Part II"
 	if (m.length > 5) {
 		const escapedM = m.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-		const regex = new RegExp(`(^|[^a-z0-9])${escapedM}([^a-z0-9]|$)`, "i");
-		if (regex.test(ref)) {
-			return true;
+		const regex = new RegExp(`(^|[^a-z0-9])(${escapedM})([^a-z0-9]|$)`, "i");
+		const match = ref.match(regex);
+		if (match && match.index !== undefined) {
+			let start = match.index;
+			if (match[1].length > 0) start += match[1].length;
+			return { start, end: start + match[2].length };
 		}
 	}
 
 	// For short markers, extract the alphanumeric core to avoid punctuation mismatches
 	// e.g. "1." -> "1", "a)" -> "a"
 	const coreMarker = m.replace(/[^a-z0-9]/g, "");
-	if (!coreMarker) return false;
+	if (!coreMarker) return null;
 
 	const escaped = coreMarker.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
@@ -34,7 +37,45 @@ export function matchesMarker(
 	}
 
 	const regex = new RegExp(regexStr, "i");
-	return regex.test(ref);
+	const match = ref.match(regex);
+	if (match && match.index !== undefined) {
+		let start = match.index;
+		if (match[1].length > 0) start += match[1].length;
+		return { start, end: start + match[2].length };
+	}
+	return null;
+}
+
+function getPotentialMarkers(
+	text: string,
+): { token: string; start: number; end: number }[] {
+	const results: { token: string; start: number; end: number }[] = [];
+	const regex = /[a-z0-9]+/gi;
+	const matches = text.matchAll(regex);
+	for (const match of matches) {
+		const token = match[0];
+		if (
+			/^[0-9]+$/.test(token) ||
+			/^[a-z]$/i.test(token) ||
+			/^(i|ii|iii|iv|v|vi|vii|viii|ix|x)$/i.test(token)
+		) {
+			results.push({
+				token,
+				start: match.index,
+				end: match.index + token.length,
+			});
+		}
+	}
+	return results;
+}
+
+function extractNumber(text: string | null | undefined): string | null {
+	if (!text) return null;
+	const match = text.match(/(?:\s|^)(\d+|[ivx]+)(?:\s|$)/i);
+	if (match) return match[1];
+	const digits = text.match(/\d+/);
+	if (digits) return digits[0];
+	return null;
 }
 
 export type ParagraphForMapping = {
@@ -43,17 +84,16 @@ export type ParagraphForMapping = {
 	text: string;
 	section: {
 		marker: string | null;
-		title: string | null;
 	};
 	parentParagraph: {
 		marker: string | null;
 	} | null;
 };
 
-export function mapCraRefToParagraphs(
+export function mapCraRefToParagraph(
 	craRef: string,
 	allParagraphs: ParagraphForMapping[],
-): number[] {
+): number | null {
 	let bestScore = 0;
 	const scoredParagraphs: { id: number; score: number }[] = [];
 
@@ -61,6 +101,8 @@ export function mapCraRefToParagraphs(
 	// (e.g. "Article 10(2)" -> true, "Article 10" -> false)
 	const sectionPattern =
 		/(article\s+\d+|art\.?\s*\d+|annex\s+[ivx]+|part\s+[ivx]+|chapter\s+[ivx\d]+)/gi;
+
+	const potentialMarkers = getPotentialMarkers(craRef);
 
 	for (const p of allParagraphs) {
 		// Check if section constraints are met
@@ -81,13 +123,10 @@ export function mapCraRefToParagraphs(
 			let sectionSatisfied = false;
 			for (const sr of sectionRefs) {
 				const markerStr = p.section.marker?.toLowerCase() || "";
-				const titleStr = p.section.title?.toLowerCase() || "";
 
 				if (
 					markerStr.includes(sr) ||
-					titleStr.includes(sr) ||
-					matchesMarker(p.section.marker, sr) ||
-					matchesMarker(p.section.title, sr)
+					matchesMarker(p.section.marker, sr) !== null
 				) {
 					sectionSatisfied = true;
 					break;
@@ -99,20 +138,81 @@ export function mapCraRefToParagraphs(
 		}
 
 		let score = 0;
+		let isValidOrder = true;
+		const matchRanges: { start: number; end: number }[] = [];
 
 		// Most specific match: the paragraph marker itself
-		if (matchesMarker(p.marker, craRef)) score += 10;
-
-		// Next: the parent paragraph's marker
-		if (p.parentParagraph && matchesMarker(p.parentParagraph.marker, craRef)) {
-			score += 5;
+		const paraMatch = matchesMarker(p.marker, craRef);
+		if (paraMatch !== null) {
+			score += 10;
+			matchRanges.push(paraMatch);
 		}
 
-		// Less specific: the section marker or title
-		if (matchesMarker(p.section.marker, craRef)) score += 5;
-		if (matchesMarker(p.section.title, craRef)) score += 5;
+		// Next: the parent paragraph's marker
+		let parentMatch: { start: number; end: number } | null = null;
+		if (p.parentParagraph) {
+			parentMatch = matchesMarker(p.parentParagraph.marker, craRef);
+			if (parentMatch !== null) {
+				score += 5;
+				matchRanges.push(parentMatch);
+				if (paraMatch !== null && parentMatch.start > paraMatch.start) {
+					isValidOrder = false;
+				}
+			}
+		}
 
-		if (score > 0) {
+		// Less specific: the section marker
+		const sectionMarkerMatch = matchesMarker(p.section.marker, craRef);
+		const sectionNum = extractNumber(p.section.marker);
+		const sectionNumMatch = sectionNum
+			? matchesMarker(sectionNum, craRef)
+			: null;
+
+		let activeSectionMatch: { start: number; end: number } | null = null;
+
+		if (sectionMarkerMatch !== null) {
+			score += 5;
+			activeSectionMatch = sectionMarkerMatch;
+			matchRanges.push(sectionMarkerMatch);
+		} else if (sectionNumMatch !== null) {
+			score += 5;
+			activeSectionMatch = sectionNumMatch;
+			matchRanges.push(sectionNumMatch);
+		}
+
+		if (activeSectionMatch !== null) {
+			if (paraMatch !== null && activeSectionMatch.start > paraMatch.start) {
+				isValidOrder = false;
+			}
+			if (
+				parentMatch !== null &&
+				activeSectionMatch.start > parentMatch.start
+			) {
+				isValidOrder = false;
+			}
+		}
+
+		// Check for intervening potential markers that shouldn't be there
+		if (isValidOrder && matchRanges.length > 0) {
+			matchRanges.sort((a, b) => a.start - b.start);
+
+			const gaps = [{ start: 0, end: matchRanges[0].start }];
+			for (let i = 0; i < matchRanges.length - 1; i++) {
+				gaps.push({ start: matchRanges[i].end, end: matchRanges[i + 1].start });
+			}
+
+			for (const gap of gaps) {
+				for (const pm of potentialMarkers) {
+					if (pm.start >= gap.start && pm.end <= gap.end) {
+						isValidOrder = false;
+						break;
+					}
+				}
+				if (!isValidOrder) break;
+			}
+		}
+
+		if (score > 0 && isValidOrder) {
 			scoredParagraphs.push({ id: p.id, score });
 			if (score > bestScore) {
 				bestScore = score;
@@ -120,15 +220,23 @@ export function mapCraRefToParagraphs(
 		}
 	}
 
-	const matchedIds: number[] = [];
+	let bestMatchId: number | null = null;
 	const minRequiredScore = 10;
+
 	if (bestScore >= minRequiredScore) {
 		for (const sp of scoredParagraphs) {
 			if (sp.score === bestScore) {
-				matchedIds.push(sp.id);
+				if (bestMatchId === null) {
+					bestMatchId = sp.id;
+				} else {
+					console.error(
+						`Ambiguous match for CRA reference "${craRef}". Multiple paragraphs found with best score ${bestScore}.`,
+					);
+					return null;
+				}
 			}
 		}
 	}
 
-	return matchedIds;
+	return bestMatchId;
 }

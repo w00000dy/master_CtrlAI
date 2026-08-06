@@ -1,84 +1,146 @@
 import assert from "node:assert/strict";
 import { describe, test } from "node:test";
 import type { ParagraphForMapping } from "./mapping.ts";
-import { mapCraRefToParagraphs, matchesMarker } from "./mapping.ts";
+import { mapCraRefToParagraph, matchesMarker } from "./mapping.ts";
 
-describe("mapCraRefToParagraphs", () => {
+describe("mapCraRefToParagraph", () => {
 	const mockParagraphs: ParagraphForMapping[] = [
 		{
 			id: 1,
 			marker: "1",
 			text: "This is the first paragraph of Article 10.",
-			section: { marker: "Article 10", title: "Security Requirements" },
+			section: { marker: "Article 10" },
 			parentParagraph: null,
 		},
 		{
 			id: 2,
 			marker: "2",
 			text: "This is the second paragraph of Article 10.",
-			section: { marker: "Article 10", title: "Security Requirements" },
+			section: { marker: "Article 10" },
 			parentParagraph: null,
 		},
 		{
 			id: 3,
 			marker: "a",
 			text: "This is a subparagraph of paragraph 2.",
-			section: { marker: "Article 10", title: "Security Requirements" },
+			section: { marker: "Article 10" },
 			parentParagraph: { marker: "2" },
 		},
 		{
 			id: 4,
 			marker: "1",
 			text: "First paragraph of Article 11.",
-			section: { marker: "Article 11", title: "Reporting" },
+			section: { marker: "Article 11" },
 			parentParagraph: null,
 		},
 	];
 
-	test("returns empty array if no specific paragraph is requested", () => {
-		const result = mapCraRefToParagraphs("Article 10", mockParagraphs);
-		assert.deepEqual(result, []);
+	test("returns null if no specific paragraph is requested", () => {
+		const result = mapCraRefToParagraph("Article 10", mockParagraphs);
+		assert.equal(result, null);
+	});
+
+	test("returns null if article does not exist", () => {
+		assert.equal(mapCraRefToParagraph("Article 1", mockParagraphs), null);
+		assert.equal(mapCraRefToParagraph("Article 1 (2)", mockParagraphs), null);
+		assert.equal(mapCraRefToParagraph("Article 1 (2) a", mockParagraphs), null);
+	});
+
+	test("returns null if order of section and paragraph reference is wrong", () => {
+		const result = mapCraRefToParagraph("2 10", mockParagraphs);
+		assert.equal(result, null);
+	});
+
+	test("returns null if order of parent paragraph and paragraph reference is wrong", () => {
+		assert.equal(mapCraRefToParagraph("a 10 2", mockParagraphs), null);
+		assert.equal(mapCraRefToParagraph("10 a 2", mockParagraphs), null);
+		assert.equal(mapCraRefToParagraph("a 2 10", mockParagraphs), null);
+	});
+
+	test("matches section and paragraph reference without section name", () => {
+		assert.equal(mapCraRefToParagraph("10 2", mockParagraphs), 2);
+		assert.equal(mapCraRefToParagraph("10 2 a", mockParagraphs), 2);
 	});
 
 	test("maps to a specific paragraph when perfectly matched", () => {
-		const result = mapCraRefToParagraphs("Article 10(2)", mockParagraphs);
-		assert.deepEqual(result, [2]);
+		const result = mapCraRefToParagraph("Article 10(2)", mockParagraphs);
+		assert.equal(result, 2);
 	});
 
 	test("maps to a child paragraph when matched", () => {
-		const result = mapCraRefToParagraphs("Article 10(2)(a)", mockParagraphs);
-		assert.deepEqual(result, [3]);
+		const result = mapCraRefToParagraph("Article 10(2)(a)", mockParagraphs);
+		assert.equal(result, 3);
 	});
 
-	test("returns empty array if specific paragraph is requested but not found", () => {
-		const result = mapCraRefToParagraphs("Article 10(99)", mockParagraphs);
-		assert.deepEqual(result, []);
+	test("returns null if specific paragraph is requested but not found", () => {
+		const result = mapCraRefToParagraph("Article 10(9)", mockParagraphs);
+		assert.equal(result, null);
 	});
 
 	test("does not cross section boundaries", () => {
-		const result = mapCraRefToParagraphs("Article 11(1)", mockParagraphs);
-		assert.deepEqual(result, [4]);
+		const result = mapCraRefToParagraph("Article 11(1)", mockParagraphs);
+		assert.equal(result, 4);
+	});
+
+	test("matches short markers", () => {
+		const result = mapCraRefToParagraph("Art. 11(1)", mockParagraphs);
+		assert.equal(result, 4);
+	});
+
+	test("handles craRef without section pattern", () => {
+		const result = mapCraRefToParagraph(
+			"Just some random text without markers",
+			mockParagraphs,
+		);
+		assert.equal(result, null);
+	});
+
+	test("handles sections with null marker", () => {
+		const nullSectionParagraphs: ParagraphForMapping[] = [
+			{
+				id: 5,
+				marker: "1",
+				text: "Text",
+				section: { marker: null },
+				parentParagraph: null,
+			},
+		];
+		const result = mapCraRefToParagraph("Article 10(1)", nullSectionParagraphs);
+		assert.equal(result, null);
 	});
 });
 
 describe("matchesMarker", () => {
 	const assertNotMatchesBoth = (a: string, b: string) => {
-		assert.equal(matchesMarker(a, b), false, `matchesMarker("${a}", "${b}") should be false`);
-		assert.equal(matchesMarker(b, a), false, `matchesMarker("${b}", "${a}") should be false`);
+		assert.equal(
+			matchesMarker(a, b),
+			null,
+			`matchesMarker("${a}", "${b}") should be null`,
+		);
+		assert.equal(
+			matchesMarker(b, a),
+			null,
+			`matchesMarker("${b}", "${a}") should be null`,
+		);
 	};
 
-	test("returns false for null or undefined marker", () => {
-		assert.equal(matchesMarker(null, "Article 10"), false);
-		assert.equal(matchesMarker(undefined, "Article 10"), false);
+	test("returns null for null or undefined marker", () => {
+		assert.equal(matchesMarker(null, "Article 10"), null);
+		assert.equal(matchesMarker(undefined, "Article 10"), null);
 		assertNotMatchesBoth("", "Article 10");
 	});
 
+	test("returns null when short marker has no alphanumeric characters", () => {
+		assert.equal(matchesMarker("()", "Article 10"), null);
+		assert.equal(matchesMarker("...", "Article 10"), null);
+	});
+
 	test("matches long markers with word boundaries", () => {
-		assert.equal(matchesMarker("Article 10", "Article 10"), true);
-		assert.equal(matchesMarker("Art. 10", "Art. 10"), true);
-		assert.equal(matchesMarker("Article 10", "Article 10(2)"), true);
-		assert.equal(matchesMarker("Article 10", "Article 10 (2)"), true);
-		assert.equal(matchesMarker("Part I", "Part I"), true);
+		assert.notEqual(matchesMarker("Article 10", "Article 10"), null);
+		assert.notEqual(matchesMarker("Art. 10", "Art. 10"), null);
+		assert.notEqual(matchesMarker("Article 10", "Article 10(2)"), null);
+		assert.notEqual(matchesMarker("Article 10", "Article 10 (2)"), null);
+		assert.notEqual(matchesMarker("Part I", "Part I"), null);
 		assertNotMatchesBoth("Part I", "Part II"); // word boundary check
 		assertNotMatchesBoth("P I", "P II");
 		assertNotMatchesBoth("Article 1", "Article 10");
@@ -86,28 +148,28 @@ describe("matchesMarker", () => {
 	});
 
 	test("matches numeric short markers in various formats", () => {
-		assert.equal(matchesMarker("1", "Article 10(1)"), true); // in parentheses
-		assert.equal(matchesMarker("1", "1. This is a paragraph"), true); // with dot
-		assert.equal(matchesMarker("1", "1) paragraph"), true); // right parenthesis
-		assert.equal(matchesMarker("1", "1 "), true); // bare number
-		assert.equal(matchesMarker("1.", "Article 10(1)"), true); // marker contains dot
-		assert.equal(matchesMarker("(1)", "1."), true); // marker contains parentheses
+		assert.notEqual(matchesMarker("1", "Article 10(1)"), null); // in parentheses
+		assert.notEqual(matchesMarker("1", "1. This is a paragraph"), null); // with dot
+		assert.notEqual(matchesMarker("1", "1) paragraph"), null); // right parenthesis
+		assert.notEqual(matchesMarker("1", "1 "), null); // bare number
+		assert.notEqual(matchesMarker("1.", "Article 10(1)"), null); // marker contains dot
+		assert.notEqual(matchesMarker("(1)", "1."), null); // marker contains parentheses
 		assertNotMatchesBoth("1", "11"); // does not match inside other numbers
 	});
 
 	test("matches letter short markers only with punctuation to avoid false positives", () => {
-		assert.equal(matchesMarker("a", "Article 10(2)(a)"), true); // in parentheses
-		assert.equal(matchesMarker("a", "a. paragraph"), true); // with dot
-		assert.equal(matchesMarker("a", "a) paragraph"), true); // right parenthesis
+		assert.notEqual(matchesMarker("a", "Article 10(2)(a)"), null); // in parentheses
+		assert.notEqual(matchesMarker("a", "a. paragraph"), null); // with dot
+		assert.notEqual(matchesMarker("a", "a) paragraph"), null); // right parenthesis
 		assertNotMatchesBoth("a", "a paragraph"); // does NOT match bare letter
 		assertNotMatchesBoth("a", "Article"); // does NOT match inside words
 		assertNotMatchesBoth("i", "Annex I"); // does NOT match Roman numeral without punctuation
-		assert.equal(matchesMarker("i", "(i)"), true); // matches Roman numeral with punctuation
+		assert.notEqual(matchesMarker("i", "(i)"), null); // matches Roman numeral with punctuation
 	});
 
 	test("is case insensitive", () => {
-		assert.equal(matchesMarker("ARTICLE 10", "article 10(2)"), true);
-		assert.equal(matchesMarker("A", "Article 10(2)(a)"), true);
-		assert.equal(matchesMarker("Part I", "part i"), true);
+		assert.notEqual(matchesMarker("ARTICLE 10", "article 10(2)"), null);
+		assert.notEqual(matchesMarker("A", "Article 10(2)(a)"), null);
+		assert.notEqual(matchesMarker("Part I", "part i"), null);
 	});
 });

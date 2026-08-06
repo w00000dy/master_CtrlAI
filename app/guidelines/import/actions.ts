@@ -28,7 +28,7 @@ type ParsedYaml = {
 };
 
 import type { ParagraphForMapping } from "./mapping";
-import { mapCraRefToParagraphs } from "./mapping";
+import { mapCraRefToParagraph } from "./mapping";
 
 export async function importGuidelineYaml(formData: FormData) {
 	const file = formData.get("file") as File;
@@ -111,7 +111,6 @@ export async function importGuidelineYaml(formData: FormData) {
 				section: {
 					select: {
 						marker: true,
-						title: true,
 					},
 				},
 				parentParagraph: {
@@ -131,12 +130,16 @@ export async function importGuidelineYaml(formData: FormData) {
 			const matchedParagraphIds = new Set<number>();
 
 			for (const craRef of craRefs) {
-				const matchedIds = mapCraRefToParagraphs(
+				const matchedId = mapCraRefToParagraph(
 					craRef,
 					allParagraphs as ParagraphForMapping[],
 				);
-				for (const id of matchedIds) {
-					matchedParagraphIds.add(id);
+				if (matchedId !== null) {
+					matchedParagraphIds.add(matchedId);
+				} else {
+					console.warn(
+						`Could not map control "${ctrl.title}" (id: ${ctrl.id}) with CRA reference "${craRef}" to a paragraph in the database for guideline "${guidelineTitle}".`,
+					);
 				}
 			}
 
