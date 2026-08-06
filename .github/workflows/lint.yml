@@ -11,6 +11,8 @@ jobs:
   build:
     name: Lint
     runs-on: ubuntu-latest
+    env:
+      DISABLE_ERD: "true"
 
     permissions:
       contents: read
