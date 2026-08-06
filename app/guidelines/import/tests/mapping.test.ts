@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { describe, test } from "node:test";
 import type { ParagraphForMapping } from "../mapping.ts";
 import { mapCraRefToParagraph, matchesMarker } from "../mapping.ts";
-import { craParagraphs } from "./mapping-cra-data.mock.ts"
+import { craParagraphs } from "./mapping-cra-data.mock.ts";
 
 describe("mapCraRefToParagraph - Basic", () => {
 	const mockParagraphs: ParagraphForMapping[] = [
@@ -171,8 +171,25 @@ describe("matchesMarker", () => {
 });
 
 describe("mapCraRefToParagraph - CRA", () => {
-	test("correctly maps examples from the BSI TR-03183-1", () => {
-		const result = mapCraRefToParagraph("CRA Annex I Part I (2) point (d)", craParagraphs);
-		assert.equal(result, 30);
+	test("correctly maps examples from the BSI TR-03183-1 with a direct match", () => {
+		assert.equal(
+			mapCraRefToParagraph("CRA Annex I Part I (2) point (d)", craParagraphs),
+			30,
+		);
+		assert.equal(
+			mapCraRefToParagraph("CRA Annex I Part I (2) point (e)", craParagraphs),
+			31,
+		);
+		assert.equal(
+			mapCraRefToParagraph("CRA Annex I Part II (2)", craParagraphs),
+			42,
+		);
+	});
+
+	test("returns null when no direct match is found", () => {
+		assert.equal(
+			mapCraRefToParagraph("CRA Article 13 (3) & (4)", craParagraphs),
+			null,
+		);
 	});
 });
