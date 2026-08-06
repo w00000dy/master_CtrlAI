@@ -1,9 +1,10 @@
 import assert from "node:assert/strict";
 import { describe, test } from "node:test";
-import type { ParagraphForMapping } from "./mapping.ts";
-import { mapCraRefToParagraph, matchesMarker } from "./mapping.ts";
+import type { ParagraphForMapping } from "../mapping.ts";
+import { mapCraRefToParagraph, matchesMarker } from "../mapping.ts";
+import { craParagraphs } from "./mapping-cra-data.mock.ts"
 
-describe("mapCraRefToParagraph", () => {
+describe("mapCraRefToParagraph - Basic", () => {
 	const mockParagraphs: ParagraphForMapping[] = [
 		{
 			id: 1,
@@ -166,5 +167,12 @@ describe("matchesMarker", () => {
 		assert.notEqual(matchesMarker("ARTICLE 10", "article 10(2)"), null);
 		assert.notEqual(matchesMarker("A", "Article 10(2)(a)"), null);
 		assert.notEqual(matchesMarker("Part I", "part i"), null);
+	});
+});
+
+describe("mapCraRefToParagraph - CRA", () => {
+	test("returns null if no specific paragraph is requested", () => {
+		const result = mapCraRefToParagraph("CRA Annex I Part I (2) point (d)", craParagraphs);
+		assert.equal(result, 30);
 	});
 });
