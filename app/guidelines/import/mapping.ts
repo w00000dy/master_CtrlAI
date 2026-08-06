@@ -6,8 +6,6 @@ export function matchesMarker(
 	const m = marker.toLowerCase().trim();
 	const ref = craRef.toLowerCase();
 
-	// For long markers, use word boundaries to avoid partial matches
-	// e.g., "Part I" should not match "Part II"
 	if (m.length > 5) {
 		const escapedM = m.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 		const regexStr = `(^|[^a-z0-9])(${escapedM})([^a-z0-9]|$)`;
@@ -15,16 +13,11 @@ export function matchesMarker(
 		if (matchRange) return matchRange;
 	}
 
-	// For short markers, extract the alphanumeric core to avoid punctuation mismatches
-	// e.g. "1." -> "1", "a)" -> "a"
 	const coreMarker = m.replace(/[^a-z0-9]/g, "");
 	if (!coreMarker) return null;
 
 	const escaped = coreMarker.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
-	// If the core marker is purely digits, allow it to match without punctuation as well.
-	// If it contains letters (like 'a', 'i', 'ii'), REQUIRE standard punctuation like (a), a., or a)
-	// to prevent false positives with Roman numerals like 'Annex I' or words.
 	let regexStr = "";
 	if (/^[0-9]+$/.test(coreMarker)) {
 		regexStr = `(^|[^a-z0-9])(\\(${escaped}\\)|${escaped}\\.|${escaped}\\)|${escaped})([^a-z0-9]|$)`;
@@ -99,15 +92,12 @@ export function mapCraRefToParagraph(
 	let bestScore = 0;
 	const scoredParagraphs: { id: number; score: number }[] = [];
 
-	// Check if the CRA reference contains more than just the section name
-	// (e.g. "Article 10(2)" -> true, "Article 10" -> false)
 	const sectionPattern =
 		/(article\s+\d+|art\.?\s*\d+|annex\s+[ivx]+|part\s+[ivx]+|chapter\s+[ivx\d]+)/gi;
 
 	const potentialMarkers = getPotentialMarkers(craRef);
 
 	for (const p of allParagraphs) {
-		// Check if section constraints are met
 		const sectionRefsMatch = craRef.match(sectionPattern);
 		if (sectionRefsMatch && sectionRefsMatch.length > 0) {
 			const sectionRefs: string[] = [];
@@ -140,7 +130,7 @@ export function mapCraRefToParagraph(
 				}
 			}
 			if (!sectionSatisfied) {
-				continue; // Skip because the paragraph is not in the required section
+				continue;
 			}
 		}
 
@@ -148,14 +138,12 @@ export function mapCraRefToParagraph(
 		let isValidOrder = true;
 		const matchRanges: { start: number; end: number }[] = [];
 
-		// Most specific match: the paragraph marker itself
 		const paraMatch = matchesMarker(p.marker, craRef);
 		if (paraMatch !== null) {
 			score += 10;
 			matchRanges.push(paraMatch);
 		}
 
-		// Next: the parent paragraph's marker
 		let parentMatch: { start: number; end: number } | null = null;
 		if (p.parentParagraph) {
 			parentMatch = matchesMarker(p.parentParagraph.marker, craRef);
@@ -168,7 +156,6 @@ export function mapCraRefToParagraph(
 			}
 		}
 
-		// Less specific: the section marker
 		const sectionMarkerMatch = matchesMarker(p.section.marker, craRef);
 		const sectionNum = extractNumber(p.section.marker);
 		const sectionNumMatch = sectionNum
@@ -216,6 +203,33 @@ export function mapCraRefToParagraph(
 					}
 				}
 				if (!isValidOrder) break;
+			}
+
+			// Check if there are explicit unmapped markers after the last match
+			if (isValidOrder) {
+				const lastMatchEnd = matchRanges[matchRanges.length - 1].end;
+				for (const pm of potentialMarkers) {
+					if (pm.start >= lastMatchEnd) {
+						if (/^[0-9]+$/.test(pm.token)) {
+							isValidOrder = false;
+							break;
+						}
+
+						const before = craRef.slice(Math.max(0, pm.start - 1), pm.start);
+						const after = craRef.slice(
+							pm.end,
+							Math.min(craRef.length, pm.end + 1),
+						);
+						if (
+							(before === "(" && after === ")") ||
+							after === "." ||
+							after === ")"
+						) {
+							isValidOrder = false;
+							break;
+						}
+					}
+				}
 			}
 		}
 

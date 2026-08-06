@@ -185,6 +185,13 @@ describe("mapCraRefToParagraph - CRA", () => {
 			31,
 		);
 		assert.equal(
+			mapCraRefToParagraph(
+				"CRA Annex I Part  I   (2)   point   (e)     ",
+				craParagraphs,
+			),
+			31,
+		);
+		assert.equal(
 			mapCraRefToParagraph("CRA Annex I Part II (2)", craParagraphs),
 			42,
 		);
@@ -193,6 +200,10 @@ describe("mapCraRefToParagraph - CRA", () => {
 	test("returns null when no direct match is found", () => {
 		assert.equal(
 			mapCraRefToParagraph("CRA Article 13 (3) & (4)", craParagraphs),
+			null,
+		);
+		assert.equal(
+			mapCraRefToParagraph("CRA Annex I Part I (2) point (o)", craParagraphs),
 			null,
 		);
 	});
