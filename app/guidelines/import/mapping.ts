@@ -203,7 +203,7 @@ export function mapCraRefToParagraph(
 		if (isValidOrder && matchRanges.length > 0) {
 			matchRanges.sort((a, b) => a.start - b.start);
 
-			const gaps = [{ start: 0, end: matchRanges[0].start }];
+			const gaps = [];
 			for (let i = 0; i < matchRanges.length - 1; i++) {
 				gaps.push({ start: matchRanges[i].end, end: matchRanges[i + 1].start });
 			}

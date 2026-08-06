@@ -49,7 +49,6 @@ describe("mapCraRefToParagraph - Basic", () => {
 	});
 
 	test("returns null if order of parent paragraph and paragraph reference is wrong", () => {
-		assert.equal(mapCraRefToParagraph("a 10 2", mockParagraphs), null);
 		assert.equal(mapCraRefToParagraph("10 a 2", mockParagraphs), null);
 		assert.equal(mapCraRefToParagraph("a 2 10", mockParagraphs), null);
 	});
@@ -57,6 +56,7 @@ describe("mapCraRefToParagraph - Basic", () => {
 	test("matches section and paragraph reference without section name", () => {
 		assert.equal(mapCraRefToParagraph("10 2", mockParagraphs), 2);
 		assert.equal(mapCraRefToParagraph("10 2 a", mockParagraphs), 2);
+		assert.equal(mapCraRefToParagraph("a 10 2", mockParagraphs), 2); // a is a Prefix (could be the name of the document)
 	});
 
 	test("maps to a specific paragraph when perfectly matched", () => {
@@ -137,7 +137,7 @@ describe("matchesMarker", () => {
 		assert.notEqual(matchesMarker("Article 10", "Article 10(2)"), null);
 		assert.notEqual(matchesMarker("Article 10", "Article 10 (2)"), null);
 		assert.notEqual(matchesMarker("Part I", "Part I"), null);
-		assertNotMatchesBoth("Part I", "Part II"); // word boundary check
+		assertNotMatchesBoth("Part I", "Part II");
 		assertNotMatchesBoth("P I", "P II");
 		assertNotMatchesBoth("Article 1", "Article 10");
 		assertNotMatchesBoth("Art. 10", "Article 10");
@@ -171,7 +171,7 @@ describe("matchesMarker", () => {
 });
 
 describe("mapCraRefToParagraph - CRA", () => {
-	test("returns null if no specific paragraph is requested", () => {
+	test("correctly maps examples from the BSI TR-03183-1", () => {
 		const result = mapCraRefToParagraph("CRA Annex I Part I (2) point (d)", craParagraphs);
 		assert.equal(result, 30);
 	});
