@@ -18,53 +18,110 @@ describe("matchesMarker", () => {
 		);
 	};
 
-	test("returns null for null or undefined marker", () => {
-		assert.equal(matchesMarker(null, "Article 10"), null);
-		assert.equal(matchesMarker(undefined, "Article 10"), null);
-		assertNotMatchesBoth("", "Article 10");
+	describe("returns null for null, undefined, or empty markers", () => {
+		for (const marker of [null, undefined]) {
+			test(`returns null for ${marker} marker`, () => {
+				assert.equal(matchesMarker(marker, "Article 10"), null);
+			});
+		}
+
+		test("returns null for empty string marker", () => {
+			assertNotMatchesBoth("", "Article 10");
+		});
 	});
 
-	test("returns null when short marker has no alphanumeric characters", () => {
-		assert.equal(matchesMarker("()", "Article 10"), null);
-		assert.equal(matchesMarker("...", "Article 10"), null);
+	describe("returns null when short marker has no alphanumeric characters", () => {
+		const nonAlphanumericMarkers = ["()", "..."];
+		for (const marker of nonAlphanumericMarkers) {
+			test(`returns null for marker "${marker}"`, () => {
+				assert.equal(matchesMarker(marker, "Article 10"), null);
+			});
+		}
 	});
 
-	test("matches long markers with word boundaries", () => {
-		assert.notEqual(matchesMarker("Article 10", "Article 10"), null);
-		assert.notEqual(matchesMarker("Art. 10", "Art. 10"), null);
-		assert.notEqual(matchesMarker("Article 10", "Article 10(2)"), null);
-		assert.notEqual(matchesMarker("Article 10", "Article 10 (2)"), null);
-		assert.notEqual(matchesMarker("Part I", "Part I"), null);
-		assertNotMatchesBoth("Part I", "Part II");
-		assertNotMatchesBoth("P I", "P II");
-		assertNotMatchesBoth("Article 1", "Article 10");
-		assertNotMatchesBoth("Art. 10", "Article 10");
+	describe("matches long markers", () => {
+		const matchingCases = [
+			{ a: "Article 10", b: "Article 10" },
+			{ a: "Art. 10", b: "Art. 10" },
+			{ a: "Article 10", b: "Article 10(2)" },
+			{ a: "Article 10", b: "Article 10 (2)" },
+			{ a: "Part I", b: "Part I" },
+		];
+		for (const { a, b } of matchingCases) {
+			test(`matches "${a}" within "${b}"`, () => {
+				assert.notEqual(matchesMarker(a, b), null);
+			});
+		}
+
+		const nonMatchingCases = [
+			{ a: "Part I", b: "Part II" },
+			{ a: "P I", b: "P II" },
+			{ a: "Article 1", b: "Article 10" },
+			{ a: "Art. 10", b: "Article 10" },
+		];
+		for (const { a, b } of nonMatchingCases) {
+			test(`does not match "${a}" with "${b}"`, () => {
+				assertNotMatchesBoth(a, b);
+			});
+		}
 	});
 
-	test("matches numeric short markers in various formats", () => {
-		assert.notEqual(matchesMarker("1", "Article 10(1)"), null); // in parentheses
-		assert.notEqual(matchesMarker("1", "1. This is a paragraph"), null); // with dot
-		assert.notEqual(matchesMarker("1", "1) paragraph"), null); // right parenthesis
-		assert.notEqual(matchesMarker("1", "1 "), null); // bare number
-		assert.notEqual(matchesMarker("1.", "Article 10(1)"), null); // marker contains dot
-		assert.notEqual(matchesMarker("(1)", "1."), null); // marker contains parentheses
-		assertNotMatchesBoth("1", "11"); // does not match inside other numbers
+	describe("matches numeric short markers in various formats", () => {
+		const matchingCases = [
+			{ a: "1", b: "Article 10(1)", desc: "in parentheses" },
+			{ a: "1", b: "1. This is a paragraph", desc: "with dot" },
+			{ a: "1", b: "1) paragraph", desc: "right parenthesis" },
+			{ a: "1", b: "1 ", desc: "bare number" },
+			{ a: "1.", b: "Article 10(1)", desc: "marker contains dot" },
+			{ a: "(1)", b: "1.", desc: "marker contains parentheses" },
+		];
+		for (const { a, b, desc } of matchingCases) {
+			test(`matches "${a}" within "${b}" (${desc})`, () => {
+				assert.notEqual(matchesMarker(a, b), null);
+			});
+		}
+
+		test('does not match "1" inside other numbers like "11"', () => {
+			assertNotMatchesBoth("1", "11");
+		});
 	});
 
-	test("matches letter short markers only with punctuation to avoid false positives", () => {
-		assert.notEqual(matchesMarker("a", "Article 10(2)(a)"), null); // in parentheses
-		assert.notEqual(matchesMarker("a", "a. paragraph"), null); // with dot
-		assert.notEqual(matchesMarker("a", "a) paragraph"), null); // right parenthesis
-		assertNotMatchesBoth("a", "a paragraph"); // does NOT match bare letter
-		assertNotMatchesBoth("a", "Article"); // does NOT match inside words
-		assertNotMatchesBoth("i", "Annex I"); // does NOT match Roman numeral without punctuation
-		assert.notEqual(matchesMarker("i", "(i)"), null); // matches Roman numeral with punctuation
+	describe("matches letter short markers in various formats", () => {
+		const matchingCases = [
+			{ a: "a", b: "Article 10(2)(a)", desc: "in parentheses" },
+			{ a: "a", b: "a. paragraph", desc: "with dot" },
+			{ a: "a", b: "a) paragraph", desc: "right parenthesis" },
+			{ a: "i", b: "(i)", desc: "Roman numeral with punctuation" },
+		];
+		for (const { a, b, desc } of matchingCases) {
+			test(`matches "${a}" within "${b}" (${desc})`, () => {
+				assert.notEqual(matchesMarker(a, b), null);
+			});
+		}
+
+		const nonMatchingCases = [
+			{ a: "a", b: "a paragraph", desc: "bare letter" },
+			{ a: "a", b: "Article", desc: "inside words" },
+			{ a: "i", b: "Annex I", desc: "Roman numeral without punctuation" },
+		];
+		for (const { a, b, desc } of nonMatchingCases) {
+			test(`does NOT match "${a}" within "${b}" (${desc})`, () => {
+				assertNotMatchesBoth(a, b);
+			});
+		}
 	});
 
-	test("is case insensitive", () => {
-		assert.notEqual(matchesMarker("ARTICLE 10", "article 10(2)"), null);
-		assert.notEqual(matchesMarker("A", "Article 10(2)(a)"), null);
-		assert.notEqual(matchesMarker("Part I", "part i"), null);
+	describe("is case insensitive", () => {
+		const cases = [
+			{ a: "ARTICLE 10", b: "article 10(2)" },
+			{ a: "A", b: "Article 10(2)(a)" },
+			{ a: "Part I", b: "part i" },
+		];
+		for (const { a, b } of cases) {
+			test(`matches "${a}" with "${b}" regardless of case`, () => {
+				assert.notEqual(matchesMarker(a, b), null);
+			});
+		}
 	});
 });
 
@@ -101,10 +158,13 @@ describe("mapCraRefToParagraph - Basic", () => {
 		assert.equal(result, null);
 	});
 
-	test("returns null if article does not exist", () => {
-		assert.equal(mapCraRefToParagraph("Article 1", mockParagraphs), null);
-		assert.equal(mapCraRefToParagraph("Article 1 (2)", mockParagraphs), null);
-		assert.equal(mapCraRefToParagraph("Article 1 (2) a", mockParagraphs), null);
+	describe("returns null if article does not exist", () => {
+		const invalidRefs = ["Article 1", "Article 1 (2)", "Article 1 (2) a"];
+		for (const ref of invalidRefs) {
+			test(`returns null for non-existent article reference "${ref}"`, () => {
+				assert.equal(mapCraRefToParagraph(ref, mockParagraphs), null);
+			});
+		}
 	});
 
 	test("returns null if order of section and paragraph reference is wrong", () => {
@@ -112,15 +172,26 @@ describe("mapCraRefToParagraph - Basic", () => {
 		assert.equal(result, null);
 	});
 
-	test("returns null if order of parent paragraph and paragraph reference is wrong", () => {
-		assert.equal(mapCraRefToParagraph("10 a 2", mockParagraphs), null);
-		assert.equal(mapCraRefToParagraph("a 2 10", mockParagraphs), null);
+	describe("returns null if order of parent paragraph and paragraph reference is wrong", () => {
+		const cases = ["10 a 2", "a 2 10"];
+		for (const ref of cases) {
+			test(`returns null for incorrect order "${ref}"`, () => {
+				assert.equal(mapCraRefToParagraph(ref, mockParagraphs), null);
+			});
+		}
 	});
 
-	test("matches section and paragraph reference without section name", () => {
-		assert.equal(mapCraRefToParagraph("10 2", mockParagraphs), 2);
-		assert.equal(mapCraRefToParagraph("10 2 a", mockParagraphs), 2);
-		assert.equal(mapCraRefToParagraph("a 10 2", mockParagraphs), 2); // a is a Prefix (could be the name of the document)
+	describe("matches section and paragraph reference without section name", () => {
+		const cases = [
+			{ ref: "10 2", desc: "just numbers" },
+			{ ref: "10 2 a", desc: "with letter" },
+			{ ref: "a 10 2", desc: "with prefix (could be doc name)" },
+		];
+		for (const { ref, desc } of cases) {
+			test(`matches "${ref}" (${desc}) to paragraph 2`, () => {
+				assert.equal(mapCraRefToParagraph(ref, mockParagraphs), 2);
+			});
+		}
 	});
 
 	test("maps to a specific paragraph when perfectly matched", () => {
@@ -171,48 +242,42 @@ describe("mapCraRefToParagraph - Basic", () => {
 });
 
 describe("mapCraRefToParagraph - CRA", () => {
-	test("correctly maps a direct match", () => {
-		assert.equal(
-			mapCraRefToParagraph("CRA Annex I Part I (1)", craParagraphs),
-			25,
-		);
-		assert.equal(
-			mapCraRefToParagraph("CRA Annex I Part I (2) point (d)", craParagraphs),
-			30,
-		);
-		assert.equal(
-			mapCraRefToParagraph("CRA Annex I Part I (2) point (e)", craParagraphs),
-			31,
-		);
-		assert.equal(
-			mapCraRefToParagraph(
-				"CRA Annex I Part  I   (2)   point   (e)     ",
-				craParagraphs,
-			),
-			31,
-		);
-		assert.equal(
-			mapCraRefToParagraph("CRA Annex I Part II (2)", craParagraphs),
-			42,
-		);
+	describe("correctly maps a direct match", () => {
+		const cases = [
+			{ ref: "CRA Annex I Part I (1)", expectedId: 25 },
+			{ ref: "CRA Annex I Part I (2) point (d)", expectedId: 30 },
+			{ ref: "CRA Annex I Part I (2) point (e)", expectedId: 31 },
+			{ ref: "CRA Annex I Part  I   (2)   point   (e)     ", expectedId: 31, desc: "with extra whitespace" },
+			{ ref: "CRA Annex I Part II (2)", expectedId: 42 },
+		];
+		for (const { ref, expectedId, desc } of cases) {
+			test(`maps "${ref}" to paragraph ${expectedId}${desc ? ` (${desc})` : ""}`, () => {
+				assert.equal(mapCraRefToParagraph(ref, craParagraphs), expectedId);
+			});
+		}
 	});
 
-	test("returns null when no direct match is found", () => {
-		assert.equal(
-			mapCraRefToParagraph("CRA Article 13 (3) & (4)", craParagraphs),
-			null,
-		);
-		assert.equal(
-			mapCraRefToParagraph("CRA Annex I Part I (2) point (o)", craParagraphs),
-			null,
-		);
+	describe("returns null when no direct match is found", () => {
+		const cases = [
+			"CRA Article 13 (3) & (4)",
+			"CRA Annex I Part I (2) point (o)"
+		];
+		for (const ref of cases) {
+			test(`returns null for unmatched reference "${ref}"`, () => {
+				assert.equal(mapCraRefToParagraph(ref, craParagraphs), null);
+			});
+		}
 	});
 
-	test("returns null when crafRef is erroneus", () => {
-		assert.equal(
-			mapCraRefToParagraph("CRA Annex I (2) point (e)", craParagraphs),
-			null,
-		);
-		assert.equal(mapCraRefToParagraph("CRA Annex II (2)", craParagraphs), null);
+	describe("returns null when craRef is erroneous", () => {
+		const cases = [
+			"CRA Annex I (2) point (e)",
+			"CRA Annex II (2)"
+		];
+		for (const ref of cases) {
+			test(`returns null for erroneous reference "${ref}"`, () => {
+				assert.equal(mapCraRefToParagraph(ref, craParagraphs), null);
+			});
+		}
 	});
 });
