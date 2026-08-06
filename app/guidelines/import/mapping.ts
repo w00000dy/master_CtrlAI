@@ -126,9 +126,11 @@ export function mapCraRefToParagraph(
 			let sectionSatisfied = false;
 			for (const sr of sectionRefs) {
 				const markerStr = p.section.marker?.toLowerCase() || "";
+				const escapedSr = sr.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+				const srRegex = new RegExp(`(^|[^a-z0-9])${escapedSr}([^a-z0-9]|$)`, "i");
 
 				if (
-					markerStr.includes(sr) ||
+					srRegex.test(markerStr) ||
 					matchesMarker(p.section.marker, sr) !== null
 				) {
 					sectionSatisfied = true;
