@@ -171,7 +171,11 @@ describe("matchesMarker", () => {
 });
 
 describe("mapCraRefToParagraph - CRA", () => {
-	test("correctly maps examples from the BSI TR-03183-1 with a direct match", () => {
+	test("correctly maps a direct match", () => {
+		assert.equal(
+			mapCraRefToParagraph("CRA Annex I Part I (1)", craParagraphs),
+			25,
+		);
 		assert.equal(
 			mapCraRefToParagraph("CRA Annex I Part I (2) point (d)", craParagraphs),
 			30,
@@ -191,5 +195,13 @@ describe("mapCraRefToParagraph - CRA", () => {
 			mapCraRefToParagraph("CRA Article 13 (3) & (4)", craParagraphs),
 			null,
 		);
+	});
+
+	test("returns null when crafRef is erroneus", () => {
+		assert.equal(
+			mapCraRefToParagraph("CRA Annex I (2) point (e)", craParagraphs),
+			null,
+		);
+		assert.equal(mapCraRefToParagraph("CRA Annex II (2)", craParagraphs), null);
 	});
 });
