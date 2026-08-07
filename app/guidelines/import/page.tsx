@@ -31,10 +31,8 @@ export default function ImportGuidelinePage() {
 
 	useEffect(() => {
 		const loadDocuments = async () => {
-			const res = await getDocuments();
-			if (res.success && res.documents) {
-				setDocuments(res.documents);
-			}
+			const documents = await getDocuments();
+			setDocuments(documents);
 		};
 		loadDocuments();
 	}, []);

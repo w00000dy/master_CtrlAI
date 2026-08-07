@@ -202,10 +202,8 @@ export default function ImportPage() {
 								setIsSaving(true);
 								const result = await saveDocument(parsedData);
 								setIsSaving(false);
-								if (result.success) {
+								if (result?.id) {
 									setSaveSuccess(true);
-								} else {
-									setError(result.error || "Failed to save document.");
 								}
 							}}
 							disabled={isSaving || saveSuccess}

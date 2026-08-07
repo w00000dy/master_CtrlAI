@@ -74,15 +74,17 @@ export default function DocumentViewPage() {
 	useEffect(() => {
 		if (!id) return;
 
-		getDocumentById(parseInt(id, 10)).then((res) => {
-			if (res.success && res.data) {
-				setDocument(res.data.document as DocumentData);
-				setEditTitle(res.data.document.title || "");
+		getDocumentById(parseInt(id, 10)).then((documentData) => {
+			if (documentData) {
+				setDocument(documentData.document as DocumentData);
+				setEditTitle(documentData.document.title || "");
 				setSavedAt(
-					res.data.savedAt ? new Date(res.data.savedAt).toISOString() : null,
+					documentData.savedAt
+						? new Date(documentData.savedAt).toISOString()
+						: null,
 				);
 			} else {
-				setError(res.error || "Failed to load the document.");
+				setError("Document not found.");
 			}
 			setIsLoading(false);
 		});
@@ -91,15 +93,10 @@ export default function DocumentViewPage() {
 	const handleUpdateTitle = async () => {
 		if (!editTitle.trim()) return;
 		setIsSavingTitle(true);
-		const res = await updateDocumentTitle(parseInt(id, 10), editTitle.trim());
-		if (res.success) {
-			setDocument((prev) =>
-				prev ? { ...prev, title: editTitle.trim() } : prev,
-			);
-			setIsEditingTitle(false);
-		} else {
-			alert("Failed to update title");
-		}
+		await updateDocumentTitle(parseInt(id, 10), editTitle.trim());
+		setDocument((prev) => (prev ? { ...prev, title: editTitle.trim() } : prev));
+		setIsEditingTitle(false);
+
 		setIsSavingTitle(false);
 	};
 
@@ -107,13 +104,8 @@ export default function DocumentViewPage() {
 		if (!window.confirm("Are you sure you want to delete this document?"))
 			return;
 		setIsDeleting(true);
-		const res = await deleteDocument(parseInt(id, 10));
-		if (res.success) {
-			router.push("/documents");
-		} else {
-			alert("Failed to delete document");
-			setIsDeleting(false);
-		}
+		await deleteDocument(parseInt(id, 10));
+		router.push("/documents");
 	};
 
 	const handleParagraphClick = async (p: ParagraphWithControls) => {

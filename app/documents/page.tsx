@@ -73,27 +73,19 @@ function DocumentCard({
 export default function DocumentsPage() {
 	const [documents, setDocuments] = useState<DocumentMeta[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
-	const [error, setError] = useState<string | null>(null);
+	const [error] = useState<string | null>(null);
 
 	const handleDelete = async (e: React.MouseEvent, id: number) => {
 		e.preventDefault();
 		if (!confirm("Are you sure you want to delete this document?")) return;
 
-		const res = await deleteDocument(id);
-		if (res.success) {
-			setDocuments((prev) => prev.filter((doc) => doc.id !== id));
-		} else {
-			alert("Failed to delete document.");
-		}
+		await deleteDocument(id);
+		setDocuments((prev) => prev.filter((doc) => doc.id !== id));
 	};
 
 	useEffect(() => {
-		getDocuments().then((res) => {
-			if (res.success && res.documents) {
-				setDocuments(res.documents);
-			} else {
-				setError(res.error || "Failed to load documents.");
-			}
+		getDocuments().then((documents) => {
+			setDocuments(documents);
 			setIsLoading(false);
 		});
 	}, []);

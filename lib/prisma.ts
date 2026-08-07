@@ -1,7 +1,12 @@
 import "dotenv/config";
 import { PrismaMariaDb } from "@prisma/adapter-mariadb";
 import { PrismaClient } from "../generated/prisma/client";
-import { DATABASE_HOST, DATABASE_NAME, DATABASE_PASSWORD, DATABASE_USER } from "./constants";
+import {
+	DATABASE_HOST,
+	DATABASE_NAME,
+	DATABASE_PASSWORD,
+	DATABASE_USER,
+} from "./constants";
 
 const adapter = new PrismaMariaDb({
 	host: DATABASE_HOST,
