@@ -18,6 +18,22 @@ describe("matchesMarker", () => {
 		);
 	};
 
+	const testMatchingCases = (cases: { a: string; b: string; desc?: string }[]) => {
+		for (const { a, b, desc } of cases) {
+			test(`matches "${a}" within "${b}"${desc ? ` (${desc})` : ""}`, () => {
+				assert.notEqual(matchesMarker(a, b), null);
+			});
+		}
+	};
+
+	const testNonMatchingCases = (cases: { a: string; b: string; desc?: string }[]) => {
+		for (const { a, b, desc } of cases) {
+			test(`does not match "${a}" within "${b}"${desc ? ` (${desc})` : ""}`, () => {
+				assertNotMatchesBoth(a, b);
+			});
+		}
+	};
+
 	describe("returns null for null, undefined, or empty markers", () => {
 		for (const marker of [null, undefined]) {
 			test(`returns null for ${marker} marker`, () => {
@@ -47,11 +63,7 @@ describe("matchesMarker", () => {
 			{ a: "Article 10", b: "Article 10 (2)" },
 			{ a: "Part I", b: "Part I" },
 		];
-		for (const { a, b } of matchingCases) {
-			test(`matches "${a}" within "${b}"`, () => {
-				assert.notEqual(matchesMarker(a, b), null);
-			});
-		}
+		testMatchingCases(matchingCases);
 
 		const nonMatchingCases = [
 			{ a: "Part I", b: "Part II" },
@@ -59,11 +71,7 @@ describe("matchesMarker", () => {
 			{ a: "Article 1", b: "Article 10" },
 			{ a: "Art. 10", b: "Article 10" },
 		];
-		for (const { a, b } of nonMatchingCases) {
-			test(`does not match "${a}" with "${b}"`, () => {
-				assertNotMatchesBoth(a, b);
-			});
-		}
+		testNonMatchingCases(nonMatchingCases);
 	});
 
 	describe("matches numeric short markers in various formats", () => {
@@ -75,11 +83,7 @@ describe("matchesMarker", () => {
 			{ a: "1.", b: "Article 10(1)", desc: "marker contains dot" },
 			{ a: "(1)", b: "1.", desc: "marker contains parentheses" },
 		];
-		for (const { a, b, desc } of matchingCases) {
-			test(`matches "${a}" within "${b}" (${desc})`, () => {
-				assert.notEqual(matchesMarker(a, b), null);
-			});
-		}
+		testMatchingCases(matchingCases);
 
 		test('does not match "1" inside other numbers like "11"', () => {
 			assertNotMatchesBoth("1", "11");
@@ -93,22 +97,14 @@ describe("matchesMarker", () => {
 			{ a: "a", b: "a) paragraph", desc: "right parenthesis" },
 			{ a: "i", b: "(i)", desc: "Roman numeral with punctuation" },
 		];
-		for (const { a, b, desc } of matchingCases) {
-			test(`matches "${a}" within "${b}" (${desc})`, () => {
-				assert.notEqual(matchesMarker(a, b), null);
-			});
-		}
+		testMatchingCases(matchingCases);
 
 		const nonMatchingCases = [
 			{ a: "a", b: "a paragraph", desc: "bare letter" },
 			{ a: "a", b: "Article", desc: "inside words" },
 			{ a: "i", b: "Annex I", desc: "Roman numeral without punctuation" },
 		];
-		for (const { a, b, desc } of nonMatchingCases) {
-			test(`does NOT match "${a}" within "${b}" (${desc})`, () => {
-				assertNotMatchesBoth(a, b);
-			});
-		}
+		testNonMatchingCases(nonMatchingCases);
 	});
 
 	describe("is case insensitive", () => {
@@ -117,11 +113,7 @@ describe("matchesMarker", () => {
 			{ a: "A", b: "Article 10(2)(a)" },
 			{ a: "Part I", b: "part i" },
 		];
-		for (const { a, b } of cases) {
-			test(`matches "${a}" with "${b}" regardless of case`, () => {
-				assert.notEqual(matchesMarker(a, b), null);
-			});
-		}
+		testMatchingCases(cases);
 	});
 });
 
