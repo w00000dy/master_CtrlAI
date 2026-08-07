@@ -14,7 +14,6 @@ const ThemeToggle = dynamic(() => import("./ThemeToggle"), {
 
 const NAV_LINKS = [
 	{ href: "/", label: "Menu" },
-	{ href: "/chat", label: "Chat" },
 	{ href: "/documents", label: "Documents" },
 	{ href: "/guidelines", label: "Guidelines" },
 	{ href: "/controls", label: "Controls" },
