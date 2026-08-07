@@ -34,7 +34,6 @@ export default function ControlsPage() {
 		DocumentWithParagraphs[]
 	>([]);
 
-	// filter state
 	const [filterMapping, setFilterMapping] = useState<
 		"all" | "mapped" | "unmapped"
 	>("all");
@@ -42,7 +41,6 @@ export default function ControlsPage() {
 		"all",
 	);
 
-	// form state
 	const [newTitle, setNewTitle] = useState("");
 	const [newStatement, setNewStatement] = useState("");
 	const [newGuidance, setNewGuidance] = useState("");
@@ -52,21 +50,17 @@ export default function ControlsPage() {
 
 	const fetchControls = async () => {
 		setLoading(true);
-		const res = await getControls();
-		if (res.success && res.controls) {
-			setControls(res.controls as unknown as ControlData[]);
-		}
+		const data = await getControls();
+		setControls(data as unknown as ControlData[]);
 		setLoading(false);
 	};
 
 	useEffect(() => {
 		let active = true;
 		const init = async () => {
-			const res = await getControls();
+			const data = await getControls();
 			if (!active) return;
-			if (res.success && res.controls) {
-				setControls(res.controls as unknown as ControlData[]);
-			}
+			setControls(data as unknown as ControlData[]);
 			setLoading(false);
 		};
 		init();
@@ -77,10 +71,8 @@ export default function ControlsPage() {
 
 	const openModal = async () => {
 		setIsModalOpen(true);
-		const res = await getParagraphsForSelection();
-		if (res.success && res.documents) {
-			setDocsWithParagraphs(res.documents);
-		}
+		const docs = await getParagraphsForSelection();
+		setDocsWithParagraphs(docs);
 	};
 
 	const closeModal = () => {
@@ -101,22 +93,16 @@ export default function ControlsPage() {
 		setIsModalOpen(true);
 
 		if (docsWithParagraphs.length === 0) {
-			const res = await getParagraphsForSelection();
-			if (res.success && res.documents) {
-				setDocsWithParagraphs(res.documents);
-			}
+			const docs = await getParagraphsForSelection();
+			setDocsWithParagraphs(docs);
 		}
 	};
 
 	const handleDeleteControl = async (id: number) => {
 		if (!window.confirm("Are you sure you want to delete this control?"))
 			return;
-		const res = await deleteControl(id);
-		if (res.success) {
-			fetchControls();
-		} else {
-			alert("Failed to delete control.");
-		}
+		await deleteControl(id);
+		fetchControls();
 	};
 
 	const handleDeleteAllControls = async () => {
@@ -142,16 +128,15 @@ export default function ControlsPage() {
 		if (!newTitle || !newStatement) return;
 
 		setIsSubmitting(true);
-		let res: { success: boolean; control?: unknown; error?: string };
 		if (editingControlId) {
-			res = await updateControl(editingControlId, {
+			await updateControl(editingControlId, {
 				title: newTitle,
 				statement: newStatement,
 				implementationGuidance: newGuidance,
 				paragraphIds: selectedParagraphs,
 			});
 		} else {
-			res = await createControl({
+			await createControl({
 				title: newTitle,
 				statement: newStatement,
 				implementationGuidance: newGuidance,
@@ -159,13 +144,8 @@ export default function ControlsPage() {
 			});
 		}
 		setIsSubmitting(false);
-
-		if (res.success) {
-			closeModal();
-			fetchControls();
-		} else {
-			alert("Error creating control");
-		}
+		closeModal();
+		fetchControls();
 	};
 
 	const filteredControls = controls.filter((control) => {
@@ -188,12 +168,8 @@ export default function ControlsPage() {
 		)
 			return;
 		const ids = filteredControls.map((c) => c.id);
-		const res = await deleteControls(ids);
-		if (res.success) {
-			fetchControls();
-		} else {
-			alert("Failed to delete filtered controls.");
-		}
+		await deleteControls(ids);
+		fetchControls();
 	};
 
 	return (

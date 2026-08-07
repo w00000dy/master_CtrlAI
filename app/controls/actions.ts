@@ -6,38 +6,30 @@ import { generateResponse } from "@/lib/llm";
 import { prisma } from "@/lib/prisma";
 
 export async function getControls() {
-	try {
-		const [controls, allParagraphs] = await Promise.all([
-			prisma.control.findMany({
-				include: {
-					guideline: true,
-					paragraphs: {
-						include: {
-							section: {
-								include: {
-									document: true,
-								},
+	const [controls, allParagraphs] = await Promise.all([
+		prisma.control.findMany({
+			include: {
+				guideline: true,
+				paragraphs: {
+					include: {
+						section: {
+							include: {
+								document: true,
 							},
 						},
 					},
 				},
-				orderBy: {
-					id: "desc",
-				},
-			}),
-			prisma.paragraph.findMany(),
-		]);
+			},
+			orderBy: {
+				id: "desc",
+			},
+		}),
+		prisma.paragraph.findMany(),
+	]);
 
-		const enrichedControls = enrichControlsWithAncestors(
-			controls,
-			allParagraphs,
-		);
+	const enrichedControls = enrichControlsWithAncestors(controls, allParagraphs);
 
-		return { success: true, controls: enrichedControls };
-	} catch (error) {
-		console.error("Failed to fetch controls:", error);
-		return { success: false, error: "Failed to load controls.", controls: [] };
-	}
+	return enrichedControls;
 }
 
 export async function createControl(data: {
@@ -46,120 +38,92 @@ export async function createControl(data: {
 	implementationGuidance?: string | null;
 	paragraphIds: number[];
 }) {
-	try {
-		const control = await prisma.control.create({
-			data: {
-				title: data.title,
-				statement: data.statement,
-				implementationGuidance: data.implementationGuidance,
-				paragraphs: {
-					connect: data.paragraphIds.map((id) => ({ id })),
-				},
+	const control = await prisma.control.create({
+		data: {
+			title: data.title,
+			statement: data.statement,
+			implementationGuidance: data.implementationGuidance,
+			paragraphs: {
+				connect: data.paragraphIds.map((id) => ({ id })),
 			},
-		});
-		return { success: true, control };
-	} catch (error) {
-		console.error("Failed to create control:", error);
-		return { success: false, error: "Failed to create control." };
-	}
+		},
+	});
+	return control;
 }
 
 export async function getParagraphsForSelection() {
-	try {
-		const documents = await prisma.document.findMany({
-			include: {
-				sections: {
-					include: {
-						paragraphs: {
-							orderBy: { marker: "asc" },
-						},
+	const documents = await prisma.document.findMany({
+		include: {
+			sections: {
+				include: {
+					paragraphs: {
+						orderBy: { marker: "asc" },
 					},
-					orderBy: { title: "asc" },
 				},
+				orderBy: { title: "asc" },
 			},
-			orderBy: { title: "asc" },
-		});
-		return { success: true, documents };
-	} catch (error) {
-		console.error("Failed to fetch paragraphs for selection:", error);
-		return {
-			success: false,
-			error: "Failed to load paragraphs.",
-			documents: [],
-		};
-	}
+		},
+		orderBy: { title: "asc" },
+	});
+	return documents;
 }
 
 export async function getControlsForParagraph(paragraphId: number) {
-	try {
-		const allParagraphs = await prisma.paragraph.findMany();
+	const allParagraphs = await prisma.paragraph.findMany();
 
-		const descendantIds: number[] = [];
-		const getDescendants = (parentId: number) => {
-			const children = allParagraphs.filter(
-				(p) => p.parentParagraphId === parentId,
-			);
-			for (const child of children) {
-				descendantIds.push(child.id);
-				getDescendants(child.id);
-			}
-		};
-		getDescendants(paragraphId);
-
-		const allIdsToFetch = [paragraphId, ...descendantIds];
-
-		const controls = await prisma.control.findMany({
-			where: {
-				paragraphs: {
-					some: { id: { in: allIdsToFetch } },
-				},
-			},
-			include: {
-				guideline: true,
-				paragraphs: {
-					include: {
-						section: { include: { document: true } },
-					},
-				},
-			},
-			orderBy: { id: "desc" },
-		});
-
-		const enrichedControls = enrichControlsWithAncestors(
-			controls,
-			allParagraphs,
+	const descendantIds: number[] = [];
+	const getDescendants = (parentId: number) => {
+		const children = allParagraphs.filter(
+			(p) => p.parentParagraphId === parentId,
 		);
+		for (const child of children) {
+			descendantIds.push(child.id);
+			getDescendants(child.id);
+		}
+	};
+	getDescendants(paragraphId);
 
-		enrichedControls.sort((a, b) => {
-			const aIsDirect = a.paragraphs?.some((p) => p.id === paragraphId);
-			const bIsDirect = b.paragraphs?.some((p) => p.id === paragraphId);
-			if (aIsDirect && !bIsDirect) return -1;
-			if (!aIsDirect && bIsDirect) return 1;
-			return 0;
-		});
+	const allIdsToFetch = [paragraphId, ...descendantIds];
 
-		return { success: true, controls: enrichedControls };
-	} catch (error) {
-		console.error("Failed to fetch controls for paragraph:", error);
-		return { success: false, error: "Failed to load controls.", controls: [] };
-	}
+	const controls = await prisma.control.findMany({
+		where: {
+			paragraphs: {
+				some: { id: { in: allIdsToFetch } },
+			},
+		},
+		include: {
+			guideline: true,
+			paragraphs: {
+				include: {
+					section: { include: { document: true } },
+				},
+			},
+		},
+		orderBy: { id: "desc" },
+	});
+
+	const enrichedControls = enrichControlsWithAncestors(controls, allParagraphs);
+
+	enrichedControls.sort((a, b) => {
+		const aIsDirect = a.paragraphs?.some((p) => p.id === paragraphId);
+		const bIsDirect = b.paragraphs?.some((p) => p.id === paragraphId);
+		if (aIsDirect && !bIsDirect) return -1;
+		if (!aIsDirect && bIsDirect) return 1;
+		return 0;
+	});
+
+	return enrichedControls;
 }
 
-// Global map to hold promises for ongoing generations to prevent duplicates on reload
-type GenerationResult = {
-	success: boolean;
-	controls?: unknown[];
-	error?: string;
-};
 const generationPromises =
 	(
 		globalThis as {
-			generationPromises?: Map<number, Promise<GenerationResult>>;
+			generationPromises?: Map<number, Promise<unknown>>;
 		}
-	).generationPromises || new Map<number, Promise<GenerationResult>>();
+	).generationPromises || new Map<number, Promise<unknown>>();
 (
 	globalThis as {
-		generationPromises?: Map<number, Promise<GenerationResult>>;
+		generationPromises?: Map<number, Promise<unknown>>;
 	}
 ).generationPromises = generationPromises;
 
@@ -193,7 +157,7 @@ export async function generateControlsForParagraph(
 			});
 
 			if (!focusParagraph) {
-				return { success: false, error: "Paragraph not found." };
+				throw new Error("Paragraph not found.");
 			}
 
 			const existingControls = await prisma.control.findMany({
@@ -487,10 +451,6 @@ ${allParagraphsStr}
 				schema: ControlsArraySchema,
 			});
 
-			if (!response.success) {
-				return { success: false, error: response.error };
-			}
-
 			const resultText = response.content;
 			const parsedJson = ControlsArraySchema.parse(JSON.parse(resultText));
 
@@ -517,13 +477,7 @@ ${allParagraphsStr}
 				createdControls.push(dbControl);
 			}
 
-			return { success: true, controls: createdControls };
-		} catch (error) {
-			console.error("Failed to generate controls:", error);
-			return {
-				success: false,
-				error: "An unexpected error occurred during LLM processing.",
-			};
+			return createdControls;
 		} finally {
 			generationPromises.delete(paragraphId);
 		}
@@ -556,7 +510,7 @@ export async function updateControl(
 			}),
 		},
 	});
-	return { success: true, control };
+	return control;
 }
 
 export async function deleteControl(id: number) {
@@ -564,19 +518,13 @@ export async function deleteControl(id: number) {
 }
 
 export async function deleteControls(ids: number[]) {
-	try {
-		await prisma.control.deleteMany({
-			where: {
-				id: {
-					in: ids,
-				},
+	return prisma.control.deleteMany({
+		where: {
+			id: {
+				in: ids,
 			},
-		});
-		return { success: true };
-	} catch (error) {
-		console.error("Failed to delete controls:", error);
-		return { success: false, error: "Failed to delete controls." };
-	}
+		},
+	});
 }
 
 export async function deleteAllControls() {

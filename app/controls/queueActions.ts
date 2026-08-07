@@ -1,7 +1,6 @@
 "use server";
 
 import { generateControlsForParagraph } from "./actions";
-
 import { type GenerationTask, queueEmitter, store } from "./queueStore";
 
 const VISUAL_DELAY_MS = 2000;
