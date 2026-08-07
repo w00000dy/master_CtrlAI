@@ -18,7 +18,9 @@ describe("matchesMarker", () => {
 		);
 	};
 
-	const testMatchingCases = (cases: { a: string; b: string; desc?: string }[]) => {
+	const testMatchingCases = (
+		cases: { a: string; b: string; desc?: string }[],
+	) => {
 		for (const { a, b, desc } of cases) {
 			test(`matches "${a}" within "${b}"${desc ? ` (${desc})` : ""}`, () => {
 				assert.notEqual(matchesMarker(a, b), null);
@@ -26,7 +28,9 @@ describe("matchesMarker", () => {
 		}
 	};
 
-	const testNonMatchingCases = (cases: { a: string; b: string; desc?: string }[]) => {
+	const testNonMatchingCases = (
+		cases: { a: string; b: string; desc?: string }[],
+	) => {
 		for (const { a, b, desc } of cases) {
 			test(`does not match "${a}" within "${b}"${desc ? ` (${desc})` : ""}`, () => {
 				assertNotMatchesBoth(a, b);
