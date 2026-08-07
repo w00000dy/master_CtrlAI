@@ -103,7 +103,6 @@ export default function Home() {
 					</p>
 				</header>
 
-				{/* Bento Grid for Main Workflow */}
 				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
 					{STEPS.map((step) => (
 						<Link
@@ -139,27 +138,7 @@ export default function Home() {
 					))}
 				</div>
 
-				{/* Secondary Actions (Debug / Settings) */}
 				<div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl mx-auto md:mx-0">
-					<Link
-						href="/chat"
-						onMouseEnter={() => chatIconRef.current?.startAnimation?.()}
-						onMouseLeave={() => chatIconRef.current?.stopAnimation?.()}
-						className="flex items-center gap-4 p-4 rounded-2xl bg-zinc-100/50 dark:bg-zinc-800/30 hover:bg-zinc-200/50 dark:hover:bg-zinc-800/60 transition-colors border border-dashed border-zinc-200 dark:border-zinc-800 group"
-					>
-						<div className="p-2 bg-zinc-200 dark:bg-zinc-800 rounded-xl text-zinc-500 dark:text-zinc-400 group-hover:text-amber-500 transition-colors">
-							<TerminalIcon ref={chatIconRef} size={20} />
-						</div>
-						<div className="flex flex-col">
-							<span className="font-medium text-sm text-zinc-700 dark:text-zinc-300">
-								LLM Debug Chat
-							</span>
-							<span className="text-xs text-zinc-500 dark:text-zinc-500">
-								Test prompts & model behavior
-							</span>
-						</div>
-					</Link>
-
 					<Link
 						href="/settings"
 						onMouseEnter={() => settingsIconRef.current?.startAnimation?.()}
