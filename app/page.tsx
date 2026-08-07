@@ -8,6 +8,7 @@ import {
 	SettingsIcon,
 	ShieldCheckIcon,
 	TerminalIcon,
+	TrendingUpIcon,
 } from "lucide-animated";
 import Link from "next/link";
 import { useRef } from "react";
@@ -20,6 +21,7 @@ export default function Home() {
 	const guideIconRef = useRef<IconHandle>(null);
 	const controlIconRef = useRef<IconHandle>(null);
 	const benchIconRef = useRef<IconHandle>(null);
+	const resultsIconRef = useRef<IconHandle>(null);
 	const chatIconRef = useRef<IconHandle>(null);
 	const settingsIconRef = useRef<IconHandle>(null);
 
@@ -73,11 +75,23 @@ export default function Home() {
 			iconBgClass: "bg-teal-100 dark:bg-teal-900/30",
 			iconTextClass: "text-teal-600 dark:text-teal-400",
 		},
+		{
+			href: "/benchmark/results",
+			iconRef: resultsIconRef,
+			Icon: TrendingUpIcon,
+			stepLabel: "Step 5",
+			title: "Benchmark Results",
+			description: "Review and analyze the results of your benchmarks.",
+			hoverBorderClass: "hover:border-rose-500 dark:hover:border-rose-500",
+			gradientClass: "from-rose-400 to-rose-600",
+			iconBgClass: "bg-rose-100 dark:bg-rose-900/30",
+			iconTextClass: "text-rose-600 dark:text-rose-400",
+		},
 	];
 
 	return (
 		<div className="flex flex-col items-center justify-center flex-1 p-6 md:p-12 bg-zinc-50 dark:bg-zinc-950">
-			<div className="max-w-5xl w-full">
+			<div className="max-w-7xl w-full">
 				<header className="mb-12 text-center md:text-left">
 					<h1 className="mb-4 inline-block">
 						<Logo className="text-6xl md:text-7xl drop-shadow-sm" />
@@ -90,7 +104,7 @@ export default function Home() {
 				</header>
 
 				{/* Bento Grid for Main Workflow */}
-				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
 					{STEPS.map((step) => (
 						<Link
 							key={step.href}
