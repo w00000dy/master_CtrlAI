@@ -112,9 +112,7 @@ export default function DocumentViewPage() {
 		setSelectedParagraph(p);
 		setIsLoadingControls(true);
 		const res = await getControlsForParagraph(p.id);
-		if (res.success && res.controls) {
-			setControls(res.controls);
-		}
+		setControls(res);
 		setIsLoadingControls(false);
 	};
 
@@ -135,13 +133,11 @@ export default function DocumentViewPage() {
 	const prevCompletedTasksRef = useRef(completedTasks);
 	useEffect(() => {
 		if (completedTasks > prevCompletedTasksRef.current && selectedParagraph) {
-			getControlsForParagraph(selectedParagraph.id).then((res) => {
-				if (res.success && res.controls) {
-					setControls(res.controls);
-				}
-			});
+			getControlsForParagraph(selectedParagraph.id).then((res) =>
+				setControls(res),
+			);
+			prevCompletedTasksRef.current = completedTasks;
 		}
-		prevCompletedTasksRef.current = completedTasks;
 	}, [completedTasks, selectedParagraph]);
 
 	const handleGenerateAll = () => {
