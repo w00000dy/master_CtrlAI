@@ -7,7 +7,6 @@ import {
 	FileTextIcon,
 	SettingsIcon,
 	ShieldCheckIcon,
-	TerminalIcon,
 	TrendingUpIcon,
 } from "lucide-animated";
 import Link from "next/link";
@@ -22,7 +21,6 @@ export default function Home() {
 	const controlIconRef = useRef<IconHandle>(null);
 	const benchIconRef = useRef<IconHandle>(null);
 	const resultsIconRef = useRef<IconHandle>(null);
-	const chatIconRef = useRef<IconHandle>(null);
 	const settingsIconRef = useRef<IconHandle>(null);
 
 	const STEPS = [
