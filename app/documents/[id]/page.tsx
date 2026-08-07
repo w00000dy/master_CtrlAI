@@ -231,7 +231,7 @@ export default function DocumentViewPage() {
 						</div>
 					</div>
 
-					{/* Beautiful Header Card */}
+					{/* Header Card */}
 					<div className="relative bg-gradient-to-br from-blue-50/50 via-white to-indigo-50/50 dark:from-blue-900/10 dark:via-zinc-900 dark:to-indigo-900/10 border border-blue-100/50 dark:border-blue-900/30 rounded-3xl p-8 shadow-sm overflow-hidden">
 						<div className="absolute -top-32 -right-32 w-96 h-96 bg-blue-500/10 dark:bg-blue-400/10 rounded-full blur-3xl pointer-events-none"></div>
 
@@ -415,7 +415,7 @@ export default function DocumentViewPage() {
 				)}
 			</div>
 
-			{/* Right Side Panel (LLM Controls & Details) */}
+			{/* Right Side Panel (LLM Controls) */}
 			<div
 				className={`fixed top-[73px] right-0 bottom-0 w-[450px] bg-white dark:bg-zinc-900 border-l border-zinc-200 dark:border-zinc-800 shadow-2xl transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] z-40 flex flex-col ${selectedParagraph ? "translate-x-0" : "translate-x-full"}`}
 			>

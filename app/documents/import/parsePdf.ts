@@ -32,39 +32,23 @@ const ParsedDocumentSchema = z.object({
 export type ParsedDocument = z.infer<typeof ParsedDocumentSchema>;
 
 export async function extractPdfText(formData: FormData) {
-	try {
-		const file = formData.get("file") as File;
-		if (!file) {
-			return { success: false, error: "No file provided" };
-		}
-
-		const arrayBuffer = await file.arrayBuffer();
-		const buffer = Buffer.from(arrayBuffer);
-
-		let pdfData: { text: string };
-		try {
-			const parser = new PDFParse({ data: buffer });
-			pdfData = await parser.getText();
-			await parser.destroy();
-		} catch (err) {
-			console.error("PDF Parsing Error:", err);
-			return { success: false, error: "Failed to parse PDF file." };
-		}
-
-		const rawText = pdfData.text;
-		return { success: true, rawText };
-	} catch (error) {
-		console.error("Error in extractPdfText:", error);
-		return {
-			success: false,
-			error: "An unexpected error occurred during PDF extraction.",
-		};
+	const file = formData.get("file") as File;
+	if (!file) {
+		throw new Error("No file provided");
 	}
+
+	const arrayBuffer = await file.arrayBuffer();
+	const buffer = Buffer.from(arrayBuffer);
+
+	const parser = new PDFParse({ data: buffer });
+	const pdfData = await parser.getText();
+	await parser.destroy();
+
+	return pdfData.text;
 }
 
 export async function structureTextWithLlm(rawText: string, model: string) {
-	try {
-		const systemPrompt = `### Instruction ###
+	const systemPrompt = `### Instruction ###
 You are a legal text structuring assistant. 
 Your task is to take the provided raw text from a legal document and output a perfectly structured JSON object. 
 Extract the overall title, sections, and paragraphs. Paragraphs can have sub-paragraphs, which can themselves have sub-paragraphs, nested to any depth necessary.
@@ -106,40 +90,15 @@ The output MUST strictly match this JSON schema and contain no markdown blocks o
 
 Ensure all text is captured accurately and organized logically based on the document's recursive structure.`;
 
-		const response = await generateResponse({
-			model: model,
-			prompt: rawText,
-			systemPrompt: systemPrompt,
-			schema: ParsedDocumentSchema,
-		});
+	const response = await generateResponse({
+		model: model,
+		prompt: rawText,
+		systemPrompt: systemPrompt,
+		schema: ParsedDocumentSchema,
+	});
 
-		if (!response.success) {
-			return {
-				success: false,
-				error: response.error,
-			};
-		}
+	const resultText = response.content;
+	const parsedJson = ParsedDocumentSchema.parse(JSON.parse(resultText));
 
-		const resultText = response.content;
-		let parsedJson: ParsedDocument;
-
-		try {
-			parsedJson = ParsedDocumentSchema.parse(JSON.parse(resultText));
-		} catch (error) {
-			console.error("Failed to parse JSON from LLM:", resultText, error);
-			return {
-				success: false,
-				error: "LLM returned invalid JSON.",
-				rawJson: resultText,
-			};
-		}
-
-		return { success: true, data: parsedJson, rawJson: resultText };
-	} catch (error) {
-		console.error("Error in structureTextWithLlm:", error);
-		return {
-			success: false,
-			error: "An unexpected error occurred during LLM processing.",
-		};
-	}
+	return { data: parsedJson, rawJson: resultText };
 }

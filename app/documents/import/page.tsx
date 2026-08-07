@@ -72,34 +72,21 @@ export default function ImportPage() {
 		formData.append("file", file);
 
 		try {
-			// Step 1: Extract PDF Text
-			const extractResult = await extractPdfText(formData);
-			if (!extractResult.success || !extractResult.rawText) {
-				setError(extractResult.error || "Failed to extract text from PDF.");
-				setProcessingState(null);
-				return;
-			}
-
-			const extractedText = extractResult.rawText;
+			const extractedText = await extractPdfText(formData);
 			setRawText(extractedText);
 
-			// Step 2: Structure with LLM
 			setProcessingState("structuring");
 			const structureResult = await structureTextWithLlm(
 				extractedText,
 				selectedModel,
 			);
 
-			if (structureResult.success && structureResult.data) {
-				setParsedData(structureResult.data);
-				setRawJson(structureResult.rawJson || null);
-			} else {
-				setError(structureResult.error || "Failed to structure the text.");
-				setRawJson(structureResult.rawJson || null);
-			}
-		} catch (err) {
+			setParsedData(structureResult.data);
+			setRawJson(structureResult.rawJson || null);
+		} catch (err: unknown) {
 			console.error(err);
-			setError("An unexpected error occurred.");
+			const message = err instanceof Error ? err.message : "An unexpected error occurred.";
+			setError(message);
 		} finally {
 			setProcessingState(null);
 		}
