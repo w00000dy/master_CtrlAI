@@ -69,6 +69,32 @@ export async function extractPdfText(formData: FormData) {
 }
 
 export async function structureTextWithLlm(rawText: string, model: string) {
+	const exampleDocument = ParsedDocumentSchema.parse({
+		title: "Artificial Intelligence Act",
+		sections: [
+			{
+				marker: "Chapter 1",
+				title: "General Provisions",
+				paragraphs: [
+					{
+						marker: "1",
+						text: "The purpose of this Regulation is to improve the functioning of the internal market...",
+					},
+					{
+						marker: "2",
+						text: "This Regulation applies to:",
+						subParagraphs: [
+							{
+								marker: "a",
+								text: "providers placing on the market or putting into service AI systems in the Union;",
+							},
+						],
+					},
+				],
+			},
+		],
+	});
+
 	const systemPrompt = `### Instruction ###
 You are a legal text structuring assistant. 
 Your task is to take the provided raw text from a legal document and output a perfectly structured JSON object matching the requested schema. 
@@ -78,6 +104,10 @@ For each paragraph, extract ONLY its inner number or letter into the "marker" fi
 Do NOT drop, skip, or summarize any core legal text. Every single sentence from the actual document content must be included somewhere (title, text, or paragraph).
 Completely ignore and EXCLUDE any page headers, footers, pagination markers, or document metadata (e.g., text like page numbers or dates at the top/bottom of pages).
 If there is introductory text before a list of paragraphs (e.g., "Manufacturers of products with digital elements shall:"), treat this introductory text as a paragraph itself, and all the following list items as its sub-paragraphs.
+
+### Example Output ###
+${JSON.stringify(exampleDocument, null, 2)}
+
 Ensure all text is captured accurately and organized logically based on the document's recursive structure.`;
 
 	const response = await generateResponse({
