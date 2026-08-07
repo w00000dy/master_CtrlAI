@@ -5,12 +5,8 @@ import { useEffect, useState } from "react";
 import { PageLayout } from "@/app/components/PageLayout";
 import { getBenchmarkResults, getParagraphBenchmarks } from "./actions";
 
-type BenchmarkResult = Awaited<
-	ReturnType<typeof getBenchmarkResults>
->["results"];
-type ParagraphBenchmark = Awaited<
-	ReturnType<typeof getParagraphBenchmarks>
->["benchmarks"];
+type BenchmarkResult = Awaited<ReturnType<typeof getBenchmarkResults>>[0];
+type ParagraphBenchmark = Awaited<ReturnType<typeof getParagraphBenchmarks>>[0];
 
 function Gauge({ value, label }: { value: number; label: string }) {
 	const percentage = Math.round(value);
@@ -56,11 +52,9 @@ function Gauge({ value, label }: { value: number; label: string }) {
 }
 
 export default function BenchmarkResultsPage() {
-	const [controlResults, setControlResults] = useState<
-		NonNullable<BenchmarkResult>
-	>([]);
+	const [controlResults, setControlResults] = useState<BenchmarkResult[]>([]);
 	const [paragraphResults, setParagraphResults] = useState<
-		NonNullable<ParagraphBenchmark>
+		ParagraphBenchmark[]
 	>([]);
 	const [loading, setLoading] = useState(true);
 
@@ -71,16 +65,13 @@ export default function BenchmarkResultsPage() {
 				getBenchmarkResults(),
 				getParagraphBenchmarks(),
 			]);
-			if (ctrlRes.success && ctrlRes.results)
-				setControlResults(ctrlRes.results);
-			if (paraRes.success && paraRes.benchmarks)
-				setParagraphResults(paraRes.benchmarks);
+			setControlResults(ctrlRes);
+			setParagraphResults(paraRes);
 			setLoading(false);
 		}
 		loadData();
 	}, []);
 
-	// Calculate Control KPIs
 	const totalControls = controlResults.length;
 	const actionableControls = controlResults.filter(
 		(r) => r.isActionable,
@@ -101,7 +92,7 @@ export default function BenchmarkResultsPage() {
 
 	const relevanceScores = controlResults.map((r) => {
 		const totalMapped = r.llmControl.paragraphs.length;
-		if (totalMapped === 0) return 100; // No paragraphs mapped, so 100% (or N/A)
+		if (totalMapped === 0) return 100;
 		const relevant = r.relevantParagraphs.length;
 		return (relevant / totalMapped) * 100;
 	});
@@ -110,7 +101,6 @@ export default function BenchmarkResultsPage() {
 			? relevanceScores.reduce((a, b) => a + b, 0) / totalControls
 			: 0;
 
-	// Calculate Paragraph KPIs
 	const totalParagraphs = paragraphResults.length;
 	const completeParagraphs = paragraphResults.filter(
 		(r) => r.isComplete,
@@ -136,7 +126,7 @@ export default function BenchmarkResultsPage() {
 				</div>
 			) : (
 				<div className="space-y-12">
-					{/* KPI Dashboard */}
+					{/* Dashboard */}
 					<div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
 						<Gauge value={avgRelevanceScore} label="Relevance Score" />
 						<Gauge value={actionabilityScore} label="Actionability Score" />
