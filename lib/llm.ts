@@ -3,6 +3,7 @@ import OpenAI from "openai";
 import { zodTextFormat } from "openai/helpers/zod";
 import { Agent, setGlobalDispatcher } from "undici";
 import * as z from "zod";
+import { OLLAMA_HOST, OPENAI_API_KEY, OPENAI_HOST } from "./constants";
 
 // Disable fetch timeout for long-running LLM calls
 setGlobalDispatcher(new Agent({ headersTimeout: 0 }));
@@ -10,16 +11,16 @@ setGlobalDispatcher(new Agent({ headersTimeout: 0 }));
 const DEFAULT_TEMPERATURE = 0;
 
 const ollama = new Ollama({
-	host: process.env.OLLAMA_HOST,
+	host: OLLAMA_HOST,
 });
 
 const openai = new OpenAI({
-	apiKey: process.env.OPENAI_API_KEY || "dummy-key-for-local-proxies",
-	baseURL: process.env.OPENAI_HOST,
+	apiKey: OPENAI_API_KEY,
+	baseURL: OPENAI_HOST,
 });
 
 export const getProvider = () => {
-	if (process.env.OPENAI_HOST || process.env.OPENAI_API_KEY) {
+	if (OPENAI_HOST || OPENAI_API_KEY) {
 		return "openai";
 	}
 
