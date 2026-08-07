@@ -1,14 +1,17 @@
 "use client";
 
 import type React from "react";
-import { createContext, useCallback, useContext } from "react";
-import useSWR from "swr";
-import { POLLING_INTERVAL_MS } from "../../lib/constants";
+import {
+	createContext,
+	useCallback,
+	useContext,
+	useEffect,
+	useState,
+} from "react";
 import {
 	cancelAllGenerationTasks,
 	enqueueGenerationTasks,
 	type GenerationTask,
-	getGenerationQueueStatus,
 } from "../controls/queueActions";
 
 type GenerationContextType = {
@@ -34,35 +37,50 @@ export function GenerationProvider({
 }: {
 	children: React.ReactNode;
 }) {
-	const { data, mutate } = useSWR(
-		"generation-queue",
-		() => getGenerationQueueStatus(),
-		{
-			refreshInterval: POLLING_INTERVAL_MS,
-			revalidateOnFocus: true,
-		},
-	);
+	const [data, setData] = useState({
+		queue: [] as GenerationTask[],
+		isProcessing: false,
+		totalTasks: 0,
+		completedTasks: 0,
+	});
 
-	const enqueueTasks = useCallback(
-		async (tasks: GenerationTask[]) => {
-			await enqueueGenerationTasks(tasks);
-			mutate(); // Optimistically update/refresh
-		},
-		[mutate],
-	);
+	useEffect(() => {
+		const eventSource = new EventSource("/api/queue/stream");
+
+		eventSource.onmessage = (event) => {
+			try {
+				const status = JSON.parse(event.data);
+				setData(status);
+			} catch (error) {
+				console.error("Failed to parse queue status from SSE", error);
+			}
+		};
+
+		eventSource.onerror = (error) => {
+			console.error("SSE connection error", error);
+			eventSource.close();
+		};
+
+		return () => {
+			eventSource.close();
+		};
+	}, []);
+
+	const enqueueTasks = useCallback(async (tasks: GenerationTask[]) => {
+		await enqueueGenerationTasks(tasks);
+	}, []);
 
 	const cancelAll = useCallback(async () => {
 		await cancelAllGenerationTasks();
-		mutate();
-	}, [mutate]);
+	}, []);
 
 	return (
 		<GenerationContext.Provider
 			value={{
-				queue: data?.queue || [],
-				isProcessing: data?.isProcessing || false,
-				totalTasks: data?.totalTasks || 0,
-				completedTasks: data?.completedTasks || 0,
+				queue: data.queue || [],
+				isProcessing: data.isProcessing || false,
+				totalTasks: data.totalTasks || 0,
+				completedTasks: data.completedTasks || 0,
 				enqueueTasks,
 				cancelAll,
 			}}

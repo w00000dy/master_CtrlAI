@@ -3,27 +3,14 @@
 import { POLLING_INTERVAL_MS } from "../../lib/constants";
 import { generateControlsForParagraph } from "./actions";
 
-export type GenerationTask = {
-	paragraphId: number;
-	model: string;
-};
+import { type GenerationTask, queueEmitter, store } from "./queueStore";
 
-type QueueState = {
-	queue: GenerationTask[];
-	totalTasks: number;
-	isProcessing: boolean;
-};
+export type { GenerationTask };
 
-const store = (globalThis as unknown as { generationQueueStore: QueueState })
-	.generationQueueStore || {
-	queue: [],
-	totalTasks: 0,
-	isProcessing: false,
-};
-
-(
-	globalThis as unknown as { generationQueueStore: QueueState }
-).generationQueueStore = store;
+export async function emitQueueUpdate() {
+	const status = await getGenerationQueueStatus();
+	queueEmitter.emit("queueUpdated", status);
+}
 
 export async function getGenerationQueueStatus() {
 	const completedTasks =
@@ -63,13 +50,16 @@ async function processQueue() {
 		if (store.queue[0] === currentTask) {
 			store.queue.shift();
 		}
+		emitQueueUpdate();
 	}
 
 	store.isProcessing = false;
+	emitQueueUpdate();
 
 	setTimeout(() => {
 		if (store.queue.length === 0) {
 			store.totalTasks = 0;
+			emitQueueUpdate();
 		}
 	}, POLLING_INTERVAL_MS + 500);
 }
@@ -82,6 +72,8 @@ export async function enqueueGenerationTasks(tasks: GenerationTask[]) {
 	if (wasEmpty && !store.isProcessing) {
 		processQueue().catch(console.error);
 	}
+
+	emitQueueUpdate();
 	return { success: true };
 }
 
@@ -89,5 +81,6 @@ export async function cancelAllGenerationTasks() {
 	store.queue = [];
 	store.totalTasks = 0;
 	store.isProcessing = false;
+	emitQueueUpdate();
 	return { success: true };
 }
