@@ -27,9 +27,7 @@ export default function SettingsPage() {
 		const init = async () => {
 			const res = await getParagraphsForSelection();
 			if (!active) return;
-			if (res.success && res.documents) {
-				setDocsWithParagraphs(res.documents);
-			}
+			setDocsWithParagraphs(res);
 			setLoading(false);
 		};
 		init();
@@ -57,11 +55,7 @@ export default function SettingsPage() {
 
 		updateParagraphState(newValue);
 
-		const res = await toggleFewShotExample(paragraphId, newValue);
-		if (!res.success) {
-			updateParagraphState(currentValue);
-			console.error("Failed to toggle setting:", res.error);
-		}
+		await toggleFewShotExample(paragraphId, newValue);
 	};
 
 	return (
