@@ -45,6 +45,10 @@ export async function importGuidelineYaml(formData: FormData) {
 	const text = await file.text();
 	const parsed = yaml.parse(text) as ParsedYaml;
 
+	if (!parsed || (typeof parsed === 'object' && !parsed.controlGroup && !parsed.catalog)) {
+		throw new Error("Invalid YAML file: Missing 'controlGroup' or 'catalog' root node.");
+	}
+
 	// Support different root nodes based on BSI schema: controlGroup or catalog
 	let controlsData: YamlControl[] = [];
 	let guidelineTitle = file.name;
@@ -76,10 +80,6 @@ export async function importGuidelineYaml(formData: FormData) {
 				}
 			}
 		}
-	}
-
-	if (controlsData.length === 0) {
-		throw new Error("No controls found in the YAML file.");
 	}
 
 	const newGuideline = await prisma.guideline.create({
