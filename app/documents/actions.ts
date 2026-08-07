@@ -101,20 +101,9 @@ export async function getDocumentById(id: number) {
 }
 
 export async function deleteDocument(id: number) {
-	const guidelines = await prisma.guideline.findMany({
-		where: { documentId: id },
-		select: { id: true },
+	return prisma.document.delete({
+		where: { id },
 	});
-	const guidelineIds = guidelines.map((g) => g.id);
-
-	return prisma.$transaction([
-		prisma.control.deleteMany({
-			where: { guidelineId: { in: guidelineIds } },
-		}),
-		prisma.document.delete({
-			where: { id },
-		}),
-	]);
 }
 
 export async function updateDocumentTitle(id: number, newTitle: string) {
