@@ -1,9 +1,10 @@
 "use server";
 
-import { POLLING_INTERVAL_MS } from "../../lib/constants";
 import { generateControlsForParagraph } from "./actions";
 
 import { type GenerationTask, queueEmitter, store } from "./queueStore";
+
+const VISUAL_DELAY_MS = 2000;
 
 export type { GenerationTask };
 
@@ -61,7 +62,7 @@ async function processQueue() {
 			store.totalTasks = 0;
 			emitQueueUpdate();
 		}
-	}, POLLING_INTERVAL_MS + 500);
+	}, VISUAL_DELAY_MS);
 }
 
 export async function enqueueGenerationTasks(tasks: GenerationTask[]) {

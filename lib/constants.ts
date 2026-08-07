@@ -1,7 +1,4 @@
 import "dotenv/config";
-
-export const POLLING_INTERVAL_MS = 1500;
-
 export const OLLAMA_HOST = process.env.OLLAMA_HOST;
 export const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 export const OPENAI_HOST = process.env.OPENAI_HOST;
