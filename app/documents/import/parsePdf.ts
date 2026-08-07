@@ -7,7 +7,7 @@ import { generateResponse } from "@/lib/llm";
 export type Paragraph = {
 	marker: string | null;
 	text: string;
-	subParagraphs?: Paragraph[];
+	subParagraphs: Paragraph[];
 };
 
 const ParagraphSchema: z.ZodType<Paragraph> = z.lazy(() =>
@@ -22,8 +22,7 @@ const ParagraphSchema: z.ZodType<Paragraph> = z.lazy(() =>
 			text: z.string().describe("The text of the paragraph."),
 			subParagraphs: z
 				.array(ParagraphSchema)
-				.optional()
-				.describe("Nested sub-paragraphs."),
+				.describe("Nested sub-paragraphs. If there are no nested sub-paragraphs, return an empty array []."),
 		})
 		.describe(
 			"A legal paragraph with optional marker and nested sub-paragraphs.",
@@ -79,6 +78,7 @@ export async function structureTextWithLlm(rawText: string, model: string) {
 					{
 						marker: "1",
 						text: "The purpose of this Regulation is to improve the functioning of the internal market...",
+						subParagraphs: [],
 					},
 					{
 						marker: "2",
@@ -87,6 +87,7 @@ export async function structureTextWithLlm(rawText: string, model: string) {
 							{
 								marker: "a",
 								text: "providers placing on the market or putting into service AI systems in the Union;",
+								subParagraphs: [],
 							},
 						],
 					},
