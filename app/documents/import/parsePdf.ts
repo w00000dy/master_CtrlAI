@@ -11,21 +11,42 @@ export type Paragraph = {
 };
 
 const ParagraphSchema: z.ZodType<Paragraph> = z.lazy(() =>
-	z.object({
-		marker: z.string().nullable(),
-		text: z.string(),
-		subParagraphs: z.array(ParagraphSchema).optional(),
-	}),
+	z
+		.object({
+			marker: z
+				.string()
+				.nullable()
+				.describe(
+					'The inner number or letter of the paragraph (e.g., "1", "a"). If no marker is present, set to null. Strip any surrounding punctuation.',
+				),
+			text: z.string().describe("The text of the paragraph."),
+			subParagraphs: z
+				.array(ParagraphSchema)
+				.optional()
+				.describe("Nested sub-paragraphs."),
+		})
+		.describe(
+			"A legal paragraph with optional marker and nested sub-paragraphs.",
+		),
 );
 
 const ParsedDocumentSchema = z.object({
-	title: z.string(),
+	title: z.string().describe("The overall title of the legal document."),
 	sections: z.array(
-		z.object({
-			marker: z.string().nullable(),
-			title: z.string(),
-			paragraphs: z.array(ParagraphSchema),
-		}),
+		z
+			.object({
+				marker: z
+					.string()
+					.nullable()
+					.describe(
+						'The section number or identifier (e.g., "Part 1", "Section A", "Article 5"). Set to null if not present.',
+					),
+				title: z.string().describe("The title of the section."),
+				paragraphs: z
+					.array(ParagraphSchema)
+					.describe("The paragraphs contained within the section."),
+			})
+			.describe("A section of the legal document."),
 	),
 });
 
@@ -50,44 +71,13 @@ export async function extractPdfText(formData: FormData) {
 export async function structureTextWithLlm(rawText: string, model: string) {
 	const systemPrompt = `### Instruction ###
 You are a legal text structuring assistant. 
-Your task is to take the provided raw text from a legal document and output a perfectly structured JSON object. 
+Your task is to take the provided raw text from a legal document and output a perfectly structured JSON object matching the requested schema. 
 Extract the overall title, sections, and paragraphs. Paragraphs can have sub-paragraphs, which can themselves have sub-paragraphs, nested to any depth necessary.
 For each section, extract its number or identifier (e.g., "Part 1", "Section A", "Article 5") into the "marker" field if present, otherwise set the marker to null.
 For each paragraph, extract ONLY its inner number or letter into the "marker" field if present. Strip any surrounding punctuation, brackets, or parentheses (e.g., for "1.", "(a)", or "[1]", extract "1", "a", or "1"). If no marker is present, set the marker to null.
 Do NOT drop, skip, or summarize any core legal text. Every single sentence from the actual document content must be included somewhere (title, text, or paragraph).
 Completely ignore and EXCLUDE any page headers, footers, pagination markers, or document metadata (e.g., text like page numbers or dates at the top/bottom of pages).
 If there is introductory text before a list of paragraphs (e.g., "Manufacturers of products with digital elements shall:"), treat this introductory text as a paragraph itself, and all the following list items as its sub-paragraphs.
-
-The output MUST strictly match this JSON schema and contain no markdown blocks or other text outside the JSON:
-{
-  "title": "Document Title",
-  "sections": [
-    {
-      "marker": "Part 1",
-      "title": "Section or Annex Title",
-      "paragraphs": [
-        {
-          "marker": null,
-          "text": "Unmarked text",
-          "subParagraphs": [
-            {
-              "marker": "1",
-              "text": "Paragraph 1 text",
-              "subParagraphs": [
-                {
-                  "marker": "a",
-                  "text": "Sub-paragraph a text",
-                  "subParagraphs": []
-                }
-              ]
-            }
-          ]
-        }
-      ]
-    }
-  ]
-}
-
 Ensure all text is captured accurately and organized logically based on the document's recursive structure.`;
 
 	const response = await generateResponse({
