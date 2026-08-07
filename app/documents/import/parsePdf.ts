@@ -22,7 +22,9 @@ const ParagraphSchema: z.ZodType<Paragraph> = z.lazy(() =>
 			text: z.string().describe("The text of the paragraph."),
 			subParagraphs: z
 				.array(ParagraphSchema)
-				.describe("Nested sub-paragraphs. If there are no nested sub-paragraphs, return an empty array []."),
+				.describe(
+					"Nested sub-paragraphs. If there are no nested sub-paragraphs, return an empty array [].",
+				),
 		})
 		.describe(
 			"A legal paragraph with optional marker and nested sub-paragraphs.",
@@ -72,21 +74,54 @@ export async function structureTextWithLlm(rawText: string, model: string) {
 		title: "Artificial Intelligence Act",
 		sections: [
 			{
-				marker: "Chapter 1",
+				marker: "Part I",
 				title: "General Provisions",
 				paragraphs: [
 					{
 						marker: "1",
-						text: "The purpose of this Regulation is to improve the functioning of the internal market...",
+						text: "The purpose of this Regulation is to improve the functioning of the internal market.",
 						subParagraphs: [],
 					},
 					{
 						marker: "2",
-						text: "This Regulation applies to:",
+						text: "For the purposes of this Regulation, the following definitions apply:",
 						subParagraphs: [
 							{
 								marker: "a",
-								text: "providers placing on the market or putting into service AI systems in the Union;",
+								text: "'AI system' means a machine-based system that:",
+								subParagraphs: [
+									{
+										marker: "i",
+										text: "can, for a given set of human-defined objectives, make predictions;",
+										subParagraphs: [],
+									},
+									{
+										marker: "ii",
+										text: "operates with varying levels of autonomy.",
+										subParagraphs: [],
+									},
+								],
+							},
+						],
+					},
+				],
+			},
+			{
+				marker: "Part II",
+				title: "Vulnerability handling requirements",
+				paragraphs: [
+					{
+						marker: null,
+						text: "Manufacturers of products with digital elements shall:",
+						subParagraphs: [
+							{
+								marker: "a",
+								text: "be made available on the market without known exploitable vulnerabilities;",
+								subParagraphs: [],
+							},
+							{
+								marker: "b",
+								text: "be made available on the market with a secure by default configuration;",
 								subParagraphs: [],
 							},
 						],
@@ -104,7 +139,7 @@ For each section, extract its number or identifier (e.g., "Part 1", "Section A",
 For each paragraph, extract ONLY its inner number or letter into the "marker" field if present. Strip any surrounding punctuation, brackets, or parentheses (e.g., for "1.", "(a)", or "[1]", extract "1", "a", or "1"). If no marker is present, set the marker to null.
 Do NOT drop, skip, or summarize any core legal text. Every single sentence from the actual document content must be included somewhere (title, text, or paragraph).
 Completely ignore and EXCLUDE any page headers, footers, pagination markers, or document metadata (e.g., text like page numbers or dates at the top/bottom of pages).
-If there is introductory text before a list of paragraphs (e.g., "Manufacturers of products with digital elements shall:"), treat this introductory text as a paragraph itself, and all the following list items as its sub-paragraphs.
+If there is introductory text before a list of paragraphs (e.g., "Manufacturers of products with digital elements shall:"), treat this introductory text as a paragraph itself (with marker set to null if it has no number), and all the following list items as its sub-paragraphs.
 
 ### Example Output ###
 ${JSON.stringify(exampleDocument, null, 2)}
