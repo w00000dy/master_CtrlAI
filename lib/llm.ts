@@ -15,7 +15,7 @@ const ollama = new Ollama({
 });
 
 const openai = new OpenAI({
-	apiKey: OPENAI_API_KEY,
+	apiKey: OPENAI_API_KEY || "dummy-key-for-local-proxies",
 	baseURL: OPENAI_HOST,
 });
 

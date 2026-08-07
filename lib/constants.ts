@@ -1,4 +1,5 @@
 import "dotenv/config";
+
 export const OLLAMA_HOST = process.env.OLLAMA_HOST;
 export const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 export const OPENAI_HOST = process.env.OPENAI_HOST;
