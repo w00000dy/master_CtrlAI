@@ -22,13 +22,13 @@ export function ModelProvider({ children }: { children: React.ReactNode }) {
 
 	useEffect(() => {
 		getModels().then((res) => {
-			if (res.success && res.models?.length) {
-				setModels(res.models);
+			if (res?.length) {
+				setModels(res);
 				const storedModel = localStorage.getItem("selectedModel");
-				if (storedModel && res.models.includes(storedModel)) {
+				if (storedModel && res.includes(storedModel)) {
 					setSelectedModel(storedModel);
 				} else {
-					setSelectedModel(res.models[0]);
+					setSelectedModel(res[0]);
 				}
 			}
 		});

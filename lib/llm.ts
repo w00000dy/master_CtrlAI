@@ -32,10 +32,10 @@ export async function listModels() {
 
 	if (provider === "openai") {
 		const list = await openai.models.list();
-		return { success: true, models: list.data.map((m) => m.id) };
+		return list.data.map((m) => m.id);
 	} else {
 		const list = await ollama.list();
-		return { success: true, models: list.models.map((m) => m.name) };
+		return list.models.map((m) => m.name);
 	}
 }
 
@@ -73,11 +73,9 @@ export async function generateResponse({
 	}
 
 	let result: {
-		success: boolean;
 		content: string;
 		promptTokens: number;
 		completionTokens: number;
-		error?: string;
 	};
 
 	if (provider === "openai") {
@@ -106,7 +104,6 @@ export async function generateResponse({
 				});
 
 		result = {
-			success: true,
 			content: response.output_text || "",
 			promptTokens: response.usage?.input_tokens || 0,
 			completionTokens: response.usage?.output_tokens || 0,
@@ -131,7 +128,6 @@ export async function generateResponse({
 			});
 
 			result = {
-				success: true,
 				content: response.message.content,
 				promptTokens: response.prompt_eval_count || 0,
 				completionTokens: response.eval_count || 0,
@@ -146,7 +142,6 @@ export async function generateResponse({
 			});
 
 			result = {
-				success: true,
 				content: response.response,
 				promptTokens: response.prompt_eval_count || 0,
 				completionTokens: response.eval_count || 0,
