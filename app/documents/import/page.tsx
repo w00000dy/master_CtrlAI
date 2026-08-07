@@ -85,7 +85,8 @@ export default function ImportPage() {
 			setRawJson(structureResult.rawJson || null);
 		} catch (err: unknown) {
 			console.error(err);
-			const message = err instanceof Error ? err.message : "An unexpected error occurred.";
+			const message =
+				err instanceof Error ? err.message : "An unexpected error occurred.";
 			setError(message);
 		} finally {
 			setProcessingState(null);
