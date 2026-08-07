@@ -7,9 +7,7 @@ import { useCallback, useEffect, useState } from "react";
 import { ControlCard, type ControlData } from "../../components/ControlCard";
 import { deleteGuideline, getGuidelineById } from "../actions";
 
-type GuidelineData = NonNullable<
-	Awaited<ReturnType<typeof getGuidelineById>>["guideline"]
->;
+type GuidelineData = NonNullable<Awaited<ReturnType<typeof getGuidelineById>>>;
 
 export default function GuidelineViewPage() {
 	const params = useParams();
@@ -23,11 +21,11 @@ export default function GuidelineViewPage() {
 
 	const fetchGuideline = useCallback(async () => {
 		setLoading(true);
-		const res = await getGuidelineById(id);
-		if (res.success && res.guideline) {
-			setGuideline(res.guideline);
+		const fetchedGuideline = await getGuidelineById(id);
+		if (fetchedGuideline) {
+			setGuideline(fetchedGuideline);
 		} else {
-			setError(res.error || "Failed to load guideline.");
+			setError("Guideline not found.");
 		}
 		setLoading(false);
 	}, [id]);
@@ -44,13 +42,8 @@ export default function GuidelineViewPage() {
 		if (!window.confirm("Are you sure you want to delete this guideline?"))
 			return;
 		setIsDeleting(true);
-		const res = await deleteGuideline(id);
-		if (res.success) {
-			router.push("/guidelines");
-		} else {
-			alert("Failed to delete guideline");
-			setIsDeleting(false);
-		}
+		await deleteGuideline(id);
+		router.push("/guidelines");
 	};
 
 	if (loading) {

@@ -92,10 +92,8 @@ export default function GuidelinesPage() {
 	const importIconRef = useRef<PlusIconHandle | null>(null);
 
 	const fetchGuidelines = useCallback(async () => {
-		const res = await getGuidelines();
-		if (res.success && res.guidelines) {
-			setGuidelines(res.guidelines);
-		}
+		const guidelines = await getGuidelines();
+		setGuidelines(guidelines);
 		setLoading(false);
 	}, []);
 
@@ -113,13 +111,8 @@ export default function GuidelinesPage() {
 		)
 			return;
 		setLoading(true);
-		const res = await deleteGuideline(id);
-		if (res.success) {
-			fetchGuidelines();
-		} else {
-			alert("Failed to delete guideline");
-			setLoading(false);
-		}
+		await deleteGuideline(id);
+		fetchGuidelines();
 	};
 
 	const handleDeleteAll = async () => {
@@ -130,13 +123,8 @@ export default function GuidelinesPage() {
 		)
 			return;
 		setLoading(true);
-		const res = await deleteAllGuidelines();
-		if (res.success) {
-			fetchGuidelines();
-		} else {
-			alert("Failed to delete all guidelines");
-			setLoading(false);
-		}
+		await deleteAllGuidelines();
+		fetchGuidelines();
 	};
 
 	return (
