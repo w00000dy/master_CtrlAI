@@ -65,18 +65,16 @@ export default function ImportGuidelinePage() {
 			try {
 				const importResult = await importGuidelineYaml(formData);
 
-				if (!importResult.success) {
-					setError(importResult.error || `Failed to import ${file.name}.`);
-					hasError = true;
-					break;
-				}
-
 				totalCount += importResult.totalCount || 0;
 				mappedCount += importResult.mappedCount || 0;
 				unmappedCount += importResult.unmappedCount || 0;
-			} catch (err) {
+			} catch (err: unknown) {
 				console.error(err);
-				setError(`An unexpected error occurred while importing ${file.name}.`);
+				const message =
+					err instanceof Error
+						? err.message
+						: `An unexpected error occurred while importing ${file.name}.`;
+				setError(message);
 				hasError = true;
 				break;
 			}

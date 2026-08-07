@@ -35,155 +35,135 @@ export async function importGuidelineYaml(formData: FormData) {
 	const documentId = parseInt(formData.get("documentId") as string, 10);
 
 	if (!file) {
-		return { success: false, error: "No file uploaded." };
+		throw new Error("No file uploaded.");
 	}
 
 	if (!documentId) {
-		return { success: false, error: "No document selected." };
+		throw new Error("No document selected.");
 	}
 
-	try {
-		const text = await file.text();
-		let parsed: ParsedYaml;
-		try {
-			parsed = yaml.parse(text);
-		} catch (e) {
-			console.error("YAML Parse Error", e);
-			return { success: false, error: "Invalid YAML file format." };
-		}
+	const text = await file.text();
+	const parsed = yaml.parse(text) as ParsedYaml;
 
-		// Support different root nodes based on BSI schema: controlGroup or catalog
-		let controlsData: YamlControl[] = [];
-		let guidelineTitle = file.name;
+	// Support different root nodes based on BSI schema: controlGroup or catalog
+	let controlsData: YamlControl[] = [];
+	let guidelineTitle = file.name;
 
-		if (parsed.controlGroup) {
-			guidelineTitle =
-				parsed.controlGroup.title || parsed.controlGroup.id || file.name;
-			if (Array.isArray(parsed.controlGroup.controls)) {
-				controlsData = parsed.controlGroup.controls;
-			} else if (Array.isArray(parsed.controlGroup.subgroups)) {
-				for (const sg of parsed.controlGroup.subgroups) {
-					if (Array.isArray(sg.controls)) {
-						controlsData.push(...sg.controls);
-					}
+	if (parsed.controlGroup) {
+		guidelineTitle =
+			parsed.controlGroup.title || parsed.controlGroup.id || file.name;
+		if (Array.isArray(parsed.controlGroup.controls)) {
+			controlsData = parsed.controlGroup.controls;
+		} else if (Array.isArray(parsed.controlGroup.subgroups)) {
+			for (const sg of parsed.controlGroup.subgroups) {
+				if (Array.isArray(sg.controls)) {
+					controlsData.push(...sg.controls);
 				}
 			}
-		} else if (parsed.catalog) {
-			guidelineTitle = parsed.catalog.title || file.name;
-			if (Array.isArray(parsed.catalog.groups)) {
-				for (const g of parsed.catalog.groups) {
-					if (Array.isArray(g.controls)) {
-						controlsData.push(...g.controls);
-					} else if (Array.isArray(g.subgroups)) {
-						for (const sg of g.subgroups) {
-							if (Array.isArray(sg.controls)) {
-								controlsData.push(...sg.controls);
-							}
+		}
+	} else if (parsed.catalog) {
+		guidelineTitle = parsed.catalog.title || file.name;
+		if (Array.isArray(parsed.catalog.groups)) {
+			for (const g of parsed.catalog.groups) {
+				if (Array.isArray(g.controls)) {
+					controlsData.push(...g.controls);
+				} else if (Array.isArray(g.subgroups)) {
+					for (const sg of g.subgroups) {
+						if (Array.isArray(sg.controls)) {
+							controlsData.push(...sg.controls);
 						}
 					}
 				}
 			}
 		}
+	}
 
-		if (controlsData.length === 0) {
-			return { success: false, error: "No controls found in the YAML file." };
-		}
+	if (controlsData.length === 0) {
+		throw new Error("No controls found in the YAML file.");
+	}
 
-		// Create Guideline
-		const newGuideline = await prisma.guideline.create({
-			data: {
-				title: guidelineTitle,
+	const newGuideline = await prisma.guideline.create({
+		data: {
+			title: guidelineTitle,
+			documentId: documentId,
+		},
+	});
+
+	const allParagraphs = await prisma.paragraph.findMany({
+		where: {
+			section: {
 				documentId: documentId,
 			},
-		});
-
-		// Fetch paragraphs from DB to match against (only for the selected document)
-		const allParagraphs = await prisma.paragraph.findMany({
-			where: {
-				section: {
-					documentId: documentId,
+		},
+		select: {
+			id: true,
+			marker: true,
+			section: {
+				select: {
+					marker: true,
 				},
 			},
-			select: {
-				id: true,
-				marker: true,
-				section: {
-					select: {
-						marker: true,
-					},
-				},
-				parentParagraph: {
-					select: {
-						marker: true,
-					},
+			parentParagraph: {
+				select: {
+					marker: true,
 				},
 			},
-		});
+		},
+	});
 
-		let mappedCount = 0;
+	let mappedCount = 0;
 
-		const createdControls = [];
+	const createdControls = [];
 
-		for (const ctrl of controlsData) {
-			const craRefs: string[] = Array.isArray(ctrl.cra) ? ctrl.cra : [];
-			const matchedParagraphIds = new Set<number>();
+	for (const ctrl of controlsData) {
+		const craRefs: string[] = Array.isArray(ctrl.cra) ? ctrl.cra : [];
+		const matchedParagraphIds = new Set<number>();
 
-			for (const craRef of craRefs) {
-				const matchedId = mapCraRefToParagraph(
-					craRef,
-					allParagraphs as ParagraphForMapping[],
-				);
-				if (matchedId !== null) {
-					matchedParagraphIds.add(matchedId);
-				} else {
-					console.warn(
-						`Could not map CRA reference "${craRef}" to a paragraph.`,
-					);
-				}
-			}
-
-			if (matchedParagraphIds.size > 0) {
-				mappedCount++;
+		for (const craRef of craRefs) {
+			const matchedId = mapCraRefToParagraph(
+				craRef,
+				allParagraphs as ParagraphForMapping[],
+			);
+			if (matchedId !== null) {
+				matchedParagraphIds.add(matchedId);
 			} else {
-				console.warn(
-					`Could not map control "${ctrl.title}" (id: ${ctrl.id}) with CRA reference "${craRefs.join(", ")}" to a paragraph in the database for guideline "${guidelineTitle}".`,
-				);
+				console.warn(`Could not map CRA reference "${craRef}" to a paragraph.`);
 			}
-
-			// Statements are usually an array of strings
-			const statementText = Array.isArray(ctrl.statements)
-				? ctrl.statements.join("\n\n")
-				: ctrl.statements || "";
-
-			const newControl = await prisma.control.create({
-				data: {
-					title: ctrl.title || ctrl.id || "Untitled Control",
-					statement: statementText,
-					implementationGuidance: ctrl.implementationGuidance || null,
-					guidelineId: newGuideline.id,
-					paragraphs: {
-						connect: Array.from(matchedParagraphIds).map((id) => ({ id })),
-					},
-				},
-				include: {
-					paragraphs: true,
-				},
-			});
-			createdControls.push(newControl);
 		}
 
-		return {
-			success: true,
-			guidelineId: newGuideline.id,
-			totalCount: createdControls.length,
-			mappedCount,
-			unmappedCount: createdControls.length - mappedCount,
-		};
-	} catch (error) {
-		console.error("Failed to import YAML", error);
-		return {
-			success: false,
-			error: "An unexpected error occurred during import.",
-		};
+		if (matchedParagraphIds.size > 0) {
+			mappedCount++;
+		} else {
+			console.warn(
+				`Could not map control "${ctrl.title}" (id: ${ctrl.id}) with CRA reference "${craRefs.join(", ")}" to a paragraph in the database for guideline "${guidelineTitle}".`,
+			);
+		}
+
+		const statementText = Array.isArray(ctrl.statements)
+			? ctrl.statements.join("\n\n")
+			: ctrl.statements || "";
+
+		const newControl = await prisma.control.create({
+			data: {
+				title: ctrl.title || ctrl.id || "Untitled Control",
+				statement: statementText,
+				implementationGuidance: ctrl.implementationGuidance || null,
+				guidelineId: newGuideline.id,
+				paragraphs: {
+					connect: Array.from(matchedParagraphIds).map((id) => ({ id })),
+				},
+			},
+			include: {
+				paragraphs: true,
+			},
+		});
+		createdControls.push(newControl);
 	}
+
+	return {
+		guidelineId: newGuideline.id,
+		totalCount: createdControls.length,
+		mappedCount,
+		unmappedCount: createdControls.length - mappedCount,
+	};
 }
