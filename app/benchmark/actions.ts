@@ -5,154 +5,141 @@ import { prisma } from "@/lib/prisma";
 export async function getNextBenchmarkTask(
 	mode: "CONTROL" | "PARAGRAPH" = "CONTROL",
 ) {
-	try {
-		const allParagraphs = await prisma.paragraph.findMany();
-		const paraMap = new Map(allParagraphs.map((p) => [p.id, p]));
+	const allParagraphs = await prisma.paragraph.findMany();
+	const paraMap = new Map(allParagraphs.map((p) => [p.id, p]));
 
-		if (mode === "CONTROL") {
-			const unevaluatedControl = await prisma.control.findFirst({
-				where: {
-					guidelineId: null,
-					benchmarkResult: null,
-					OR: [
-						{ generatedForId: null },
-						{ generatedFor: { isFewShotExample: false } },
-					],
-				},
-				include: {
-					paragraphs: {
-						include: {
-							section: { include: { document: true } },
-						},
-					},
-				},
-				orderBy: { id: "asc" },
-			});
-
-			if (!unevaluatedControl) {
-				return { type: "DONE" as const };
-			}
-
-			// Enrich all paragraphs of the unevaluated control with ancestors
-			const enrichedControlParagraphs = unevaluatedControl.paragraphs.map(
-				(p) => {
-					const pAncestors = [];
-					let pCurrentId = p.parentParagraphId;
-					while (pCurrentId) {
-						const parent = paraMap.get(pCurrentId);
-						if (parent) {
-							pAncestors.unshift(parent);
-							pCurrentId = parent.parentParagraphId;
-						} else {
-							break;
-						}
-					}
-					return { ...p, ancestors: pAncestors };
-				},
-			);
-
-			const primaryParagraph = enrichedControlParagraphs[0] || null;
-
-			return {
-				type: "CONTROL" as const,
-				paragraph: primaryParagraph,
-				control: {
-					...unevaluatedControl,
-					paragraphs: enrichedControlParagraphs,
-				},
-			};
-		} else {
-			const unevaluatedParagraph = await prisma.paragraph.findFirst({
-				where: {
-					controls: {
-						some: {
-							guidelineId: null,
-							OR: [
-								{ generatedForId: null },
-								{ generatedFor: { isFewShotExample: false } },
-							],
-						},
-					},
-					benchmarkResult: null,
-					isFewShotExample: false,
-				},
-				include: {
-					controls: {
-						where: {
-							guidelineId: null,
-							OR: [
-								{ generatedForId: null },
-								{ generatedFor: { isFewShotExample: false } },
-							],
-						},
-						include: {
-							benchmarkResult: true,
-						},
-						orderBy: { id: "asc" },
-					},
-					section: {
-						include: { document: true },
-					},
-				},
-				orderBy: [
-					{ section: { document: { title: "asc" } } },
-					{ section: { marker: "asc" } },
-					{ marker: "asc" },
+	if (mode === "CONTROL") {
+		const unevaluatedControl = await prisma.control.findFirst({
+			where: {
+				guidelineId: null,
+				benchmarkResult: null,
+				OR: [
+					{ generatedForId: null },
+					{ generatedFor: { isFewShotExample: false } },
 				],
-			});
+			},
+			include: {
+				paragraphs: {
+					include: {
+						section: { include: { document: true } },
+					},
+				},
+			},
+			orderBy: { id: "asc" },
+		});
 
-			if (!unevaluatedParagraph) {
-				return { type: "DONE" as const };
-			}
+		if (!unevaluatedControl) {
+			return { type: "DONE" as const };
+		}
 
-			const ancestors = [];
-			let currentId = unevaluatedParagraph.parentParagraphId;
-			while (currentId) {
-				const parent = paraMap.get(currentId);
+		const enrichedControlParagraphs = unevaluatedControl.paragraphs.map((p) => {
+			const pAncestors = [];
+			let pCurrentId = p.parentParagraphId;
+			while (pCurrentId) {
+				const parent = paraMap.get(pCurrentId);
 				if (parent) {
-					ancestors.unshift(parent);
-					currentId = parent.parentParagraphId;
+					pAncestors.unshift(parent);
+					pCurrentId = parent.parentParagraphId;
 				} else {
 					break;
 				}
 			}
+			return { ...p, ancestors: pAncestors };
+		});
 
-			const enrichedParagraph = { ...unevaluatedParagraph, ancestors };
+		const primaryParagraph = enrichedControlParagraphs[0] || null;
 
-			return {
-				type: "PARAGRAPH" as const,
-				paragraph: enrichedParagraph,
-				evaluatedControls: enrichedParagraph.controls,
-			};
+		return {
+			type: "CONTROL" as const,
+			paragraph: primaryParagraph,
+			control: {
+				...unevaluatedControl,
+				paragraphs: enrichedControlParagraphs,
+			},
+		};
+	} else {
+		const unevaluatedParagraph = await prisma.paragraph.findFirst({
+			where: {
+				controls: {
+					some: {
+						guidelineId: null,
+						OR: [
+							{ generatedForId: null },
+							{ generatedFor: { isFewShotExample: false } },
+						],
+					},
+				},
+				benchmarkResult: null,
+				isFewShotExample: false,
+			},
+			include: {
+				controls: {
+					where: {
+						guidelineId: null,
+						OR: [
+							{ generatedForId: null },
+							{ generatedFor: { isFewShotExample: false } },
+						],
+					},
+					include: {
+						benchmarkResult: true,
+					},
+					orderBy: { id: "asc" },
+				},
+				section: {
+					include: { document: true },
+				},
+			},
+			orderBy: [
+				{ section: { document: { title: "asc" } } },
+				{ section: { marker: "asc" } },
+				{ marker: "asc" },
+			],
+		});
+
+		if (!unevaluatedParagraph) {
+			return { type: "DONE" as const };
 		}
-	} catch (error) {
-		console.error("Failed to fetch next benchmark task:", error);
-		throw new Error("Failed to load benchmark task");
+
+		const ancestors = [];
+		let currentId = unevaluatedParagraph.parentParagraphId;
+		while (currentId) {
+			const parent = paraMap.get(currentId);
+			if (parent) {
+				ancestors.unshift(parent);
+				currentId = parent.parentParagraphId;
+			} else {
+				break;
+			}
+		}
+
+		const enrichedParagraph = { ...unevaluatedParagraph, ancestors };
+
+		return {
+			type: "PARAGRAPH" as const,
+			paragraph: enrichedParagraph,
+			evaluatedControls: enrichedParagraph.controls,
+		};
 	}
 }
 
 export async function getTechnicalControls(paragraphIds?: number[]) {
-	try {
-		const controls = await prisma.control.findMany({
-			where: {
-				guidelineId: { not: null },
-				paragraphs: {
-					none: { isFewShotExample: true },
-				},
-				...(paragraphIds && paragraphIds.length > 0
-					? { paragraphs: { some: { id: { in: paragraphIds } } } }
-					: {}),
+	const controls = await prisma.control.findMany({
+		where: {
+			guidelineId: { not: null },
+			paragraphs: {
+				none: { isFewShotExample: true },
 			},
-			include: {
-				guideline: true,
-			},
-			orderBy: [{ guideline: { title: "asc" } }, { title: "asc" }],
-		});
-		return controls;
-	} catch (error) {
-		console.error("Failed to fetch technical controls:", error);
-		throw new Error("Failed to load technical controls");
-	}
+			...(paragraphIds && paragraphIds.length > 0
+				? { paragraphs: { some: { id: { in: paragraphIds } } } }
+				: {}),
+		},
+		include: {
+			guideline: true,
+		},
+		orderBy: [{ guideline: { title: "asc" } }, { title: "asc" }],
+	});
+	return controls;
 }
 
 export async function saveControlBenchmark(data: {
@@ -163,26 +150,20 @@ export async function saveControlBenchmark(data: {
 	isTechnicallyCorrect: boolean;
 	isMeasurable: boolean;
 }) {
-	try {
-		await prisma.benchmarkResult.create({
-			data: {
-				llmControlId: data.llmControlId,
-				isActionable: data.isActionable,
-				isTechnicallyCorrect: data.isTechnicallyCorrect,
-				isMeasurable: data.isMeasurable,
-				relevantParagraphs: {
-					connect: data.relevantParagraphIds.map((id) => ({ id })),
-				},
-				coveredControls: {
-					connect: data.coveredControlIds.map((id) => ({ id })),
-				},
+	return await prisma.benchmarkResult.create({
+		data: {
+			llmControlId: data.llmControlId,
+			isActionable: data.isActionable,
+			isTechnicallyCorrect: data.isTechnicallyCorrect,
+			isMeasurable: data.isMeasurable,
+			relevantParagraphs: {
+				connect: data.relevantParagraphIds.map((id) => ({ id })),
 			},
-		});
-		return { success: true };
-	} catch (error) {
-		console.error("Failed to save control benchmark:", error);
-		return { success: false, error: "Failed to save benchmark result" };
-	}
+			coveredControls: {
+				connect: data.coveredControlIds.map((id) => ({ id })),
+			},
+		},
+	});
 }
 
 export async function saveParagraphBenchmark(data: {
@@ -190,67 +171,56 @@ export async function saveParagraphBenchmark(data: {
 	isComplete: boolean;
 	hasRedundancy: boolean;
 }) {
-	try {
-		await prisma.paragraphBenchmark.create({
-			data: {
-				paragraphId: data.paragraphId,
-				isComplete: data.isComplete,
-				hasRedundancy: data.hasRedundancy,
-			},
-		});
-		return { success: true };
-	} catch (error) {
-		console.error("Failed to save paragraph benchmark:", error);
-		return { success: false, error: "Failed to save benchmark result" };
-	}
+	return await prisma.paragraphBenchmark.create({
+		data: {
+			paragraphId: data.paragraphId,
+			isComplete: data.isComplete,
+			hasRedundancy: data.hasRedundancy,
+		},
+	});
 }
 
 export async function getBenchmarkProgress(mode: "CONTROL" | "PARAGRAPH") {
-	try {
-		if (mode === "CONTROL") {
-			const whereClause = {
-				guidelineId: null,
-				OR: [
-					{ generatedForId: null },
-					{ generatedFor: { isFewShotExample: false } },
-				],
-			};
-			const total = await prisma.control.count({
-				where: whereClause,
-			});
-			const evaluated = await prisma.control.count({
-				where: {
-					...whereClause,
-					benchmarkResult: { isNot: null },
+	if (mode === "CONTROL") {
+		const whereClause = {
+			guidelineId: null,
+			OR: [
+				{ generatedForId: null },
+				{ generatedFor: { isFewShotExample: false } },
+			],
+		};
+		const total = await prisma.control.count({
+			where: whereClause,
+		});
+		const evaluated = await prisma.control.count({
+			where: {
+				...whereClause,
+				benchmarkResult: { isNot: null },
+			},
+		});
+		return { total, evaluated };
+	} else {
+		const whereClause = {
+			controls: {
+				some: {
+					guidelineId: null,
+					OR: [
+						{ generatedForId: null },
+						{ generatedFor: { isFewShotExample: false } },
+					],
 				},
-			});
-			return { success: true, total, evaluated };
-		} else {
-			const whereClause = {
-				controls: {
-					some: {
-						guidelineId: null,
-						OR: [
-							{ generatedForId: null },
-							{ generatedFor: { isFewShotExample: false } },
-						],
-					},
-				},
-				isFewShotExample: false,
-			};
-			const total = await prisma.paragraph.count({
-				where: whereClause,
-			});
-			const evaluated = await prisma.paragraph.count({
-				where: {
-					...whereClause,
-					benchmarkResult: { isNot: null },
-				},
-			});
-			return { success: true, total, evaluated };
-		}
-	} catch (error) {
-		console.error("Failed to get benchmark progress:", error);
-		return { success: false, total: 0, evaluated: 0 };
+			},
+			isFewShotExample: false,
+		};
+		const total = await prisma.paragraph.count({
+			where: whereClause,
+		});
+		const evaluated = await prisma.paragraph.count({
+			where: {
+				...whereClause,
+				benchmarkResult: { isNot: null },
+			},
+		});
+		return { total, evaluated };
 	}
 }

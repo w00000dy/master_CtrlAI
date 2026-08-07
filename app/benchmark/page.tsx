@@ -94,12 +94,10 @@ export default function BenchmarkPage() {
 			setTask(nextTask);
 
 			const progRes = await getBenchmarkProgress(mode);
-			if (progRes.success) {
-				setProgress({
-					total: progRes.total ?? 0,
-					evaluated: progRes.evaluated ?? 0,
-				});
-			}
+			setProgress({
+				total: progRes.total ?? 0,
+				evaluated: progRes.evaluated ?? 0,
+			});
 
 			if (nextTask.type === "CONTROL") {
 				const techControls = await getTechnicalControls(
@@ -162,16 +160,20 @@ export default function BenchmarkPage() {
 			return;
 		}
 
-		await saveControlBenchmark({
-			llmControlId: task.control.id,
-			coveredControlIds: Array.from(selectedCoveredControls),
-			relevantParagraphIds: Array.from(relevantParagraphs),
-			isActionable,
-			isTechnicallyCorrect,
-			isMeasurable,
-		});
-
-		await loadTask();
+		try {
+			await saveControlBenchmark({
+				llmControlId: task.control.id,
+				coveredControlIds: Array.from(selectedCoveredControls),
+				relevantParagraphIds: Array.from(relevantParagraphs),
+				isActionable,
+				isTechnicallyCorrect,
+				isMeasurable,
+			});
+			await loadTask();
+		} catch (error) {
+			console.error("Error saving benchmark:", error);
+			alert("Failed to save benchmark result");
+		}
 	};
 
 	const submitParagraph = async () => {
@@ -183,13 +185,17 @@ export default function BenchmarkPage() {
 			return;
 		}
 
-		await saveParagraphBenchmark({
-			paragraphId: task.paragraph.id,
-			isComplete,
-			hasRedundancy,
-		});
-
-		await loadTask();
+		try {
+			await saveParagraphBenchmark({
+				paragraphId: task.paragraph.id,
+				isComplete,
+				hasRedundancy,
+			});
+			await loadTask();
+		} catch (error) {
+			console.error("Error saving benchmark:", error);
+			alert("Failed to save benchmark result");
+		}
 	};
 
 	return (
