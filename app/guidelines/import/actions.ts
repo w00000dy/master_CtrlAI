@@ -45,8 +45,13 @@ export async function importGuidelineYaml(formData: FormData) {
 	const text = await file.text();
 	const parsed = yaml.parse(text) as ParsedYaml;
 
-	if (!parsed || (typeof parsed === 'object' && !parsed.controlGroup && !parsed.catalog)) {
-		throw new Error("Invalid YAML file: Missing 'controlGroup' or 'catalog' root node.");
+	if (
+		!parsed ||
+		(typeof parsed === "object" && !parsed.controlGroup && !parsed.catalog)
+	) {
+		throw new Error(
+			"Invalid YAML file: Missing 'controlGroup' or 'catalog' root node.",
+		);
 	}
 
 	// Support different root nodes based on BSI schema: controlGroup or catalog
