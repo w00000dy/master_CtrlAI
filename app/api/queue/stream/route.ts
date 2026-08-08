@@ -28,8 +28,22 @@ export async function GET(request: Request) {
 
 			queueEmitter.on("queueUpdated", onQueueUpdated);
 
+			const onShutdown = () => {
+				try {
+					controller.close();
+				} catch {
+					// ignore if already closed
+				}
+				queueEmitter.off("queueUpdated", onQueueUpdated);
+			};
+
+			process.on("SIGINT", onShutdown);
+			process.on("SIGTERM", onShutdown);
+
 			request.signal.addEventListener("abort", () => {
 				queueEmitter.off("queueUpdated", onQueueUpdated);
+				process.off("SIGINT", onShutdown);
+				process.off("SIGTERM", onShutdown);
 			});
 		},
 	});
