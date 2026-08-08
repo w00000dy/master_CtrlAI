@@ -393,8 +393,8 @@ export default function BenchmarkPage() {
 													</li>
 													<li className="text-zinc-600 dark:text-zinc-400">
 														<em>
-															Note: A single control can cover multiple
-															guidelines!
+															Note: One AI-generated control can cover multiple
+															controls from the technical guidelines!
 														</em>
 													</li>
 												</>
@@ -457,8 +457,9 @@ export default function BenchmarkPage() {
 												doItems={
 													<>
 														<li>
-															The control <strong>logically derives</strong>{" "}
-															from it without arbitrary constraints.
+															The control is a{" "}
+															<strong>direct consequence</strong> of the
+															paragraph, without adding unnecessary rules.
 														</li>
 														<li>
 															It <strong>directly mandates</strong> or strongly
