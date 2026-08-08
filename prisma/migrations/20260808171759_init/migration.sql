@@ -52,15 +52,16 @@ CREATE TABLE `Control` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `BenchmarkResult` (
+CREATE TABLE `ControlBenchmark` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `llmControlId` INTEGER NOT NULL,
     `isActionable` BOOLEAN NOT NULL,
     `isTechnicallyCorrect` BOOLEAN NOT NULL,
     `isMeasurable` BOOLEAN NOT NULL,
+    `hasNormativeLanguage` BOOLEAN NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
-    UNIQUE INDEX `BenchmarkResult_llmControlId_key`(`llmControlId`),
+    UNIQUE INDEX `ControlBenchmark_llmControlId_key`(`llmControlId`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -70,6 +71,7 @@ CREATE TABLE `ParagraphBenchmark` (
     `paragraphId` INTEGER NOT NULL,
     `isComplete` BOOLEAN NOT NULL,
     `hasRedundancy` BOOLEAN NOT NULL,
+    `hasHallucinations` BOOLEAN NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
     UNIQUE INDEX `ParagraphBenchmark_paragraphId_key`(`paragraphId`),
@@ -122,7 +124,7 @@ ALTER TABLE `Control` ADD CONSTRAINT `Control_guidelineId_fkey` FOREIGN KEY (`gu
 ALTER TABLE `Control` ADD CONSTRAINT `Control_generatedForId_fkey` FOREIGN KEY (`generatedForId`) REFERENCES `Paragraph`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `BenchmarkResult` ADD CONSTRAINT `BenchmarkResult_llmControlId_fkey` FOREIGN KEY (`llmControlId`) REFERENCES `Control`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `ControlBenchmark` ADD CONSTRAINT `ControlBenchmark_llmControlId_fkey` FOREIGN KEY (`llmControlId`) REFERENCES `Control`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `ParagraphBenchmark` ADD CONSTRAINT `ParagraphBenchmark_paragraphId_fkey` FOREIGN KEY (`paragraphId`) REFERENCES `Paragraph`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
@@ -134,13 +136,13 @@ ALTER TABLE `_ControlToParagraph` ADD CONSTRAINT `_ControlToParagraph_A_fkey` FO
 ALTER TABLE `_ControlToParagraph` ADD CONSTRAINT `_ControlToParagraph_B_fkey` FOREIGN KEY (`B`) REFERENCES `Paragraph`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `_CoveredByBenchmark` ADD CONSTRAINT `_CoveredByBenchmark_A_fkey` FOREIGN KEY (`A`) REFERENCES `BenchmarkResult`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `_CoveredByBenchmark` ADD CONSTRAINT `_CoveredByBenchmark_A_fkey` FOREIGN KEY (`A`) REFERENCES `Control`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `_CoveredByBenchmark` ADD CONSTRAINT `_CoveredByBenchmark_B_fkey` FOREIGN KEY (`B`) REFERENCES `Control`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `_CoveredByBenchmark` ADD CONSTRAINT `_CoveredByBenchmark_B_fkey` FOREIGN KEY (`B`) REFERENCES `ControlBenchmark`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `_RelevantBenchmarkParagraphs` ADD CONSTRAINT `_RelevantBenchmarkParagraphs_A_fkey` FOREIGN KEY (`A`) REFERENCES `BenchmarkResult`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `_RelevantBenchmarkParagraphs` ADD CONSTRAINT `_RelevantBenchmarkParagraphs_A_fkey` FOREIGN KEY (`A`) REFERENCES `ControlBenchmark`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `_RelevantBenchmarkParagraphs` ADD CONSTRAINT `_RelevantBenchmarkParagraphs_B_fkey` FOREIGN KEY (`B`) REFERENCES `Paragraph`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
