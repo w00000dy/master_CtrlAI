@@ -65,5 +65,10 @@ Open [http://localhost:3000](http://localhost:3000) in your browser!
 
 ## 🏗️ Built With
 
-- [Next.js](https://nextjs.org/)
-- [Prisma](https://www.prisma.io/)
+- [Next.js](https://nextjs.org/) - React framework for web applications
+- [React](https://react.dev/) - JavaScript library for user interfaces
+- [Tailwind CSS](https://tailwindcss.com/) - Utility-first CSS framework
+- [Prisma](https://www.prisma.io/) - Next-generation Node.js and TypeScript ORM
+- [Ollama](https://ollama.com/) & [OpenAI](https://openai.com/) - AI model providers
+- [Zod](https://zod.dev/) - TypeScript-first schema validation
+- [Docker](https://www.docker.com/) - Containerization for database setup
