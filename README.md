@@ -20,7 +20,7 @@ Specifically, the application provides a structured pipeline to investigate how 
 ### Prerequisites
 Before you begin, ensure you have the following installed:
 - [Node.js](https://nodejs.org/en/download) (v24 or higher recommended)
-- [Docker](https://www.docker.com/) (to easily run the database via Docker Compose)
+- [Docker Engine](https://docs.docker.com/engine/install/) and [Docker Compose](https://docs.docker.com/compose/install/) (to easily run the database)
 - Either Ollama or OpenAI
 
 ### 1. Setup
