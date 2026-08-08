@@ -3,6 +3,7 @@
 import { LoaderIcon } from "lucide-animated";
 import { useEffect, useState } from "react";
 import { PageLayout } from "@/app/components/PageLayout";
+import { BENCHMARK_TITLES } from "../constants";
 import { getBenchmarkResults, getParagraphBenchmarks } from "./actions";
 
 type BenchmarkResult = Awaited<ReturnType<typeof getBenchmarkResults>>[0];
@@ -135,16 +136,31 @@ export default function BenchmarkResultsPage() {
 				<div className="space-y-12">
 					{/* Dashboard */}
 					<div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
-						<Gauge value={avgRelevanceScore} label="Relevance Score" />
-						<Gauge value={actionabilityScore} label="Actionability Score" />
-						<Gauge value={correctnessScore} label="Technical Correctness" />
-						<Gauge value={measurabilityScore} label="Measurability Score" />
-						<Gauge value={completenessScore} label="Completeness Score" />
-						<Gauge value={efficiencyScore} label="Efficiency (No Redundancy)" />
 						<Gauge
-							value={precisionScore}
-							label="Precision (No Hallucinations)"
+							value={avgRelevanceScore}
+							label={BENCHMARK_TITLES.RELEVANCE}
 						/>
+						<Gauge
+							value={actionabilityScore}
+							label={BENCHMARK_TITLES.ACTIONABILITY}
+						/>
+						<Gauge
+							value={correctnessScore}
+							label={BENCHMARK_TITLES.TECHNICAL_CORRECTNESS}
+						/>
+						<Gauge
+							value={measurabilityScore}
+							label={BENCHMARK_TITLES.MEASURABILITY}
+						/>
+						<Gauge
+							value={completenessScore}
+							label={BENCHMARK_TITLES.COMPLETENESS}
+						/>
+						<Gauge
+							value={efficiencyScore}
+							label={BENCHMARK_TITLES.EFFICIENCY}
+						/>
+						<Gauge value={precisionScore} label={BENCHMARK_TITLES.PRECISION} />
 					</div>
 
 					<div className="grid lg:grid-cols-2 gap-8">

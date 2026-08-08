@@ -2,9 +2,9 @@
 
 import { ChevronDownIcon } from "lucide-animated";
 import { type ReactNode, useCallback, useEffect, useState } from "react";
-
 import type { Control, Guideline } from "../../generated/prisma/client";
 import { CompactControlCard } from "../components/CompactControlCard";
+import { BENCHMARK_TITLES } from "./constants";
 
 function CriteriaDetails({
 	children,
@@ -27,6 +27,31 @@ function CriteriaDetails({
 				{children}
 			</div>
 		</details>
+	);
+}
+
+function CriteriaGuidelines({
+	doLabel = "✅ DO select 'Yes' if:",
+	doNotLabel = "❌ Do NOT select 'Yes' (select 'No') if:",
+	doItems,
+	doNotItems,
+}: {
+	doLabel?: ReactNode;
+	doNotLabel?: ReactNode;
+	doItems: ReactNode;
+	doNotItems: ReactNode;
+}) {
+	return (
+		<>
+			<p className="font-semibold text-emerald-700 dark:text-emerald-400">
+				{doLabel}
+			</p>
+			<ul className="list-disc pl-4 space-y-1 mt-1 mb-3">{doItems}</ul>
+			<p className="font-semibold text-rose-700 dark:text-rose-400 border-t border-blue-200 dark:border-blue-800/50 pt-2 mt-2">
+				{doNotLabel}
+			</p>
+			<ul className="list-disc pl-4 space-y-1 mt-1">{doNotItems}</ul>
+		</>
 	);
 }
 
@@ -57,6 +82,61 @@ type Task =
 	  };
 
 type TechnicalControl = Control & { guideline: Guideline | null };
+
+function BenchmarkQuestion({
+	title,
+	question,
+	doItems,
+	doNotItems,
+	name,
+	value,
+	onChange,
+	className = "",
+}: {
+	title: ReactNode;
+	question: ReactNode;
+	doItems: ReactNode;
+	doNotItems: ReactNode;
+	name: string;
+	value: boolean | null;
+	onChange: (val: boolean) => void;
+	className?: string;
+}) {
+	return (
+		<div
+			className={`bg-zinc-50 dark:bg-zinc-800/50 p-4 rounded-lg ${className}`}
+		>
+			<p className="font-medium mb-1">
+				<strong>{title}:</strong> {question}
+			</p>
+			<CriteriaDetails className="mb-3 group">
+				<CriteriaGuidelines doItems={doItems} doNotItems={doNotItems} />
+			</CriteriaDetails>
+			<div className="flex gap-4">
+				<label className="flex items-center">
+					<input
+						type="radio"
+						name={name}
+						checked={value === true}
+						onChange={() => onChange(true)}
+						className="mr-2"
+					/>
+					Yes
+				</label>
+				<label className="flex items-center">
+					<input
+						type="radio"
+						name={name}
+						checked={value === false}
+						onChange={() => onChange(false)}
+						className="mr-2"
+					/>
+					No
+				</label>
+			</div>
+		</div>
+	);
+}
 
 export default function BenchmarkPage() {
 	const [task, setTask] = useState<Task | null>(null);
@@ -292,40 +372,46 @@ export default function BenchmarkPage() {
 										control cover?
 									</p>
 									<CriteriaDetails className="mt-2 group">
-										<p className="font-semibold text-emerald-700 dark:text-emerald-400">
-											✅ DO check the box if the generated control:
-										</p>
-										<ul className="list-disc pl-4 space-y-1 mt-1 mb-3">
-											<li>
-												Is a <strong>direct match</strong> to the guideline.
-											</li>
-											<li>
-												Provides a <strong>substantial contribution</strong> to
-												fulfilling it.
-											</li>
-											<li>
-												Is a <strong>specific, concrete implementation</strong>{" "}
-												of a broader guideline.
-											</li>
-											<li className="text-zinc-600 dark:text-zinc-400">
-												<em>
-													Note: A single control can cover multiple guidelines!
-												</em>
-											</li>
-										</ul>
-										<p className="font-semibold text-rose-700 dark:text-rose-400 border-t border-blue-200 dark:border-blue-800/50 pt-2 mt-2">
-											❌ Do NOT check the box if:
-										</p>
-										<ul className="list-disc pl-4 space-y-1 mt-1">
-											<li>
-												It is only <strong>vaguely related</strong> to the
-												guideline.
-											</li>
-											<li>
-												It just shares the <strong>same topic</strong> without
-												actually fulfilling the requirement.
-											</li>
-										</ul>
+										<CriteriaGuidelines
+											doLabel={
+												<>✅ DO check the box if the generated control:</>
+											}
+											doNotLabel={<>❌ Do NOT check the box if:</>}
+											doItems={
+												<>
+													<li>
+														Is a <strong>direct match</strong> to the guideline.
+													</li>
+													<li>
+														Provides a <strong>substantial contribution</strong>{" "}
+														to fulfilling it.
+													</li>
+													<li>
+														Is a{" "}
+														<strong>specific, concrete implementation</strong>{" "}
+														of a broader guideline.
+													</li>
+													<li className="text-zinc-600 dark:text-zinc-400">
+														<em>
+															Note: A single control can cover multiple
+															guidelines!
+														</em>
+													</li>
+												</>
+											}
+											doNotItems={
+												<>
+													<li>
+														It is only <strong>vaguely related</strong> to the
+														guideline.
+													</li>
+													<li>
+														It just shares the <strong>same topic</strong>{" "}
+														without actually fulfilling the requirement.
+													</li>
+												</>
+											}
+										/>
 									</CriteriaDetails>
 								</div>
 								<div className="flex-1 overflow-y-auto min-h-0 border border-zinc-200 dark:border-zinc-800 rounded-lg divide-y divide-zinc-200 dark:divide-zinc-800">
@@ -361,36 +447,40 @@ export default function BenchmarkPage() {
 								<div className="space-y-4 flex-1 overflow-y-auto min-h-0 pr-2 pb-4">
 									<div className="bg-zinc-50 dark:bg-zinc-800/50 p-4 rounded-lg">
 										<p className="font-medium mb-1">
-											Select the paragraphs where this control is relevant:
+											<strong>{BENCHMARK_TITLES.RELEVANCE}:</strong> Select the
+											paragraphs where this control is relevant:
 										</p>
 										<CriteriaDetails className="mb-3 group">
-											<p className="font-semibold text-emerald-700 dark:text-emerald-400">
-												✅ DO check the paragraph if:
-											</p>
-											<ul className="list-disc pl-4 space-y-1 mt-1 mb-3">
-												<li>
-													The control <strong>logically derives</strong> from it
-													without arbitrary constraints.
-												</li>
-												<li>
-													It <strong>directly mandates</strong> or strongly
-													implies the technical requirement.
-												</li>
-											</ul>
-											<p className="font-semibold text-rose-700 dark:text-rose-400 border-t border-blue-200 dark:border-blue-800/50 pt-2 mt-2">
-												❌ Do NOT check the paragraph if:
-											</p>
-											<ul className="list-disc pl-4 space-y-1 mt-1">
-												<li>
-													It only mentions the <strong>general topic</strong>{" "}
-													without supporting the specific requirement.
-												</li>
-												<li>
-													The control demands something that is{" "}
-													<strong>not necessary</strong> or goes far beyond what
-													the legal text actually requires.
-												</li>
-											</ul>
+											<CriteriaGuidelines
+												doLabel={<>✅ DO check the paragraph if:</>}
+												doNotLabel={<>❌ Do NOT check the paragraph if:</>}
+												doItems={
+													<>
+														<li>
+															The control <strong>logically derives</strong>{" "}
+															from it without arbitrary constraints.
+														</li>
+														<li>
+															It <strong>directly mandates</strong> or strongly
+															implies the technical requirement.
+														</li>
+													</>
+												}
+												doNotItems={
+													<>
+														<li>
+															It only mentions the{" "}
+															<strong>general topic</strong> without supporting
+															the specific requirement.
+														</li>
+														<li>
+															The control demands something that is{" "}
+															<strong>not necessary</strong> or goes far beyond
+															what the legal text actually requires.
+														</li>
+													</>
+												}
+											/>
 										</CriteriaDetails>
 										<div className="flex flex-col gap-2">
 											{task.control.paragraphs.map((p) => (
@@ -412,16 +502,14 @@ export default function BenchmarkPage() {
 										</div>
 									</div>
 
-									<div className="bg-zinc-50 dark:bg-zinc-800/50 p-4 rounded-lg">
-										<p className="font-medium mb-1">
-											Is the control formulated so that developers or security
-											engineers can implement it directly?
-										</p>
-										<CriteriaDetails className="mb-3 group">
-											<p className="font-semibold text-emerald-700 dark:text-emerald-400">
-												✅ DO select &apos;Yes (Actionable)&apos; if:
-											</p>
-											<ul className="list-disc pl-4 space-y-1 mt-1 mb-3">
+									<BenchmarkQuestion
+										title={BENCHMARK_TITLES.ACTIONABILITY}
+										question="Is the control formulated so that developers or security engineers can implement it directly?"
+										name="actionable"
+										value={isActionable}
+										onChange={setIsActionable}
+										doItems={
+											<>
 												<li>
 													It is <strong>highly specific</strong> (no vague
 													&quot;ensure security&quot; statements).
@@ -434,52 +522,24 @@ export default function BenchmarkPage() {
 													It is clear how to <strong>test/verify</strong> its
 													successful implementation.
 												</li>
-											</ul>
-											<p className="font-semibold text-rose-700 dark:text-rose-400 border-t border-blue-200 dark:border-blue-800/50 pt-2 mt-2">
-												❌ Do NOT select &apos;Yes&apos; (select &apos;No&apos;)
-												if:
-											</p>
-											<ul className="list-disc pl-4 space-y-1 mt-1">
-												<li>
-													It only contains <strong>generic advice</strong> or
-													lacks concrete technical steps.
-												</li>
-											</ul>
-										</CriteriaDetails>
-										<div className="flex gap-4">
-											<label className="flex items-center">
-												<input
-													type="radio"
-													name="actionable"
-													checked={isActionable === true}
-													onChange={() => setIsActionable(true)}
-													className="mr-2"
-												/>
-												Yes (Actionable)
-											</label>
-											<label className="flex items-center">
-												<input
-													type="radio"
-													name="actionable"
-													checked={isActionable === false}
-													onChange={() => setIsActionable(false)}
-													className="mr-2"
-												/>
-												No (Too vague)
-											</label>
-										</div>
-									</div>
+											</>
+										}
+										doNotItems={
+											<li>
+												It only contains <strong>generic advice</strong> or
+												lacks concrete technical steps.
+											</li>
+										}
+									/>
 
-									<div className="bg-zinc-50 dark:bg-zinc-800/50 p-4 rounded-lg">
-										<p className="font-medium mb-1">
-											Is the technical interpretation of the legal text
-											technically correct and state-of-the-art?
-										</p>
-										<CriteriaDetails className="mb-3 group">
-											<p className="font-semibold text-emerald-700 dark:text-emerald-400">
-												✅ DO select &apos;Yes (Correct)&apos; if:
-											</p>
-											<ul className="list-disc pl-4 space-y-1 mt-1 mb-3">
+									<BenchmarkQuestion
+										title={BENCHMARK_TITLES.TECHNICAL_CORRECTNESS}
+										question="Is the technical interpretation of the legal text technically correct and state-of-the-art?"
+										name="correct"
+										value={isTechnicallyCorrect}
+										onChange={setIsTechnicallyCorrect}
+										doItems={
+											<>
 												<li>
 													It uses <strong>accurate</strong> technical
 													terminology and valid security concepts.
@@ -492,12 +552,10 @@ export default function BenchmarkPage() {
 													It <strong>correctly interprets</strong> the spirit of
 													the legal requirement.
 												</li>
-											</ul>
-											<p className="font-semibold text-rose-700 dark:text-rose-400 border-t border-blue-200 dark:border-blue-800/50 pt-2 mt-2">
-												❌ Do NOT select &apos;Yes&apos; (select &apos;No&apos;)
-												if:
-											</p>
-											<ul className="list-disc pl-4 space-y-1 mt-1">
+											</>
+										}
+										doNotItems={
+											<>
 												<li>
 													It proposes <strong>outdated technology</strong> or
 													incorrect concepts.
@@ -506,82 +564,32 @@ export default function BenchmarkPage() {
 													It <strong>misinterprets</strong> or weakens the legal
 													requirement.
 												</li>
-											</ul>
-										</CriteriaDetails>
-										<div className="flex gap-4">
-											<label className="flex items-center">
-												<input
-													type="radio"
-													name="correct"
-													checked={isTechnicallyCorrect === true}
-													onChange={() => setIsTechnicallyCorrect(true)}
-													className="mr-2"
-												/>
-												Yes (Correct)
-											</label>
-											<label className="flex items-center">
-												<input
-													type="radio"
-													name="correct"
-													checked={isTechnicallyCorrect === false}
-													onChange={() => setIsTechnicallyCorrect(false)}
-													className="mr-2"
-												/>
-												No (Incorrect)
-											</label>
-										</div>
-									</div>
+											</>
+										}
+									/>
 
-									<div className="bg-zinc-50 dark:bg-zinc-800/50 p-4 rounded-lg mt-4">
-										<p className="font-medium mb-1">
-											Is the control measurable?
-										</p>
-										<CriteriaDetails className="mb-3 group">
-											<p className="font-semibold text-emerald-700 dark:text-emerald-400">
-												✅ DO select &apos;Yes (Measurable)&apos; if:
-											</p>
-											<ul className="list-disc pl-4 space-y-1 mt-1 mb-3">
-												<li>
-													It is possible to objectively verify whether the
-													control is implemented (e.g., via an automated test, a
-													log entry, or a clear configuration check).
-												</li>
-											</ul>
-											<p className="font-semibold text-rose-700 dark:text-rose-400 border-t border-blue-200 dark:border-blue-800/50 pt-2 mt-2">
-												❌ Do NOT select &apos;Yes&apos; (select &apos;No&apos;)
-												if:
-											</p>
-											<ul className="list-disc pl-4 space-y-1 mt-1">
-												<li>
-													Verification relies purely on subjective judgment,
-													vague statements, or manual assertion without concrete
-													evidence.
-												</li>
-											</ul>
-										</CriteriaDetails>
-										<div className="flex gap-4">
-											<label className="flex items-center">
-												<input
-													type="radio"
-													name="measurable"
-													checked={isMeasurable === true}
-													onChange={() => setIsMeasurable(true)}
-													className="mr-2"
-												/>
-												Yes (Measurable)
-											</label>
-											<label className="flex items-center">
-												<input
-													type="radio"
-													name="measurable"
-													checked={isMeasurable === false}
-													onChange={() => setIsMeasurable(false)}
-													className="mr-2"
-												/>
-												No (Not measurable)
-											</label>
-										</div>
-									</div>
+									<BenchmarkQuestion
+										title={BENCHMARK_TITLES.MEASURABILITY}
+										question="Is the control measurable?"
+										name="measurable"
+										value={isMeasurable}
+										onChange={setIsMeasurable}
+										className="mt-4"
+										doItems={
+											<li>
+												It is possible to objectively verify whether the control
+												is implemented (e.g., via an automated test, a log
+												entry, or a clear configuration check).
+											</li>
+										}
+										doNotItems={
+											<li>
+												Verification relies purely on subjective judgment, vague
+												statements, or manual assertion without concrete
+												evidence.
+											</li>
+										}
+									/>
 								</div>
 							</div>
 
@@ -635,16 +643,14 @@ export default function BenchmarkPage() {
 						<div className="space-y-6 lg:col-span-1 flex flex-col h-full min-h-0">
 							<div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6 flex flex-col h-full min-h-0">
 								<div className="space-y-6 flex-1 overflow-y-auto min-h-0 pr-2 pb-4">
-									<div className="bg-zinc-50 dark:bg-zinc-800/50 p-4 rounded-lg">
-										<p className="font-medium mb-1">
-											<strong>Completeness:</strong> Do all generated controls
-											completely cover the intention of this paragraph?
-										</p>
-										<CriteriaDetails className="mb-3 group">
-											<p className="font-semibold text-emerald-700 dark:text-emerald-400">
-												✅ DO select &apos;Yes&apos; if:
-											</p>
-											<ul className="list-disc pl-4 space-y-1 mt-1 mb-3">
+									<BenchmarkQuestion
+										title={BENCHMARK_TITLES.COMPLETENESS}
+										question="Do all generated controls completely cover the intention of this paragraph?"
+										name="complete"
+										value={isComplete}
+										onChange={setIsComplete}
+										doItems={
+											<>
 												<li>
 													The controls provide <strong>full coverage</strong> of
 													all technical requirements.
@@ -653,12 +659,10 @@ export default function BenchmarkPage() {
 													There are <strong>no missing gaps</strong> that a
 													developer would need to infer.
 												</li>
-											</ul>
-											<p className="font-semibold text-rose-700 dark:text-rose-400 border-t border-blue-200 dark:border-blue-800/50 pt-2 mt-2">
-												❌ Do NOT select &apos;Yes&apos; (select &apos;No&apos;)
-												if:
-											</p>
-											<ul className="list-disc pl-4 space-y-1 mt-1">
+											</>
+										}
+										doNotItems={
+											<>
 												<li>
 													The controls only <strong>partially address</strong>{" "}
 													the paragraph.
@@ -666,43 +670,18 @@ export default function BenchmarkPage() {
 												<li>
 													Important aspects are <strong>missing</strong>.
 												</li>
-											</ul>
-										</CriteriaDetails>
-										<div className="flex gap-4">
-											<label className="flex items-center">
-												<input
-													type="radio"
-													name="complete"
-													checked={isComplete === true}
-													onChange={() => setIsComplete(true)}
-													className="mr-2"
-												/>
-												Yes
-											</label>
-											<label className="flex items-center">
-												<input
-													type="radio"
-													name="complete"
-													checked={isComplete === false}
-													onChange={() => setIsComplete(false)}
-													className="mr-2"
-												/>
-												No
-											</label>
-										</div>
-									</div>
+											</>
+										}
+									/>
 
-									<div className="bg-zinc-50 dark:bg-zinc-800/50 p-4 rounded-lg">
-										<p className="font-medium mb-1">
-											<strong>Precision:</strong> Do the generated controls
-											invent technical requirements that are not supported by
-											the original text?
-										</p>
-										<CriteriaDetails className="mb-3 group">
-											<p className="font-semibold text-emerald-700 dark:text-emerald-400">
-												✅ DO select &apos;Yes&apos; if:
-											</p>
-											<ul className="list-disc pl-4 space-y-1 mt-1 mb-3">
+									<BenchmarkQuestion
+										title={BENCHMARK_TITLES.PRECISION}
+										question="Do the generated controls invent technical requirements that are not supported by the original text?"
+										name="hallucinations"
+										value={hasHallucinations}
+										onChange={setHasHallucinations}
+										doItems={
+											<>
 												<li>
 													The controls add{" "}
 													<strong>new topics or obligations</strong> that have
@@ -715,12 +694,10 @@ export default function BenchmarkPage() {
 													<strong>outside the scope</strong> of the legal
 													paragraph.
 												</li>
-											</ul>
-											<p className="font-semibold text-rose-700 dark:text-rose-400 border-t border-blue-200 dark:border-blue-800/50 pt-2 mt-2">
-												❌ Do NOT select &apos;Yes&apos; (select &apos;No&apos;)
-												if:
-											</p>
-											<ul className="list-disc pl-4 space-y-1 mt-1">
+											</>
+										}
+										doNotItems={
+											<>
 												<li>
 													The controls translate a broad legal requirement into{" "}
 													<strong>
@@ -735,44 +712,18 @@ export default function BenchmarkPage() {
 													core intention of the text without adding unrelated
 													constraints.
 												</li>
-											</ul>
-										</CriteriaDetails>
-										<div className="flex gap-4">
-											<label className="flex items-center">
-												<input
-													type="radio"
-													name="hallucinations"
-													checked={hasHallucinations === true}
-													onChange={() => setHasHallucinations(true)}
-													className="mr-2"
-												/>
-												Yes
-											</label>
-											<label className="flex items-center">
-												<input
-													type="radio"
-													name="hallucinations"
-													checked={hasHallucinations === false}
-													onChange={() => setHasHallucinations(false)}
-													className="mr-2"
-												/>
-												No
-											</label>
-										</div>
-									</div>
+											</>
+										}
+									/>
 
-									<div className="bg-zinc-50 dark:bg-zinc-800/50 p-4 rounded-lg">
-										<p className="font-medium mb-1">
-											<strong>Redundancy:</strong> Are there unnecessary
-											overlaps or content repetitions among the generated
-											controls for this paragraph?
-										</p>
-										<CriteriaDetails className="mb-3 group">
-											<p className="font-semibold text-emerald-700 dark:text-emerald-400">
-												✅ DO select &apos;Yes (There are redundancies)&apos;
-												if:
-											</p>
-											<ul className="list-disc pl-4 space-y-1 mt-1 mb-3">
+									<BenchmarkQuestion
+										title={BENCHMARK_TITLES.EFFICIENCY}
+										question="Are there unnecessary overlaps or content repetitions among the generated controls for this paragraph?"
+										name="redundancy"
+										value={hasRedundancy}
+										onChange={setHasRedundancy}
+										doItems={
+											<>
 												<li>
 													Multiple controls <strong>overlap</strong> (demand the
 													exact same technical implementation).
@@ -786,42 +737,15 @@ export default function BenchmarkPage() {
 													<strong>fully covered</strong> by another broader
 													control.
 												</li>
-											</ul>
-											<p className="font-semibold text-rose-700 dark:text-rose-400 border-t border-blue-200 dark:border-blue-800/50 pt-2 mt-2">
-												❌ Do NOT select &apos;Yes&apos; (select &apos;No&apos;)
-												if:
-											</p>
-											<ul className="list-disc pl-4 space-y-1 mt-1">
-												<li>
-													Each generated control provides a{" "}
-													<strong>distinct, non-overlapping</strong>{" "}
-													requirement.
-												</li>
-											</ul>
-										</CriteriaDetails>
-										<div className="flex gap-4">
-											<label className="flex items-center">
-												<input
-													type="radio"
-													name="redundancy"
-													checked={hasRedundancy === true}
-													onChange={() => setHasRedundancy(true)}
-													className="mr-2"
-												/>
-												Yes (There are redundancies)
-											</label>
-											<label className="flex items-center">
-												<input
-													type="radio"
-													name="redundancy"
-													checked={hasRedundancy === false}
-													onChange={() => setHasRedundancy(false)}
-													className="mr-2"
-												/>
-												No (No redundancies)
-											</label>
-										</div>
-									</div>
+											</>
+										}
+										doNotItems={
+											<li>
+												Each generated control provides a{" "}
+												<strong>distinct, non-overlapping</strong> requirement.
+											</li>
+										}
+									/>
 								</div>
 
 								<div className="flex justify-end mt-auto pt-6 shrink-0">
