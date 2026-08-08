@@ -12,7 +12,7 @@ export async function getNextBenchmarkTask(
 		const unevaluatedControl = await prisma.control.findFirst({
 			where: {
 				guidelineId: null,
-				benchmarkResult: null,
+				controlBenchmark: null,
 				OR: [
 					{ generatedForId: null },
 					{ generatedFor: { isFewShotExample: false } },
@@ -82,7 +82,7 @@ export async function getNextBenchmarkTask(
 						],
 					},
 					include: {
-						benchmarkResult: true,
+						controlBenchmark: true,
 					},
 					orderBy: { id: "asc" },
 				},
@@ -151,7 +151,7 @@ export async function saveControlBenchmark(data: {
 	isMeasurable: boolean;
 	hasNormativeLanguage: boolean;
 }) {
-	return await prisma.benchmarkResult.create({
+	return await prisma.controlBenchmark.create({
 		data: {
 			llmControlId: data.llmControlId,
 			isActionable: data.isActionable,
@@ -199,7 +199,7 @@ export async function getBenchmarkProgress(mode: "CONTROL" | "PARAGRAPH") {
 		const evaluated = await prisma.control.count({
 			where: {
 				...whereClause,
-				benchmarkResult: { isNot: null },
+				controlBenchmark: { isNot: null },
 			},
 		});
 		return { total, evaluated };

@@ -2,8 +2,8 @@
 
 import { prisma } from "@/lib/prisma";
 
-export async function getBenchmarkResults() {
-	const results = await prisma.benchmarkResult.findMany({
+export async function getControlBenchmarks() {
+	const results = await prisma.controlBenchmark.findMany({
 		include: {
 			llmControl: {
 				include: {

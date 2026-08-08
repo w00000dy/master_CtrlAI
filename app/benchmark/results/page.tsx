@@ -4,9 +4,9 @@ import { LoaderIcon } from "lucide-animated";
 import { useEffect, useState } from "react";
 import { PageLayout } from "@/app/components/PageLayout";
 import { BENCHMARK_TITLES } from "../constants";
-import { getBenchmarkResults, getParagraphBenchmarks } from "./actions";
+import { getControlBenchmarks, getParagraphBenchmarks } from "./actions";
 
-type BenchmarkResult = Awaited<ReturnType<typeof getBenchmarkResults>>[0];
+type ControlBenchmark = Awaited<ReturnType<typeof getControlBenchmarks>>[0];
 type ParagraphBenchmark = Awaited<ReturnType<typeof getParagraphBenchmarks>>[0];
 
 function Gauge({ value, label }: { value: number; label: string }) {
@@ -53,7 +53,7 @@ function Gauge({ value, label }: { value: number; label: string }) {
 }
 
 export default function BenchmarkResultsPage() {
-	const [controlResults, setControlResults] = useState<BenchmarkResult[]>([]);
+	const [controlResults, setControlResults] = useState<ControlBenchmark[]>([]);
 	const [paragraphResults, setParagraphResults] = useState<
 		ParagraphBenchmark[]
 	>([]);
@@ -63,7 +63,7 @@ export default function BenchmarkResultsPage() {
 		async function loadData() {
 			setLoading(true);
 			const [ctrlRes, paraRes] = await Promise.all([
-				getBenchmarkResults(),
+				getControlBenchmarks(),
 				getParagraphBenchmarks(),
 			]);
 			setControlResults(ctrlRes);
