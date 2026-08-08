@@ -47,8 +47,9 @@ Open the `.env` file and configure your AI provider settings by setting **either
 ### 2. Running the Application
 
 **Option A: Production (Normal Start)**
-To build and run the optimized production version:
+To run the optimized production version, you must first initialize the database schema, then build and start the application:
 ```bash
+npm run migrate:deploy
 npm run build
 npm start
 ```
