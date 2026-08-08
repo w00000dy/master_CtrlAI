@@ -519,10 +519,6 @@ export default function BenchmarkPage() {
 													A developer can directly <strong>implement</strong> it
 													as a tangible feature/config.
 												</li>
-												<li>
-													It is clear how to <strong>test/verify</strong> its
-													successful implementation.
-												</li>
 											</>
 										}
 										doNotItems={
