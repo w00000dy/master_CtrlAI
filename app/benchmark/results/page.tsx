@@ -127,6 +127,17 @@ export default function BenchmarkResultsPage() {
 			? (noHallucinationsParagraphs / totalParagraphs) * 100
 			: 0;
 
+	const benchmarkMetrics = [
+		{ value: avgRelevanceScore, label: BENCHMARK_TITLES.RELEVANCE },
+		{ value: actionabilityScore, label: BENCHMARK_TITLES.ACTIONABILITY },
+		{ value: correctnessScore, label: BENCHMARK_TITLES.TECHNICAL_CORRECTNESS },
+		{ value: measurabilityScore, label: BENCHMARK_TITLES.MEASURABILITY },
+		{ value: normativeScore, label: BENCHMARK_TITLES.NORMATIVE_LANGUAGE },
+		{ value: completenessScore, label: BENCHMARK_TITLES.COMPLETENESS },
+		{ value: efficiencyScore, label: BENCHMARK_TITLES.EFFICIENCY },
+		{ value: precisionScore, label: BENCHMARK_TITLES.PRECISION },
+	];
+
 	return (
 		<PageLayout
 			title="Benchmark Results"
@@ -141,35 +152,13 @@ export default function BenchmarkResultsPage() {
 				<div className="space-y-12">
 					{/* Dashboard */}
 					<div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-						<Gauge
-							value={avgRelevanceScore}
-							label={BENCHMARK_TITLES.RELEVANCE}
-						/>
-						<Gauge
-							value={actionabilityScore}
-							label={BENCHMARK_TITLES.ACTIONABILITY}
-						/>
-						<Gauge
-							value={correctnessScore}
-							label={BENCHMARK_TITLES.TECHNICAL_CORRECTNESS}
-						/>
-						<Gauge
-							value={measurabilityScore}
-							label={BENCHMARK_TITLES.MEASURABILITY}
-						/>
-						<Gauge
-							value={normativeScore}
-							label={BENCHMARK_TITLES.NORMATIVE_LANGUAGE}
-						/>
-						<Gauge
-							value={completenessScore}
-							label={BENCHMARK_TITLES.COMPLETENESS}
-						/>
-						<Gauge
-							value={efficiencyScore}
-							label={BENCHMARK_TITLES.EFFICIENCY}
-						/>
-						<Gauge value={precisionScore} label={BENCHMARK_TITLES.PRECISION} />
+						{benchmarkMetrics.map((metric) => (
+							<Gauge
+								key={metric.label}
+								value={metric.value}
+								label={metric.label}
+							/>
+						))}
 					</div>
 
 					<div className="grid lg:grid-cols-2 gap-8">
