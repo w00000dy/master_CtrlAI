@@ -159,6 +159,9 @@ export default function BenchmarkPage() {
 		boolean | null
 	>(null);
 	const [isMeasurable, setIsMeasurable] = useState<boolean | null>(null);
+	const [hasNormativeLanguage, setHasNormativeLanguage] = useState<
+		boolean | null
+	>(null);
 	const [selectedCoveredControls, setSelectedCoveredControls] = useState<
 		Set<number>
 	>(new Set());
@@ -193,6 +196,7 @@ export default function BenchmarkPage() {
 				setIsActionable(null);
 				setIsTechnicallyCorrect(null);
 				setIsMeasurable(null);
+				setHasNormativeLanguage(null);
 				setSelectedCoveredControls(new Set());
 			} else if (nextTask.type === "PARAGRAPH") {
 				// Reset paragraph form
@@ -239,7 +243,8 @@ export default function BenchmarkPage() {
 			task?.type !== "CONTROL" ||
 			isActionable === null ||
 			isTechnicallyCorrect === null ||
-			isMeasurable === null
+			isMeasurable === null ||
+			hasNormativeLanguage === null
 		) {
 			return;
 		}
@@ -252,6 +257,7 @@ export default function BenchmarkPage() {
 				isActionable,
 				isTechnicallyCorrect,
 				isMeasurable,
+				hasNormativeLanguage,
 			});
 			await loadTask();
 		} catch (error) {
@@ -585,6 +591,36 @@ export default function BenchmarkPage() {
 												statements, or manual assertion without concrete
 												evidence.
 											</li>
+										}
+									/>
+
+									<BenchmarkQuestion
+										title={BENCHMARK_TITLES.NORMATIVE_LANGUAGE}
+										question="Is the control formulated using proper normative language (e.g., MUST, SHOULD) typical for compliance frameworks?"
+										name="normative"
+										value={hasNormativeLanguage}
+										onChange={setHasNormativeLanguage}
+										className="mt-4"
+										doItems={
+											<>
+												<li>
+													It uses strict, professional normative language.
+												</li>
+												<li>
+													The tone matches official regulatory or technical
+													guidelines.
+												</li>
+											</>
+										}
+										doNotItems={
+											<>
+												<li>
+													It uses casual or suggestive language (e.g., &quot;You
+													might want to...&quot;, &quot;It is a good idea
+													to...&quot;).
+												</li>
+												<li>It lacks authoritative requirements.</li>
+											</>
 										}
 									/>
 								</div>

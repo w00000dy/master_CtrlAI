@@ -3,6 +3,7 @@ export const BENCHMARK_TITLES = {
 	ACTIONABILITY: "Actionability",
 	TECHNICAL_CORRECTNESS: "Technical Correctness",
 	MEASURABILITY: "Measurability",
+	NORMATIVE_LANGUAGE: "Normative Language",
 	COMPLETENESS: "Completeness",
 	EFFICIENCY: "Efficiency",
 	PRECISION: "Precision",

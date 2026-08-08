@@ -149,6 +149,7 @@ export async function saveControlBenchmark(data: {
 	isActionable: boolean;
 	isTechnicallyCorrect: boolean;
 	isMeasurable: boolean;
+	hasNormativeLanguage: boolean;
 }) {
 	return await prisma.benchmarkResult.create({
 		data: {
@@ -156,6 +157,7 @@ export async function saveControlBenchmark(data: {
 			isActionable: data.isActionable,
 			isTechnicallyCorrect: data.isTechnicallyCorrect,
 			isMeasurable: data.isMeasurable,
+			hasNormativeLanguage: data.hasNormativeLanguage,
 			relevantParagraphs: {
 				connect: data.relevantParagraphIds.map((id) => ({ id })),
 			},

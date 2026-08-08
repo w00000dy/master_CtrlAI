@@ -83,6 +83,9 @@ export default function BenchmarkResultsPage() {
 	const measurableControls = controlResults.filter(
 		(r) => r.isMeasurable,
 	).length;
+	const normativeControls = controlResults.filter(
+		(r) => r.hasNormativeLanguage,
+	).length;
 
 	const actionabilityScore =
 		totalControls > 0 ? (actionableControls / totalControls) * 100 : 0;
@@ -90,6 +93,8 @@ export default function BenchmarkResultsPage() {
 		totalControls > 0 ? (correctControls / totalControls) * 100 : 0;
 	const measurabilityScore =
 		totalControls > 0 ? (measurableControls / totalControls) * 100 : 0;
+	const normativeScore =
+		totalControls > 0 ? (normativeControls / totalControls) * 100 : 0;
 
 	const relevanceScores = controlResults.map((r) => {
 		const totalMapped = r.llmControl.paragraphs.length;
@@ -135,7 +140,7 @@ export default function BenchmarkResultsPage() {
 			) : (
 				<div className="space-y-12">
 					{/* Dashboard */}
-					<div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+					<div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
 						<Gauge
 							value={avgRelevanceScore}
 							label={BENCHMARK_TITLES.RELEVANCE}
@@ -151,6 +156,10 @@ export default function BenchmarkResultsPage() {
 						<Gauge
 							value={measurabilityScore}
 							label={BENCHMARK_TITLES.MEASURABILITY}
+						/>
+						<Gauge
+							value={normativeScore}
+							label={BENCHMARK_TITLES.NORMATIVE_LANGUAGE}
 						/>
 						<Gauge
 							value={completenessScore}
@@ -201,6 +210,13 @@ export default function BenchmarkResultsPage() {
 												{result.isMeasurable
 													? "✓ Measurable"
 													: "✗ Not Measurable"}
+											</span>
+											<span
+												className={`px-2 py-1 rounded-full ${result.hasNormativeLanguage ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"}`}
+											>
+												{result.hasNormativeLanguage
+													? "✓ Normative"
+													: "✗ Non-Normative"}
 											</span>
 										</div>
 
