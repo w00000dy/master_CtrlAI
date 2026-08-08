@@ -17,15 +17,50 @@ Specifically, the application provides a structured pipeline to investigate how 
 
 ## 🛠️ Getting Started
 
-1. **Install dependencies:**
-   ```bash
-   npm install
-   ```
-2. **Start the development server:**
-   ```bash
-   npm run dev
-   ```
-3. Open [http://localhost:3000](http://localhost:3000) in your browser!
+### Prerequisites
+Before you begin, ensure you have the following installed:
+- [Node.js](https://nodejs.org/en/download) (v24 or higher recommended)
+- [Docker](https://www.docker.com/) (to easily run the database via Docker Compose)
+- Either Ollama or OpenAI
+
+### 1. Setup
+
+**Start the Database:**
+The easiest way to start the required MySQL database is using Docker Compose:
+```bash
+docker compose up -d
+```
+*(If you are not using Docker, you will need to set up a MySQL database manually).*
+
+**Install dependencies:**
+```bash
+npm install
+```
+
+**Set up environment variables:**
+Copy the sample environment file to create your own configuration:
+```bash
+cp .env.sample .env
+```
+Open the `.env` file and configure your AI provider settings by setting **either** the Ollama variables **or** the OpenAI variables. The application will automatically detect and use the correct API based on the variables you have configured. You only need to change the database variables (`DATABASE_URL`, `DATABASE_HOST`, etc.) if you are **not** using the provided Docker Compose setup.
+
+### 2. Running the Application
+
+**Option A: Production (Normal Start)**
+To build and run the optimized production version:
+```bash
+npm run build
+npm start
+```
+
+**Option B: Development**
+To start the development server with live reload and automatic database migrations:
+```bash
+npm run dev
+```
+
+### 3. Access the App
+Open [http://localhost:3000](http://localhost:3000) in your browser!
 
 ## 🏗️ Built With
 
