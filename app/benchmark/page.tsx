@@ -86,6 +86,9 @@ export default function BenchmarkPage() {
 	// Form State for Paragraph
 	const [isComplete, setIsComplete] = useState<boolean | null>(null);
 	const [hasRedundancy, setHasRedundancy] = useState<boolean | null>(null);
+	const [hasHallucinations, setHasHallucinations] = useState<boolean | null>(
+		null,
+	);
 
 	const loadTask = useCallback(async () => {
 		setLoading(true);
@@ -115,6 +118,7 @@ export default function BenchmarkPage() {
 				// Reset paragraph form
 				setIsComplete(null);
 				setHasRedundancy(null);
+				setHasHallucinations(null);
 			}
 		} catch (error) {
 			console.error(error);
@@ -180,7 +184,8 @@ export default function BenchmarkPage() {
 		if (
 			task?.type !== "PARAGRAPH" ||
 			isComplete === null ||
-			hasRedundancy === null
+			hasRedundancy === null ||
+			hasHallucinations === null
 		) {
 			return;
 		}
@@ -190,6 +195,7 @@ export default function BenchmarkPage() {
 				paragraphId: task.paragraph.id,
 				isComplete,
 				hasRedundancy,
+				hasHallucinations,
 			});
 			await loadTask();
 		} catch (error) {
@@ -688,6 +694,75 @@ export default function BenchmarkPage() {
 
 									<div className="bg-zinc-50 dark:bg-zinc-800/50 p-4 rounded-lg">
 										<p className="font-medium mb-1">
+											<strong>Precision:</strong> Do the generated controls
+											invent technical requirements that are not supported by
+											the original text?
+										</p>
+										<CriteriaDetails className="mb-3 group">
+											<p className="font-semibold text-emerald-700 dark:text-emerald-400">
+												✅ DO select &apos;Yes&apos; if:
+											</p>
+											<ul className="list-disc pl-4 space-y-1 mt-1 mb-3">
+												<li>
+													The controls add{" "}
+													<strong>new topics or obligations</strong> that have
+													no basis in the provided text (e.g., demanding a
+													password policy when the paragraph is only about data
+													backups).
+												</li>
+												<li>
+													They invent requirements that are clearly{" "}
+													<strong>outside the scope</strong> of the legal
+													paragraph.
+												</li>
+											</ul>
+											<p className="font-semibold text-rose-700 dark:text-rose-400 border-t border-blue-200 dark:border-blue-800/50 pt-2 mt-2">
+												❌ Do NOT select &apos;Yes&apos; (select &apos;No&apos;)
+												if:
+											</p>
+											<ul className="list-disc pl-4 space-y-1 mt-1">
+												<li>
+													The controls translate a broad legal requirement into{" "}
+													<strong>
+														concrete, state-of-the-art technical implementations
+													</strong>{" "}
+													(e.g., specifying &quot;Use AES-256&quot; for a
+													general &quot;encryption&quot; requirement). This is
+													expected and desired!
+												</li>
+												<li>
+													All technical controls are logically derived from the
+													core intention of the text without adding unrelated
+													constraints.
+												</li>
+											</ul>
+										</CriteriaDetails>
+										<div className="flex gap-4">
+											<label className="flex items-center">
+												<input
+													type="radio"
+													name="hallucinations"
+													checked={hasHallucinations === true}
+													onChange={() => setHasHallucinations(true)}
+													className="mr-2"
+												/>
+												Yes
+											</label>
+											<label className="flex items-center">
+												<input
+													type="radio"
+													name="hallucinations"
+													checked={hasHallucinations === false}
+													onChange={() => setHasHallucinations(false)}
+													className="mr-2"
+												/>
+												No
+											</label>
+										</div>
+									</div>
+
+									<div className="bg-zinc-50 dark:bg-zinc-800/50 p-4 rounded-lg">
+										<p className="font-medium mb-1">
 											<strong>Redundancy:</strong> Are there unnecessary
 											overlaps or content repetitions among the generated
 											controls for this paragraph?
@@ -753,7 +828,11 @@ export default function BenchmarkPage() {
 									<button
 										type="button"
 										onClick={submitParagraph}
-										disabled={isComplete === null || hasRedundancy === null}
+										disabled={
+											isComplete === null ||
+											hasRedundancy === null ||
+											hasHallucinations === null
+										}
 										className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
 									>
 										Save & Next Paragraph

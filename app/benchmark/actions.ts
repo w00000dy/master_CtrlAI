@@ -170,12 +170,14 @@ export async function saveParagraphBenchmark(data: {
 	paragraphId: number;
 	isComplete: boolean;
 	hasRedundancy: boolean;
+	hasHallucinations: boolean;
 }) {
 	return await prisma.paragraphBenchmark.create({
 		data: {
 			paragraphId: data.paragraphId,
 			isComplete: data.isComplete,
 			hasRedundancy: data.hasRedundancy,
+			hasHallucinations: data.hasHallucinations,
 		},
 	});
 }

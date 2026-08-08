@@ -108,11 +108,18 @@ export default function BenchmarkResultsPage() {
 	const noRedundancyParagraphs = paragraphResults.filter(
 		(r) => !r.hasRedundancy,
 	).length;
+	const noHallucinationsParagraphs = paragraphResults.filter(
+		(r) => !r.hasHallucinations,
+	).length;
 
 	const completenessScore =
 		totalParagraphs > 0 ? (completeParagraphs / totalParagraphs) * 100 : 0;
 	const efficiencyScore =
 		totalParagraphs > 0 ? (noRedundancyParagraphs / totalParagraphs) * 100 : 0;
+	const precisionScore =
+		totalParagraphs > 0
+			? (noHallucinationsParagraphs / totalParagraphs) * 100
+			: 0;
 
 	return (
 		<PageLayout
@@ -134,6 +141,10 @@ export default function BenchmarkResultsPage() {
 						<Gauge value={measurabilityScore} label="Measurability Score" />
 						<Gauge value={completenessScore} label="Completeness Score" />
 						<Gauge value={efficiencyScore} label="Efficiency (No Redundancy)" />
+						<Gauge
+							value={precisionScore}
+							label="Precision (No Hallucinations)"
+						/>
 					</div>
 
 					<div className="grid lg:grid-cols-2 gap-8">
@@ -234,6 +245,13 @@ export default function BenchmarkResultsPage() {
 												{!result.hasRedundancy
 													? "✓ Efficient"
 													: "⚠ Redundant Controls"}
+											</span>
+											<span
+												className={`px-2 py-1 rounded-full ${!result.hasHallucinations ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"}`}
+											>
+												{!result.hasHallucinations
+													? "✓ No Hallucinations"
+													: "✗ Over-Compliant"}
 											</span>
 										</div>
 									</div>

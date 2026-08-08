@@ -91,8 +91,9 @@ model ParagraphBenchmark {
   paragraphId Int       @unique
   paragraph   Paragraph @relation(fields: [paragraphId], references: [id], onDelete: Cascade)
 
-  isComplete    Boolean
-  hasRedundancy Boolean
+  isComplete        Boolean
+  hasRedundancy     Boolean
+  hasHallucinations Boolean
 
   createdAt DateTime @default(now())
 }
