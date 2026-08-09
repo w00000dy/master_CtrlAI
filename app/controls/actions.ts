@@ -255,6 +255,7 @@ export async function generateControlsForParagraph(
 				}),
 				mappedParagraphIds: z
 					.array(z.int().min(minParagraphId).max(maxParagraphId))
+					.min(1)
 					.meta({
 						description:
 							"Array of exact IDs of paragraphs this control helps fulfill. MUST include the FOCUS PARAGRAPH ID.",
@@ -276,6 +277,7 @@ export async function generateControlsForParagraph(
 			const ControlSchema = BaseControlSchema.extend({
 				mappedParagraphIds: z
 					.array(z.int().min(minParagraphId).max(maxParagraphId))
+					.min(1)
 					.refine((ids) => ids.includes(focusParagraph.id), {
 						message: "Must include the focus paragraph ID.",
 					})
