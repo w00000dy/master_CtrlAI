@@ -71,6 +71,10 @@ export async function generateResponse({
 			console.log(`[${msg.role.toUpperCase()}]:\n${msg.content}\n`);
 		});
 	}
+	if (schema) {
+		console.log("Schema:");
+		console.log(JSON.stringify(z.toJSONSchema(schema), null, 2))
+	}
 
 	let result: {
 		content: string;
