@@ -432,7 +432,7 @@ You will be given:
 Write as many specific, actionable controls as necessary to completely fulfill the requirements of the FOCUS PARAGRAPH TEXT. Do not limit yourself to a specific number, but avoid redundancies and irrelevant points.
 If the EXISTING CONTROLS FOR FOCUS PARAGRAPH already completely and exhaustively fulfill the requirements, or if the FOCUS PARAGRAPH TEXT is purely definitional/informational and requires no technical or administrative safeguards, return an empty array ([]). Do not generate forced or redundant controls.
 When providing 'implementationGuidance', focus on concrete technical standards (e.g., TLS 1.3, AES-256), specific architecture patterns, or exact procedural steps rather than generic advice. If there is no specific technical or procedural guidance to provide, omit it or set it to null.
-For each control, determine if it also helps fulfill any OTHER paragraphs from the ALL PARAGRAPHS list. When mapping to paragraphs in 'mappedParagraphIds', YOU MUST ALWAYS include the exact FOCUS PARAGRAPH ID itself, along with any additional related IDs from ALL PARAGRAPHS specified inside the [ID: ...] brackets.
+For each control, determine if it also helps fulfill any OTHER paragraphs from the ALL PARAGRAPHS list. The 'mappedParagraphIds' array MUST ALWAYS contain the FOCUS PARAGRAPH ID. If the control also applies to other paragraphs, extract their IDs (found inside the [ID: ...] brackets of the ALL PARAGRAPHS list) and add them to the array as well.
 DO NOT generate duplicates or overly similar controls to the EXISTING CONTROLS FOR FOCUS PARAGRAPH${provideExistingControls ? " or OTHER EXISTING CONTROLS IN DATABASE provided in the context" : ""}.`;
 
 			const userPrompt = `### Context ###
