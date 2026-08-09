@@ -73,7 +73,7 @@ export async function generateResponse({
 	}
 	if (schema) {
 		console.log("Schema:");
-		console.log(JSON.stringify(z.toJSONSchema(schema), null, 2))
+		console.log(JSON.stringify(z.toJSONSchema(schema), null, 2));
 	}
 
 	let result: {
