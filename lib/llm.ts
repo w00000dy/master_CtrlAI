@@ -63,8 +63,11 @@ export async function generateResponse({
 
 	console.log("\n=== LLM Request ===");
 	console.log(`Provider: ${provider} | Model: ${model}`);
-	if (systemPrompt) console.log("System Prompt:\n", systemPrompt);
-	console.log("Prompt:\n", prompt);
+	if (systemPrompt) {
+		console.log("System Prompt:");
+		console.log(systemPrompt);
+	}
+	console.log("User Prompt:\n", prompt);
 	if (chatHistory && chatHistory.length > 0) {
 		console.log("History:");
 		chatHistory.forEach((msg) => {
