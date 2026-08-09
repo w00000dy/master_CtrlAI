@@ -131,6 +131,7 @@ export async function generateControlsForParagraph(
 	paragraphId: number,
 	model: string,
 	useCoT: boolean = true,
+	provideExistingControls: boolean = false,
 ) {
 	if (generationPromises.has(paragraphId)) {
 		console.log(
@@ -160,15 +161,21 @@ export async function generateControlsForParagraph(
 				throw new Error("Paragraph not found.");
 			}
 
-			const existingControls = await prisma.control.findMany({
-				where: {
-					guidelineId: null,
-					paragraphs: {
-						none: { id: paragraphId },
-					},
-				},
-				select: { title: true, statement: true, implementationGuidance: true },
-			});
+			const existingControls = provideExistingControls
+				? await prisma.control.findMany({
+						where: {
+							guidelineId: null,
+							paragraphs: {
+								none: { id: paragraphId },
+							},
+						},
+						select: {
+							title: true,
+							statement: true,
+							implementationGuidance: true,
+						},
+					})
+				: [];
 
 			const fewShotParagraphs = await prisma.paragraph.findMany({
 				where: { isFewShotExample: true },
@@ -209,15 +216,16 @@ export async function generateControlsForParagraph(
 							.join("\n")
 					: "No LLM-generated controls currently mapped to this paragraph.";
 
-			const existingControlsStr =
-				existingControls.length > 0
+			const existingControlsStr = provideExistingControls
+				? existingControls.length > 0
 					? existingControls
 							.map(
 								(c) =>
 									`- ${c.title}: ${c.statement}${c.implementationGuidance ? ` (Implementation Guidance: ${c.implementationGuidance})` : ""}`,
 							)
 							.join("\n")
-					: "No other existing controls in database.";
+					: "No other existing controls in database."
+				: "";
 
 			// Find ancestors
 			const ancestors = [];
@@ -401,6 +409,10 @@ export async function generateControlsForParagraph(
 					? "\n- EXAMPLES: Examples of paragraphs and the expected style/granularity of Controls mapped to them. Use these as a reference for quality and format."
 					: "";
 
+			const otherControlsInstruction = provideExistingControls
+				? "\n- OTHER EXISTING CONTROLS IN DATABASE: Other controls already generated in the database."
+				: "";
+
 			const systemPrompt = `### Instruction ###
 You are a compliance and security expert. Your task is to generate actionable, technical implementation controls for a specific legal paragraph.
 
@@ -414,15 +426,14 @@ You will be given:
 - FOCUS PARAGRAPH ID: The unique identifier of the paragraph you must write controls for.
 - ANCESTOR PARAGRAPHS: Provide broader regulatory context from parent paragraphs. Use them ONLY to understand the overarching purpose and scope of the FOCUS PARAGRAPH TEXT.
 - SUBORDINATE PARAGRAPHS: Provide specific details and lower-level requirements. Use them ONLY to understand the boundaries of the FOCUS PARAGRAPH TEXT; do not generate controls for specific details that belong strictly to subordinate paragraphs unless required at the focus level.
-- EXISTING CONTROLS FOR FOCUS PARAGRAPH: Controls that are already mapped to this focus paragraph ID.
-- OTHER EXISTING CONTROLS IN DATABASE: Other controls already generated in the database.${examplesInstruction}
+- EXISTING CONTROLS FOR FOCUS PARAGRAPH: Controls that are already mapped to this focus paragraph ID.${otherControlsInstruction}${examplesInstruction}
 - ALL PARAGRAPHS: A list of all paragraphs in the database with their IDs.
 
 Write as many specific, actionable controls as necessary to completely fulfill the requirements of the FOCUS PARAGRAPH TEXT. Do not limit yourself to a specific number, but avoid redundancies and irrelevant points.
 If the EXISTING CONTROLS FOR FOCUS PARAGRAPH already completely and exhaustively fulfill the requirements, or if the FOCUS PARAGRAPH TEXT is purely definitional/informational and requires no technical or administrative safeguards, return an empty array ([]). Do not generate forced or redundant controls.
 When providing 'implementationGuidance', focus on concrete technical standards (e.g., TLS 1.3, AES-256), specific architecture patterns, or exact procedural steps rather than generic advice. If there is no specific technical or procedural guidance to provide, omit it or set it to null.
 For each control, determine if it also helps fulfill any OTHER paragraphs from the ALL PARAGRAPHS list. When mapping to paragraphs in 'mappedParagraphIds', YOU MUST ALWAYS include the exact FOCUS PARAGRAPH ID itself, along with any additional related IDs from ALL PARAGRAPHS specified inside the [ID: ...] brackets.
-DO NOT generate duplicates or overly similar controls to the EXISTING CONTROLS FOR FOCUS PARAGRAPH or OTHER EXISTING CONTROLS IN DATABASE provided in the context.`;
+DO NOT generate duplicates or overly similar controls to the EXISTING CONTROLS FOR FOCUS PARAGRAPH${provideExistingControls ? " or OTHER EXISTING CONTROLS IN DATABASE provided in the context" : ""}.`;
 
 			const userPrompt = `### Context ###
 DOCUMENT: ${focusParagraph.section.document.title}
@@ -438,10 +449,7 @@ ${descendantsStr}
 
 EXISTING CONTROLS FOR FOCUS PARAGRAPH:
 ${focusControlsStr}
-
-OTHER EXISTING CONTROLS IN DATABASE:
-${existingControlsStr}
-${fewShotParagraphs.length > 0 ? `\nEXAMPLES:\n${fewShotExamplesStr}\n` : ""}
+${provideExistingControls ? `\nOTHER EXISTING CONTROLS IN DATABASE:\n${existingControlsStr}\n` : ""}${fewShotParagraphs.length > 0 ? `\nEXAMPLES:\n${fewShotExamplesStr}\n` : ""}
 ALL PARAGRAPHS IN DATABASE:
 ${allParagraphsStr}
 `;
