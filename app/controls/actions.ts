@@ -422,18 +422,18 @@ export async function generateControlsForParagraph(
 				: "";
 
 			const systemPrompt = `### Instruction ###
-You are a compliance and security expert. Your task is to generate actionable, technical implementation controls for a specific legal paragraph.
+You are a compliance and security expert. Your task is to generate actionable, technical implementation controls for a specific target paragraph (the "FOCUS PARAGRAPH").
 
 DEFINITION OF A CONTROL:
 A control is a specific technical, administrative, or physical safeguard, process, or policy put in place to satisfy legal or regulatory requirements. It must be an actionable, clear, and measurable directive that describes exactly what needs to be implemented or enforced.
 
 You will be given:
-- FOCUS PARAGRAPH TEXT: The exact wording of the legal paragraph you must analyze and write controls for.
-- FOCUS PARAGRAPH ID: The unique identifier of the paragraph you must write controls for.
 - DOCUMENT: The title of the legal or regulatory document containing the focus paragraph.
 - SECTION: The specific section or chapter title within the document containing the focus paragraph.
-- ANCESTOR PARAGRAPHS: Provide broader regulatory context from parent paragraphs. Use them ONLY to understand the overarching purpose and scope of the FOCUS PARAGRAPH TEXT.
-- SUBORDINATE PARAGRAPHS: Provide specific details and lower-level requirements. Use them ONLY to understand the boundaries of the FOCUS PARAGRAPH TEXT. Do not generate controls for specific details that belong strictly to subordinate paragraphs unless required at the focus level.
+- ANCESTOR PARAGRAPHS: Provide broader regulatory context from parent paragraphs. Use them ONLY to understand the overarching purpose and scope of the FOCUS PARAGRAPH.
+- FOCUS PARAGRAPH ID: The unique identifier of the paragraph you must write controls for.
+- FOCUS PARAGRAPH TEXT: The exact wording of the target paragraph you must analyze and write controls for.
+- SUBORDINATE PARAGRAPHS: Provide specific details and lower-level requirements. Use them ONLY to understand the boundaries of the FOCUS PARAGRAPH. Do not generate controls for specific details that belong strictly to subordinate paragraphs unless required at the focus level.
 - EXISTING CONTROLS FOR FOCUS PARAGRAPH: Controls that are already mapped to this focus paragraph ID.${otherControlsInstruction}${examplesInstruction}
 - ALL PARAGRAPHS: A list of all paragraphs in the database with their IDs.
 
@@ -444,14 +444,12 @@ For each control, determine if it also helps fulfill any OTHER paragraphs from t
 ${cotInstruction}DO NOT generate duplicates or overly similar controls to the EXISTING CONTROLS FOR FOCUS PARAGRAPH${provideExistingControls ? " or OTHER EXISTING CONTROLS IN DATABASE provided in the context" : ""}.`;
 
 			const userPrompt = `### Context ###
-FOCUS PARAGRAPH TEXT: ${focusParagraph.text}
-FOCUS PARAGRAPH ID: ${focusParagraph.id}
 DOCUMENT: ${focusParagraph.section.document.title}
 SECTION: ${focusParagraph.section.title}
-
 ANCESTOR PARAGRAPHS:
 ${ancestorsStr}
-
+FOCUS PARAGRAPH ID: ${focusParagraph.id}
+FOCUS PARAGRAPH TEXT: ${focusParagraph.text}
 SUBORDINATE PARAGRAPHS:
 ${descendantsStr}
 
