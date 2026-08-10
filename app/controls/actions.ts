@@ -200,6 +200,44 @@ export async function generateControlsForParagraph(
 				],
 			});
 
+			const buildAncestorsStr = (paragraphId: number | null) => {
+				const ancestors = [];
+				let currentId = paragraphId;
+				while (currentId) {
+					const parent = allParagraphs.find((p) => p.id === currentId);
+					if (parent) {
+						ancestors.unshift(parent);
+						currentId = parent.parentParagraphId;
+					} else {
+						break;
+					}
+				}
+				return ancestors.length > 0
+					? ancestors.map((p) => `- ${p.text}`).join("\n")
+					: "No ancestor paragraphs.";
+			};
+
+			const buildDescendantsStr = (paragraphId: number) => {
+				const descendants: { p: (typeof allParagraphs)[0]; depth: number }[] =
+					[];
+				const getDescendants = (parentId: number, depth: number = 1) => {
+					const children = allParagraphs.filter(
+						(p) => p.parentParagraphId === parentId,
+					);
+					for (const child of children) {
+						descendants.push({ p: child, depth });
+						getDescendants(child.id, depth + 1);
+					}
+				};
+				getDescendants(paragraphId);
+
+				return descendants.length > 0
+					? descendants
+							.map(({ p, depth }) => `${"  ".repeat(depth)}- ${p.text}`)
+							.join("\n")
+					: "No subordinate paragraphs.";
+			};
+
 			const paragraphIdStats = await prisma.paragraph.aggregate({
 				_min: { id: true },
 				_max: { id: true },
@@ -228,21 +266,7 @@ export async function generateControlsForParagraph(
 				: "";
 
 			// Find ancestors
-			const ancestors = [];
-			let currentId = focusParagraph.parentParagraphId;
-			while (currentId) {
-				const parent = allParagraphs.find((p) => p.id === currentId);
-				if (parent) {
-					ancestors.unshift(parent);
-					currentId = parent.parentParagraphId;
-				} else {
-					break;
-				}
-			}
-			const ancestorsStr =
-				ancestors.length > 0
-					? ancestors.map((p) => `- ${p.text}`).join("\n")
-					: "No ancestor paragraphs.";
+			const ancestorsStr = buildAncestorsStr(focusParagraph.parentParagraphId);
 
 			const minParagraphId = paragraphIdStats._min.id ?? 1;
 			const maxParagraphId = paragraphIdStats._max.id ?? 1;
@@ -299,8 +323,10 @@ export async function generateControlsForParagraph(
 			if (fewShotParagraphs.length > 0) {
 				fewShotExamplesStr = fewShotParagraphs
 					.map((p) => {
-						const pText = p.text;
-						const pDoc = `${p.section.document.title} - ${p.section.title}`;
+						const pDoc = p.section.document.title;
+						const pSec = p.section.title;
+						const pAncestorsStr = buildAncestorsStr(p.parentParagraphId);
+						const pDescendantsStr = buildDescendantsStr(p.id);
 
 						const rawControlsObj = p.controls.map((c) => {
 							const mappedIds =
@@ -321,7 +347,7 @@ export async function generateControlsForParagraph(
 							ExampleControlsArraySchema.parse(rawControlsObj);
 						const pControlsJson = JSON.stringify(validatedControls, null, 2);
 
-						return `Example Paragraph:\nDocument: ${pDoc}\nText: ${pText}\nExpected Controls (JSON):\n${
+						return `Example Paragraph:\nDOCUMENT: ${pDoc}\nSECTION: ${pSec}\n\nANCESTOR PARAGRAPHS:\n${pAncestorsStr}\n\nFOCUS PARAGRAPH TEXT:\n${p.text}\n\nSUBORDINATE PARAGRAPHS:\n${pDescendantsStr}\n\nExpected Controls (JSON):\n${
 							p.controls.length > 0 ? pControlsJson : "[]"
 						}`;
 					})
@@ -329,24 +355,7 @@ export async function generateControlsForParagraph(
 			}
 
 			// Find descendants
-			const descendants: { p: (typeof allParagraphs)[0]; depth: number }[] = [];
-			const getDescendants = (parentId: number, depth: number = 1) => {
-				const children = allParagraphs.filter(
-					(p) => p.parentParagraphId === parentId,
-				);
-				for (const child of children) {
-					descendants.push({ p: child, depth });
-					getDescendants(child.id, depth + 1);
-				}
-			};
-			getDescendants(focusParagraph.id);
-
-			const descendantsStr =
-				descendants.length > 0
-					? descendants
-							.map(({ p, depth }) => `${"  ".repeat(depth)}- ${p.text}`)
-							.join("\n")
-					: "No subordinate paragraphs.";
+			const descendantsStr = buildDescendantsStr(focusParagraph.id);
 
 			// Group all paragraphs by Document -> Section
 			const grouped: Record<string, Record<string, typeof allParagraphs>> = {};
