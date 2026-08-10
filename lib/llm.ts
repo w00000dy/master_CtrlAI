@@ -67,7 +67,8 @@ export async function generateResponse({
 		console.log("System Prompt:");
 		console.log(systemPrompt);
 	}
-	console.log("User Prompt:\n", prompt);
+	console.log("\nUser Prompt:");
+	console.log(prompt);
 	if (chatHistory && chatHistory.length > 0) {
 		console.log("History:");
 		chatHistory.forEach((msg) => {
@@ -158,10 +159,10 @@ export async function generateResponse({
 
 	console.log("\n=== LLM Response ===");
 	console.log(result.content);
-	console.log(
-		`[LLM Usage] Prompt tokens: ${result.promptTokens}, Generated tokens: ${result.completionTokens}`,
-	);
 	console.log("===================\n");
+	console.log(
+		`Prompt tokens: ${result.promptTokens}, Generated tokens: ${result.completionTokens}`,
+	);
 
 	return result;
 }

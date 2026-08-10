@@ -241,9 +241,7 @@ export async function generateControlsForParagraph(
 			}
 			const ancestorsStr =
 				ancestors.length > 0
-					? ancestors
-							.map((p) => `- ${p.marker ? `${p.marker} ` : ""}${p.text}`)
-							.join("\n")
+					? ancestors.map((p) => `- ${p.text}`).join("\n")
 					: "No ancestor paragraphs.";
 
 			const minParagraphId = paragraphIdStats._min.id ?? 1;
@@ -301,7 +299,7 @@ export async function generateControlsForParagraph(
 			if (fewShotParagraphs.length > 0) {
 				fewShotExamplesStr = fewShotParagraphs
 					.map((p) => {
-						const pText = `${p.marker ? `${p.marker} ` : ""}${p.text}`;
+						const pText = p.text;
 						const pDoc = `${p.section.document.title} - ${p.section.title}`;
 
 						const rawControlsObj = p.controls.map((c) => {
@@ -346,10 +344,7 @@ export async function generateControlsForParagraph(
 			const descendantsStr =
 				descendants.length > 0
 					? descendants
-							.map(
-								({ p, depth }) =>
-									`${"  ".repeat(depth)}- ${p.marker ? `${p.marker} ` : ""}${p.text}`,
-							)
+							.map(({ p, depth }) => `${"  ".repeat(depth)}- ${p.text}`)
 							.join("\n")
 					: "No subordinate paragraphs.";
 
