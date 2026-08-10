@@ -347,7 +347,7 @@ export async function generateControlsForParagraph(
 							ExampleControlsArraySchema.parse(rawControlsObj);
 						const pControlsJson = JSON.stringify(validatedControls, null, 2);
 
-						return `Example Paragraph:\nDOCUMENT: ${pDoc}\nSECTION: ${pSec}\n\nANCESTOR PARAGRAPHS:\n${pAncestorsStr}\n\nFOCUS PARAGRAPH TEXT:\n${p.text}\n\nSUBORDINATE PARAGRAPHS:\n${pDescendantsStr}\n\nExpected Controls (JSON):\n${
+						return `Example Paragraph:\nDOCUMENT: ${pDoc}\nSECTION: ${pSec}\nANCESTOR PARAGRAPHS:\n${pAncestorsStr}\nFOCUS PARAGRAPH ID: ${p.id}\nFOCUS PARAGRAPH TEXT:\n${p.text}\nSUBORDINATE PARAGRAPHS:\n${pDescendantsStr}\n\nExpected Controls (JSON):\n${
 							p.controls.length > 0 ? pControlsJson : "[]"
 						}`;
 					})
@@ -452,7 +452,6 @@ FOCUS PARAGRAPH ID: ${focusParagraph.id}
 FOCUS PARAGRAPH TEXT: ${focusParagraph.text}
 SUBORDINATE PARAGRAPHS:
 ${descendantsStr}
-
 EXISTING CONTROLS FOR FOCUS PARAGRAPH:
 ${focusControlsStr}
 ${provideExistingControls ? `\nOTHER EXISTING CONTROLS IN DATABASE:\n${existingControlsStr}\n` : ""}${fewShotParagraphs.length > 0 ? `\nEXAMPLES:\n${fewShotExamplesStr}\n` : ""}
