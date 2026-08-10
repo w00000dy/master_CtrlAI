@@ -413,6 +413,10 @@ export async function generateControlsForParagraph(
 				? "\n- OTHER EXISTING CONTROLS IN DATABASE: Other controls already generated in the database."
 				: "";
 
+			const cotInstruction = useCoT
+				? "For each control, use the 'reasoning' field to briefly explain step-by-step why this control is necessary to fulfill the focus paragraph, how it differs from existing controls, and why it maps to the specified other paragraphs, before generating the control itself.\n"
+				: "";
+
 			const systemPrompt = `### Instruction ###
 You are a compliance and security expert. Your task is to generate actionable, technical implementation controls for a specific legal paragraph.
 
@@ -433,7 +437,7 @@ Write as many specific, actionable controls as necessary to completely fulfill t
 If the EXISTING CONTROLS FOR FOCUS PARAGRAPH already completely and exhaustively fulfill the requirements, or if the FOCUS PARAGRAPH TEXT is purely definitional/informational and requires no technical or administrative safeguards, return an empty array ([]). Do not generate forced or redundant controls.
 When providing 'implementationGuidance', focus on concrete technical standards (e.g., TLS 1.3, AES-256), specific architecture patterns, or exact procedural steps rather than generic advice. If there is no specific technical or procedural guidance to provide, omit it or set it to null.
 For each control, determine if it also helps fulfill any OTHER paragraphs from the ALL PARAGRAPHS list. The 'mappedParagraphIds' array MUST ALWAYS contain the FOCUS PARAGRAPH ID. If the control also applies to other paragraphs, extract their IDs (found inside the [ID: ...] brackets of the ALL PARAGRAPHS list) and add them to the array as well.
-DO NOT generate duplicates or overly similar controls to the EXISTING CONTROLS FOR FOCUS PARAGRAPH${provideExistingControls ? " or OTHER EXISTING CONTROLS IN DATABASE provided in the context" : ""}.`;
+${cotInstruction}DO NOT generate duplicates or overly similar controls to the EXISTING CONTROLS FOR FOCUS PARAGRAPH${provideExistingControls ? " or OTHER EXISTING CONTROLS IN DATABASE provided in the context" : ""}.`;
 
 			const userPrompt = `### Context ###
 FOCUS PARAGRAPH TEXT: ${focusParagraph.marker ? `${focusParagraph.marker} ` : ""}${focusParagraph.text}
