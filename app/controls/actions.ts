@@ -390,7 +390,7 @@ export async function generateControlsForParagraph(
 
 					const printPara = (p: (typeof allParagraphs)[0], depth: number) => {
 						const indent = `    ${"  ".repeat(depth)}`;
-						allParagraphsStr += `${indent}- [ID: ${p.id}] ${p.marker ? `${p.marker} ` : ""}${p.text}\n`;
+						allParagraphsStr += `${indent}- [ID: ${p.id}] ${p.marker ? `${p.marker}) ` : ""}${p.text}\n`;
 						const children = childrenMap.get(p.id) || [];
 						for (const child of children) {
 							printPara(child, depth + 1);
@@ -440,7 +440,7 @@ For each control, determine if it also helps fulfill any OTHER paragraphs from t
 ${cotInstruction}DO NOT generate duplicates or overly similar controls to the EXISTING CONTROLS FOR FOCUS PARAGRAPH${provideExistingControls ? " or OTHER EXISTING CONTROLS IN DATABASE provided in the context" : ""}.`;
 
 			const userPrompt = `### Context ###
-FOCUS PARAGRAPH TEXT: ${focusParagraph.marker ? `${focusParagraph.marker} ` : ""}${focusParagraph.text}
+FOCUS PARAGRAPH TEXT: ${focusParagraph.text}
 FOCUS PARAGRAPH ID: ${focusParagraph.id}
 DOCUMENT: ${focusParagraph.section.document.title}
 SECTION: ${focusParagraph.section.title}
