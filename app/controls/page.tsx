@@ -31,6 +31,9 @@ export default function ControlsPage() {
 	const [loading, setLoading] = useState(true);
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [isDuplicatesModalOpen, setIsDuplicatesModalOpen] = useState(false);
+	const [activeDuplicateTab, setActiveDuplicateTab] = useState<
+		"title" | "statement" | "guidance" | "titleStatement" | "full"
+	>("title");
 	const [docsWithParagraphs, setDocsWithParagraphs] = useState<
 		DocumentWithParagraphs[]
 	>([]);
@@ -202,7 +205,58 @@ export default function ControlsPage() {
 			}
 		}
 
-		// 2. Same Title & Statement
+		// 2. Same Statement
+		const statementMap = new Map<string, ControlData[]>();
+		for (const c of controls) {
+			const key = normalize(c.statement);
+			if (!key) continue;
+			let group = statementMap.get(key);
+			if (!group) {
+				group = [];
+				statementMap.set(key, group);
+			}
+			group.push(c);
+		}
+
+		const sameStatementGroups: { title: string; controls: ControlData[] }[] =
+			[];
+		let sameStatementCount = 0;
+		for (const group of statementMap.values()) {
+			if (group.length > 1) {
+				sameStatementCount += group.length;
+				sameStatementGroups.push({
+					title: group[0].statement,
+					controls: group,
+				});
+			}
+		}
+
+		// 3. Same Implementation Guidance
+		const guidanceMap = new Map<string, ControlData[]>();
+		for (const c of controls) {
+			const key = normalize(c.implementationGuidance);
+			if (!key) continue;
+			let group = guidanceMap.get(key);
+			if (!group) {
+				group = [];
+				guidanceMap.set(key, group);
+			}
+			group.push(c);
+		}
+
+		const sameGuidanceGroups: { title: string; controls: ControlData[] }[] = [];
+		let sameGuidanceCount = 0;
+		for (const group of guidanceMap.values()) {
+			if (group.length > 1) {
+				sameGuidanceCount += group.length;
+				sameGuidanceGroups.push({
+					title: group[0].implementationGuidance || "",
+					controls: group,
+				});
+			}
+		}
+
+		// 4. Same Title & Statement
 		const titleStatementMap = new Map<string, ControlData[]>();
 		for (const c of controls) {
 			const key = `${normalize(c.title)}|||${normalize(c.statement)}`;
@@ -214,16 +268,22 @@ export default function ControlsPage() {
 			group.push(c);
 		}
 
+		const sameTitleStatementGroups: {
+			title: string;
+			controls: ControlData[];
+		}[] = [];
 		let sameTitleStatementCount = 0;
-		let sameTitleStatementGroupsCount = 0;
 		for (const group of titleStatementMap.values()) {
 			if (group.length > 1) {
-				sameTitleStatementGroupsCount++;
 				sameTitleStatementCount += group.length;
+				sameTitleStatementGroups.push({
+					title: group[0].title,
+					controls: group,
+				});
 			}
 		}
 
-		// 3. Same Title, Statement & Guidance
+		// 5. Title, Statement & Guidance (All 3 fields)
 		const fullMap = new Map<string, ControlData[]>();
 		for (const c of controls) {
 			const key = `${normalize(c.title)}|||${normalize(c.statement)}|||${normalize(c.implementationGuidance)}`;
@@ -235,23 +295,38 @@ export default function ControlsPage() {
 			group.push(c);
 		}
 
+		const sameFullGroups: { title: string; controls: ControlData[] }[] = [];
 		let sameFullCount = 0;
-		let sameFullGroupsCount = 0;
 		for (const group of fullMap.values()) {
 			if (group.length > 1) {
-				sameFullGroupsCount++;
 				sameFullCount += group.length;
+				sameFullGroups.push({
+					title: group[0].title,
+					controls: group,
+				});
 			}
 		}
 
 		return {
 			sameTitleCount,
 			sameTitleGroupsCount: sameTitleGroups.length,
-			sameTitleStatementCount,
-			sameTitleStatementGroupsCount,
-			sameFullCount,
-			sameFullGroupsCount,
 			sameTitleGroups,
+
+			sameStatementCount,
+			sameStatementGroupsCount: sameStatementGroups.length,
+			sameStatementGroups,
+
+			sameGuidanceCount,
+			sameGuidanceGroupsCount: sameGuidanceGroups.length,
+			sameGuidanceGroups,
+
+			sameTitleStatementCount,
+			sameTitleStatementGroupsCount: sameTitleStatementGroups.length,
+			sameTitleStatementGroups,
+
+			sameFullCount,
+			sameFullGroupsCount: sameFullGroups.length,
+			sameFullGroups,
 		};
 	};
 
@@ -398,7 +473,7 @@ export default function ControlsPage() {
 
 			{isDuplicatesModalOpen && (
 				<div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-900/60 backdrop-blur-sm animate-in fade-in duration-200">
-					<div className="bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden border border-zinc-200 dark:border-zinc-800">
+					<div className="bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl w-full max-w-5xl max-h-[90vh] flex flex-col overflow-hidden border border-zinc-200 dark:border-zinc-800">
 						<div className="p-6 border-b border-zinc-200 dark:border-zinc-800 flex justify-between items-center bg-zinc-50/50 dark:bg-zinc-900/50">
 							<div>
 								<h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
@@ -409,7 +484,8 @@ export default function ControlsPage() {
 									Duplicate Check
 								</h2>
 								<p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
-									Overview of duplicate controls in the database.
+									Overview of duplicate controls in the database. Select a card
+									to view matching groups.
 								</p>
 							</div>
 							<button
@@ -424,84 +500,140 @@ export default function ControlsPage() {
 						<div className="p-6 overflow-y-auto flex-1 space-y-6">
 							{(() => {
 								const stats = getDuplicateStats();
+
+								const tabCards = [
+									{
+										id: "title" as const,
+										label: "Same Title",
+										count: stats.sameTitleCount,
+										groupsCount: stats.sameTitleGroupsCount,
+										desc: "Identical title",
+										groups: stats.sameTitleGroups,
+										activeClass:
+											"ring-2 ring-purple-500 border-purple-300 dark:border-purple-700 bg-purple-50 dark:bg-purple-950/40",
+										inactiveClass:
+											"bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 hover:bg-purple-50/50 dark:hover:bg-purple-950/20",
+										badgeColor:
+											"text-purple-700 dark:text-purple-300 bg-purple-100 dark:bg-purple-900/40",
+									},
+									{
+										id: "statement" as const,
+										label: "Same Statement",
+										count: stats.sameStatementCount,
+										groupsCount: stats.sameStatementGroupsCount,
+										desc: "Identical statement alone",
+										groups: stats.sameStatementGroups,
+										activeClass:
+											"ring-2 ring-emerald-500 border-emerald-300 dark:border-emerald-700 bg-emerald-50 dark:bg-emerald-950/40",
+										inactiveClass:
+											"bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 hover:bg-emerald-50/50 dark:hover:bg-emerald-950/20",
+										badgeColor:
+											"text-emerald-700 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-900/40",
+									},
+									{
+										id: "guidance" as const,
+										label: "Same Guidance",
+										count: stats.sameGuidanceCount,
+										groupsCount: stats.sameGuidanceGroupsCount,
+										desc: "Identical guidance alone",
+										groups: stats.sameGuidanceGroups,
+										activeClass:
+											"ring-2 ring-teal-500 border-teal-300 dark:border-teal-700 bg-teal-50 dark:bg-teal-950/40",
+										inactiveClass:
+											"bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 hover:bg-teal-50/50 dark:hover:bg-teal-950/20",
+										badgeColor:
+											"text-teal-700 dark:text-teal-300 bg-teal-100 dark:bg-teal-900/40",
+									},
+									{
+										id: "titleStatement" as const,
+										label: "Title & Statement",
+										count: stats.sameTitleStatementCount,
+										groupsCount: stats.sameTitleStatementGroupsCount,
+										desc: "Identical title & statement",
+										groups: stats.sameTitleStatementGroups,
+										activeClass:
+											"ring-2 ring-blue-500 border-blue-300 dark:border-blue-700 bg-blue-50 dark:bg-blue-950/40",
+										inactiveClass:
+											"bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 hover:bg-blue-50/50 dark:hover:bg-blue-950/20",
+										badgeColor:
+											"text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-900/40",
+									},
+									{
+										id: "full" as const,
+										label: "All 3 Fields",
+										count: stats.sameFullCount,
+										groupsCount: stats.sameFullGroupsCount,
+										desc: "Title, statement & guidance",
+										groups: stats.sameFullGroups,
+										activeClass:
+											"ring-2 ring-amber-500 border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-950/40",
+										inactiveClass:
+											"bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 hover:bg-amber-50/50 dark:hover:bg-amber-950/20",
+										badgeColor:
+											"text-amber-700 dark:text-amber-300 bg-amber-100 dark:bg-amber-900/40",
+									},
+								];
+
+								const activeCard =
+									tabCards.find((c) => c.id === activeDuplicateTab) ||
+									tabCards[0];
+
 								return (
 									<>
-										<div className="grid gap-4 md:grid-cols-3">
-											<div className="p-4 rounded-xl bg-purple-50 dark:bg-purple-950/30 border border-purple-200 dark:border-purple-800/50 flex flex-col justify-between">
-												<div>
-													<span className="text-xs font-semibold text-purple-700 dark:text-purple-300 uppercase tracking-wider">
-														Same Title
-													</span>
-													<div className="text-3xl font-extrabold text-purple-900 dark:text-purple-100 mt-2">
-														{stats.sameTitleCount}
-													</div>
-													<p className="text-xs text-purple-600 dark:text-purple-400 mt-1">
-														Controls with identical title
-													</p>
-												</div>
-												<div className="mt-3 pt-2 border-t border-purple-200/60 dark:border-purple-800/40 text-[11px] text-purple-700 dark:text-purple-300 font-medium">
-													{stats.sameTitleGroupsCount > 0
-														? `${stats.sameTitleGroupsCount} Title Group${stats.sameTitleGroupsCount > 1 ? "s" : ""}`
-														: "No duplicates"}
-												</div>
-											</div>
-
-											<div className="p-4 rounded-xl bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800/50 flex flex-col justify-between">
-												<div>
-													<span className="text-xs font-semibold text-blue-700 dark:text-blue-300 uppercase tracking-wider">
-														Same Title & Statement
-													</span>
-													<div className="text-3xl font-extrabold text-blue-900 dark:text-blue-100 mt-2">
-														{stats.sameTitleStatementCount}
-													</div>
-													<p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
-														Identical title & statement
-													</p>
-												</div>
-												<div className="mt-3 pt-2 border-t border-blue-200/60 dark:border-blue-800/40 text-[11px] text-blue-700 dark:text-blue-300 font-medium">
-													{stats.sameTitleStatementGroupsCount > 0
-														? `${stats.sameTitleStatementGroupsCount} Group${stats.sameTitleStatementGroupsCount > 1 ? "s" : ""}`
-														: "No duplicates"}
-												</div>
-											</div>
-
-											<div className="p-4 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50 flex flex-col justify-between">
-												<div>
-													<span className="text-xs font-semibold text-amber-700 dark:text-amber-300 uppercase tracking-wider">
-														Title, Statement & Guidance
-													</span>
-													<div className="text-3xl font-extrabold text-amber-900 dark:text-amber-100 mt-2">
-														{stats.sameFullCount}
-													</div>
-													<p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
-														Identical across all 3 fields
-													</p>
-												</div>
-												<div className="mt-3 pt-2 border-t border-amber-200/60 dark:border-amber-800/40 text-[11px] text-amber-700 dark:text-amber-300 font-medium">
-													{stats.sameFullGroupsCount > 0
-														? `${stats.sameFullGroupsCount} Exact Group${stats.sameFullGroupsCount > 1 ? "s" : ""}`
-														: "No duplicates"}
-												</div>
-											</div>
+										<div className="grid gap-3 grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
+											{tabCards.map((card) => {
+												const isActive = card.id === activeDuplicateTab;
+												return (
+													<button
+														key={card.id}
+														type="button"
+														onClick={() => setActiveDuplicateTab(card.id)}
+														className={`p-3.5 rounded-xl border text-left flex flex-col justify-between transition-all cursor-pointer ${
+															isActive ? card.activeClass : card.inactiveClass
+														}`}
+													>
+														<div>
+															<span className="text-[11px] font-semibold uppercase tracking-wider text-zinc-600 dark:text-zinc-400">
+																{card.label}
+															</span>
+															<div className="text-2xl font-extrabold text-zinc-900 dark:text-zinc-100 mt-1">
+																{card.count}
+															</div>
+															<p className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-0.5 leading-tight">
+																{card.desc}
+															</p>
+														</div>
+														<div className="mt-3 pt-2 border-t border-zinc-200/60 dark:border-zinc-800/60 text-[11px] font-medium text-zinc-600 dark:text-zinc-400">
+															{card.groupsCount > 0
+																? `${card.groupsCount} Group${card.groupsCount > 1 ? "s" : ""}`
+																: "No duplicates"}
+														</div>
+													</button>
+												);
+											})}
 										</div>
 
-										{stats.sameTitleGroups.length > 0 ? (
+										{activeCard.groups.length > 0 ? (
 											<div className="space-y-4 pt-2">
-												<h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-100 uppercase tracking-wider">
-													Duplicate Groups Found ({stats.sameTitleGroups.length}
-													)
+												<h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-100 uppercase tracking-wider flex items-center justify-between">
+													<span>
+														Duplicate Groups: {activeCard.label} (
+														{activeCard.groups.length})
+													</span>
 												</h3>
 												<div className="space-y-4 max-h-72 overflow-y-auto pr-1">
-													{stats.sameTitleGroups.map((group) => (
+													{activeCard.groups.map((group) => (
 														<div
-															key={`group-${group.title}-${group.controls[0]?.id || 0}`}
+															key={`group-${activeDuplicateTab}-${group.controls.map((c) => c.id).join("-")}`}
 															className="p-4 rounded-xl bg-zinc-50 dark:bg-zinc-950/50 border border-zinc-200 dark:border-zinc-800"
 														>
-															<div className="flex justify-between items-center mb-2">
-																<span className="font-bold text-zinc-900 dark:text-zinc-100 text-sm">
+															<div className="flex justify-between items-start mb-2 gap-4">
+																<span className="font-bold text-zinc-900 dark:text-zinc-100 text-sm line-clamp-3">
 																	{group.title}
 																</span>
-																<span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300">
+																<span
+																	className={`px-2 py-0.5 rounded-full text-xs font-semibold shrink-0 ${activeCard.badgeColor}`}
+																>
 																	{group.controls.length} Controls
 																</span>
 															</div>
@@ -521,7 +653,8 @@ export default function ControlsPage() {
 											</div>
 										) : (
 											<div className="text-center py-8 text-zinc-500 dark:text-zinc-400 text-sm bg-zinc-50 dark:bg-zinc-950/50 rounded-xl border border-dashed border-zinc-200 dark:border-zinc-800">
-												No controls with duplicate titles were found.
+												No duplicate controls found for &quot;
+												{activeCard.label}&quot;.
 											</div>
 										)}
 									</>
