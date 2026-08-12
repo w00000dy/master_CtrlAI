@@ -73,6 +73,24 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) in your browser!
 
+## 💾 Database Backup & Restore
+
+### Backup
+
+To dump the database content to `dump.sql` using environment variables from `.env`:
+
+```bash
+env $(grep -v '^#' .env | xargs) bash -c 'MYSQL_PWD="$MYSQL_ROOT_PASSWORD" mysqldump -h 127.0.0.1 -u root --single-transaction --set-gtid-purged=OFF "$DATABASE_NAME" > dump.sql'
+```
+
+### Restore
+
+To restore the database from `dump.sql`:
+
+```bash
+env $(grep -v '^#' .env | xargs) bash -c 'MYSQL_PWD="$MYSQL_ROOT_PASSWORD" mysql -h 127.0.0.1 -u root "$DATABASE_NAME" < dump.sql'
+```
+
 ## 🏗️ Built With
 
 - [Next.js](https://nextjs.org/) - React framework for web applications
