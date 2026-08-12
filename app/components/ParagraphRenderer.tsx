@@ -1,6 +1,7 @@
 import {
 	BookTextIcon,
 	BotIcon,
+	GitForkIcon,
 	LoaderIcon,
 	SparklesIcon,
 	TimerIcon,
@@ -12,6 +13,7 @@ export type ParagraphWithControls = Prisma.ParagraphGetPayload<{
 		controls: {
 			select: {
 				guidelineId: true;
+				generatedForId: true;
 			};
 		};
 	};
@@ -34,8 +36,19 @@ export const ParagraphRenderer = ({
 }: ParagraphProps) => {
 	const guidelineControlsCount =
 		paragraph.controls?.filter((c) => c.guidelineId !== null).length || 0;
-	const llmControlsCount =
-		paragraph.controls?.filter((c) => c.guidelineId === null).length || 0;
+	const directLlmControlsCount =
+		paragraph.controls?.filter(
+			(c) =>
+				c.guidelineId === null &&
+				(c.generatedForId === paragraph.id || c.generatedForId === null),
+		).length || 0;
+	const mappedLlmControlsCount =
+		paragraph.controls?.filter(
+			(c) =>
+				c.guidelineId === null &&
+				c.generatedForId !== null &&
+				c.generatedForId !== paragraph.id,
+		).length || 0;
 
 	return (
 		<div
@@ -77,7 +90,8 @@ export const ParagraphRenderer = ({
 
 					{/* Controls Indicators & Few-Shot & Generation Status */}
 					{(guidelineControlsCount > 0 ||
-						llmControlsCount > 0 ||
+						directLlmControlsCount > 0 ||
+						mappedLlmControlsCount > 0 ||
 						paragraph.isFewShotExample ||
 						generationStatus !== "none") && (
 						<div
@@ -119,13 +133,22 @@ export const ParagraphRenderer = ({
 									<span>{guidelineControlsCount}</span>
 								</div>
 							)}
-							{llmControlsCount > 0 && (
+							{directLlmControlsCount > 0 && (
 								<div
 									className="flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-medium rounded-md bg-green-50 text-green-600 border border-green-100 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800/30"
-									title={`${llmControlsCount} LLM Generated Controls`}
+									title={`${directLlmControlsCount} Directly Generated LLM Controls`}
 								>
 									<BotIcon size={10} />
-									<span>{llmControlsCount}</span>
+									<span>{directLlmControlsCount}</span>
+								</div>
+							)}
+							{mappedLlmControlsCount > 0 && (
+								<div
+									className="flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-medium rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200/60 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-800/40"
+									title={`${mappedLlmControlsCount} Mapped LLM Controls (generated for another paragraph)`}
+								>
+									<GitForkIcon size={10} />
+									<span>{mappedLlmControlsCount}</span>
 								</div>
 							)}
 						</div>

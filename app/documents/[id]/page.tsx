@@ -38,6 +38,7 @@ export type DocumentData = Prisma.DocumentGetPayload<{
 						controls: {
 							select: {
 								guidelineId: true;
+								generatedForId: true;
 							};
 						};
 					};

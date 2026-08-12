@@ -80,7 +80,7 @@ export async function getDocumentById(id: number) {
 						orderBy: { marker: "asc" },
 						include: {
 							controls: {
-								select: { guidelineId: true },
+								select: { guidelineId: true, generatedForId: true },
 							},
 						},
 					},
