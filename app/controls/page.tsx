@@ -1,6 +1,6 @@
 "use client";
 
-import { XIcon } from "lucide-animated";
+import { CopyIcon, XIcon } from "lucide-animated";
 import type React from "react";
 import { useEffect, useState } from "react";
 import { PageLayout } from "@/app/components/PageLayout";
@@ -30,6 +30,7 @@ export default function ControlsPage() {
 	const [controls, setControls] = useState<ControlData[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [isModalOpen, setIsModalOpen] = useState(false);
+	const [isDuplicatesModalOpen, setIsDuplicatesModalOpen] = useState(false);
 	const [docsWithParagraphs, setDocsWithParagraphs] = useState<
 		DocumentWithParagraphs[]
 	>([]);
@@ -172,6 +173,88 @@ export default function ControlsPage() {
 		fetchControls();
 	};
 
+	const getDuplicateStats = () => {
+		const normalize = (str: string | null | undefined) =>
+			(str || "").trim().toLowerCase();
+
+		// 1. Same Title
+		const titleMap = new Map<string, ControlData[]>();
+		for (const c of controls) {
+			const key = normalize(c.title);
+			if (!key) continue;
+			let group = titleMap.get(key);
+			if (!group) {
+				group = [];
+				titleMap.set(key, group);
+			}
+			group.push(c);
+		}
+
+		const sameTitleGroups: { title: string; controls: ControlData[] }[] = [];
+		let sameTitleCount = 0;
+		for (const group of titleMap.values()) {
+			if (group.length > 1) {
+				sameTitleCount += group.length;
+				sameTitleGroups.push({
+					title: group[0].title,
+					controls: group,
+				});
+			}
+		}
+
+		// 2. Same Title & Statement
+		const titleStatementMap = new Map<string, ControlData[]>();
+		for (const c of controls) {
+			const key = `${normalize(c.title)}|||${normalize(c.statement)}`;
+			let group = titleStatementMap.get(key);
+			if (!group) {
+				group = [];
+				titleStatementMap.set(key, group);
+			}
+			group.push(c);
+		}
+
+		let sameTitleStatementCount = 0;
+		let sameTitleStatementGroupsCount = 0;
+		for (const group of titleStatementMap.values()) {
+			if (group.length > 1) {
+				sameTitleStatementGroupsCount++;
+				sameTitleStatementCount += group.length;
+			}
+		}
+
+		// 3. Same Title, Statement & Guidance
+		const fullMap = new Map<string, ControlData[]>();
+		for (const c of controls) {
+			const key = `${normalize(c.title)}|||${normalize(c.statement)}|||${normalize(c.implementationGuidance)}`;
+			let group = fullMap.get(key);
+			if (!group) {
+				group = [];
+				fullMap.set(key, group);
+			}
+			group.push(c);
+		}
+
+		let sameFullCount = 0;
+		let sameFullGroupsCount = 0;
+		for (const group of fullMap.values()) {
+			if (group.length > 1) {
+				sameFullGroupsCount++;
+				sameFullCount += group.length;
+			}
+		}
+
+		return {
+			sameTitleCount,
+			sameTitleGroupsCount: sameTitleGroups.length,
+			sameTitleStatementCount,
+			sameTitleStatementGroupsCount,
+			sameFullCount,
+			sameFullGroupsCount,
+			sameTitleGroups,
+		};
+	};
+
 	return (
 		<PageLayout
 			title={
@@ -207,6 +290,14 @@ export default function ControlsPage() {
 						className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-colors shadow-sm"
 					>
 						Delete All Controls
+					</button>
+					<button
+						type="button"
+						onClick={() => setIsDuplicatesModalOpen(true)}
+						className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-colors shadow-sm flex items-center gap-2"
+					>
+						<CopyIcon size={18} />
+						Check Duplicates
 					</button>
 					<button
 						type="button"
@@ -302,6 +393,152 @@ export default function ControlsPage() {
 							onDelete={handleDeleteControl}
 						/>
 					))}
+				</div>
+			)}
+
+			{isDuplicatesModalOpen && (
+				<div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+					<div className="bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden border border-zinc-200 dark:border-zinc-800">
+						<div className="p-6 border-b border-zinc-200 dark:border-zinc-800 flex justify-between items-center bg-zinc-50/50 dark:bg-zinc-900/50">
+							<div>
+								<h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
+									<CopyIcon
+										className="text-purple-600 dark:text-purple-400"
+										size={22}
+									/>
+									Duplicate Check
+								</h2>
+								<p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
+									Overview of duplicate controls in the database.
+								</p>
+							</div>
+							<button
+								type="button"
+								onClick={() => setIsDuplicatesModalOpen(false)}
+								className="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors p-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800"
+							>
+								<XIcon size={24} />
+							</button>
+						</div>
+
+						<div className="p-6 overflow-y-auto flex-1 space-y-6">
+							{(() => {
+								const stats = getDuplicateStats();
+								return (
+									<>
+										<div className="grid gap-4 md:grid-cols-3">
+											<div className="p-4 rounded-xl bg-purple-50 dark:bg-purple-950/30 border border-purple-200 dark:border-purple-800/50 flex flex-col justify-between">
+												<div>
+													<span className="text-xs font-semibold text-purple-700 dark:text-purple-300 uppercase tracking-wider">
+														Same Title
+													</span>
+													<div className="text-3xl font-extrabold text-purple-900 dark:text-purple-100 mt-2">
+														{stats.sameTitleCount}
+													</div>
+													<p className="text-xs text-purple-600 dark:text-purple-400 mt-1">
+														Controls with identical title
+													</p>
+												</div>
+												<div className="mt-3 pt-2 border-t border-purple-200/60 dark:border-purple-800/40 text-[11px] text-purple-700 dark:text-purple-300 font-medium">
+													{stats.sameTitleGroupsCount > 0
+														? `${stats.sameTitleGroupsCount} Title Group${stats.sameTitleGroupsCount > 1 ? "s" : ""}`
+														: "No duplicates"}
+												</div>
+											</div>
+
+											<div className="p-4 rounded-xl bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800/50 flex flex-col justify-between">
+												<div>
+													<span className="text-xs font-semibold text-blue-700 dark:text-blue-300 uppercase tracking-wider">
+														Same Title & Statement
+													</span>
+													<div className="text-3xl font-extrabold text-blue-900 dark:text-blue-100 mt-2">
+														{stats.sameTitleStatementCount}
+													</div>
+													<p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
+														Identical title & statement
+													</p>
+												</div>
+												<div className="mt-3 pt-2 border-t border-blue-200/60 dark:border-blue-800/40 text-[11px] text-blue-700 dark:text-blue-300 font-medium">
+													{stats.sameTitleStatementGroupsCount > 0
+														? `${stats.sameTitleStatementGroupsCount} Group${stats.sameTitleStatementGroupsCount > 1 ? "s" : ""}`
+														: "No duplicates"}
+												</div>
+											</div>
+
+											<div className="p-4 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50 flex flex-col justify-between">
+												<div>
+													<span className="text-xs font-semibold text-amber-700 dark:text-amber-300 uppercase tracking-wider">
+														Title, Statement & Guidance
+													</span>
+													<div className="text-3xl font-extrabold text-amber-900 dark:text-amber-100 mt-2">
+														{stats.sameFullCount}
+													</div>
+													<p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
+														Identical across all 3 fields
+													</p>
+												</div>
+												<div className="mt-3 pt-2 border-t border-amber-200/60 dark:border-amber-800/40 text-[11px] text-amber-700 dark:text-amber-300 font-medium">
+													{stats.sameFullGroupsCount > 0
+														? `${stats.sameFullGroupsCount} Exact Group${stats.sameFullGroupsCount > 1 ? "s" : ""}`
+														: "No duplicates"}
+												</div>
+											</div>
+										</div>
+
+										{stats.sameTitleGroups.length > 0 ? (
+											<div className="space-y-4 pt-2">
+												<h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-100 uppercase tracking-wider">
+													Duplicate Groups Found ({stats.sameTitleGroups.length}
+													)
+												</h3>
+												<div className="space-y-4 max-h-72 overflow-y-auto pr-1">
+													{stats.sameTitleGroups.map((group) => (
+														<div
+															key={`group-${group.title}-${group.controls[0]?.id || 0}`}
+															className="p-4 rounded-xl bg-zinc-50 dark:bg-zinc-950/50 border border-zinc-200 dark:border-zinc-800"
+														>
+															<div className="flex justify-between items-center mb-2">
+																<span className="font-bold text-zinc-900 dark:text-zinc-100 text-sm">
+																	{group.title}
+																</span>
+																<span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300">
+																	{group.controls.length} Controls
+																</span>
+															</div>
+															<div className="space-y-4 mt-3">
+																{group.controls.map((ctrl) => (
+																	<ControlCard
+																		key={ctrl.id}
+																		control={ctrl}
+																		onEdit={openEditModal}
+																		onDelete={handleDeleteControl}
+																	/>
+																))}
+															</div>
+														</div>
+													))}
+												</div>
+											</div>
+										) : (
+											<div className="text-center py-8 text-zinc-500 dark:text-zinc-400 text-sm bg-zinc-50 dark:bg-zinc-950/50 rounded-xl border border-dashed border-zinc-200 dark:border-zinc-800">
+												No controls with duplicate titles were found.
+											</div>
+										)}
+									</>
+								);
+							})()}
+						</div>
+
+						<div className="p-6 border-t border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 flex justify-end">
+							<button
+								type="button"
+								onClick={() => setIsDuplicatesModalOpen(false)}
+								className="px-5 py-2.5 bg-zinc-800 hover:bg-zinc-700 text-white font-medium rounded-lg transition-colors shadow-sm"
+							>
+								Close
+							</button>
+						</div>
+					</div>
 				</div>
 			)}
 
