@@ -706,7 +706,8 @@ export default function BenchmarkPage() {
 									disabled={
 										isActionable === null ||
 										isTechnicallyCorrect === null ||
-										isMeasurable === null
+										isMeasurable === null ||
+										hasNormativeLanguage === null
 									}
 									className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
 								>
