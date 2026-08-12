@@ -152,7 +152,7 @@ export async function importGuidelineYaml(formData: FormData) {
 			data: {
 				title: ctrl.title || ctrl.id || "Untitled Control",
 				statement: statementText,
-				implementationGuidance: ctrl.implementationGuidance || null,
+				implementationGuidance: ctrl.implementationGuidance?.trim() || null,
 				guidelineId: newGuideline.id,
 				paragraphs: {
 					connect: Array.from(matchedParagraphIds).map((id) => ({ id })),

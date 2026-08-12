@@ -38,11 +38,12 @@ export async function createControl(data: {
 	implementationGuidance?: string | null;
 	paragraphIds: number[];
 }) {
+	const guidance = data.implementationGuidance?.trim() || null;
 	const control = await prisma.control.create({
 		data: {
 			title: data.title,
 			statement: data.statement,
-			implementationGuidance: data.implementationGuidance,
+			implementationGuidance: guidance,
 			paragraphs: {
 				connect: data.paragraphIds.map((id) => ({ id })),
 			},
@@ -477,7 +478,7 @@ ${allParagraphsStr}
 					data: {
 						title: ctrl.title || "Untitled Control",
 						statement: ctrl.statement || "",
-						implementationGuidance: ctrl.implementationGuidance || null,
+						implementationGuidance: ctrl.implementationGuidance?.trim() || null,
 						generatedForId: paragraphId,
 						paragraphs: {
 							connect: validIds.map((id) => ({ id })),
@@ -511,12 +512,16 @@ export async function updateControl(
 		paragraphIds?: number[];
 	},
 ) {
+	const guidance =
+		data.implementationGuidance !== undefined
+			? data.implementationGuidance?.trim() || null
+			: undefined;
 	const control = await prisma.control.update({
 		where: { id },
 		data: {
 			title: data.title,
 			statement: data.statement,
-			implementationGuidance: data.implementationGuidance,
+			...(guidance !== undefined && { implementationGuidance: guidance }),
 			...(data.paragraphIds && {
 				paragraphs: {
 					set: [],
