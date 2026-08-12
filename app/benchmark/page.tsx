@@ -61,12 +61,25 @@ import {
 	type ParagraphWithContext,
 } from "../components/MappedParagraphCard";
 import {
+	getBenchmarkParagraphs,
 	getBenchmarkProgress,
 	getNextBenchmarkTask,
 	getTechnicalControls,
 	saveControlBenchmark,
 	saveParagraphBenchmark,
 } from "./actions";
+
+type BenchmarkParagraph = {
+	id: number;
+	marker: string | null;
+	text: string;
+	sectionTitle: string;
+	sectionMarker: string | null;
+	documentTitle: string;
+	ancestorMarkers: string[];
+	totalControls: number;
+	evaluatedControls: number;
+};
 
 type Task =
 	| { type: "DONE" }
@@ -145,6 +158,12 @@ export default function BenchmarkPage() {
 	>([]);
 	const [loading, setLoading] = useState(true);
 	const [mode, setMode] = useState<"CONTROL" | "PARAGRAPH">("CONTROL");
+	const [paragraphsList, setParagraphsList] = useState<BenchmarkParagraph[]>(
+		[],
+	);
+	const [selectedParagraphId, setSelectedParagraphId] = useState<number | null>(
+		null,
+	);
 	const [progress, setProgress] = useState<{
 		total: number;
 		evaluated: number;
@@ -176,14 +195,18 @@ export default function BenchmarkPage() {
 	const loadTask = useCallback(async () => {
 		setLoading(true);
 		try {
-			const nextTask = await getNextBenchmarkTask(mode);
-			setTask(nextTask);
+			const [nextTask, progRes, paras] = await Promise.all([
+				getNextBenchmarkTask(mode, selectedParagraphId),
+				getBenchmarkProgress(mode, selectedParagraphId),
+				getBenchmarkParagraphs(),
+			]);
 
-			const progRes = await getBenchmarkProgress(mode);
+			setTask(nextTask);
 			setProgress({
 				total: progRes.total ?? 0,
 				evaluated: progRes.evaluated ?? 0,
 			});
+			setParagraphsList(paras);
 
 			if (nextTask.type === "CONTROL") {
 				const techControls = await getTechnicalControls(
@@ -209,7 +232,7 @@ export default function BenchmarkPage() {
 		} finally {
 			setLoading(false);
 		}
-	}, [mode]);
+	}, [mode, selectedParagraphId]);
 
 	useEffect(() => {
 		const init = async () => {
@@ -292,8 +315,43 @@ export default function BenchmarkPage() {
 
 	return (
 		<div className="flex-1 min-h-0 bg-zinc-50 dark:bg-zinc-950 flex flex-col">
-			<div className="bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 py-2 px-4 shrink-0 flex justify-between items-center">
-				<div className="w-48 flex-shrink-0 hidden md:block"></div>
+			<div className="bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 py-2.5 px-4 md:px-8 shrink-0 flex flex-wrap justify-between items-center gap-3">
+				<div className="flex items-center gap-2 max-w-xl flex-1 min-w-[280px]">
+					<label
+						htmlFor="paragraph-select"
+						className="text-xs font-semibold text-zinc-500 uppercase tracking-wider shrink-0"
+					>
+						Paragraph:
+					</label>
+					<select
+						id="paragraph-select"
+						value={selectedParagraphId ?? ""}
+						onChange={(e) => {
+							const val = e.target.value;
+							setSelectedParagraphId(val ? Number(val) : null);
+						}}
+						className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 text-xs rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 truncate"
+					>
+						<option value="">All Paragraphs</option>
+						{paragraphsList.map((p) => {
+							const markers = [
+								...(p.sectionMarker ? [p.sectionMarker] : []),
+								...p.ancestorMarkers,
+								...(p.marker ? [p.marker] : []),
+							].join(" ");
+							const markerStr = markers ? `${markers} - ` : "";
+							const paraSnippet =
+								p.text.length > 40 ? `${p.text.substring(0, 40)}...` : p.text;
+							const label = `[${p.documentTitle}] ${markerStr}${paraSnippet} (${p.evaluatedControls}/${p.totalControls} evaluated)`;
+							return (
+								<option key={p.id} value={p.id}>
+									{label}
+								</option>
+							);
+						})}
+					</select>
+				</div>
+
 				<div className="flex bg-zinc-100 dark:bg-zinc-800 p-1 rounded-lg shrink-0">
 					<button
 						type="button"
@@ -310,13 +368,13 @@ export default function BenchmarkPage() {
 						Paragraph Benchmark
 					</button>
 				</div>
-				<div className="w-48 flex-shrink-0 text-sm text-zinc-600 dark:text-zinc-400 font-medium text-right hidden md:flex items-center justify-end gap-2">
+				<div className="text-sm text-zinc-600 dark:text-zinc-400 font-medium flex items-center gap-2 shrink-0">
 					{progress && (
 						<>
 							<span>
 								{progress.evaluated} / {progress.total}
 							</span>
-							<span className="text-xs px-2 py-0.5 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full border border-blue-100 dark:border-blue-800">
+							<span className="text-xs px-2 py-0.5 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full border border-blue-100 dark:border-blue-800 font-semibold">
 								{progress.total > 0
 									? Math.round((progress.evaluated / progress.total) * 100)
 									: 0}
@@ -335,8 +393,23 @@ export default function BenchmarkPage() {
 					<div className="text-red-500 text-center">Error loading task.</div>
 				) : task.type === "DONE" ? (
 					<div className="bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 p-8 rounded-xl text-center border border-green-200 dark:border-green-800 max-w-4xl mx-auto">
-						<h2 className="text-2xl font-bold mb-4">Excellent!</h2>
-						<p>All controls and paragraphs have been successfully evaluated.</p>
+						<h2 className="text-2xl font-bold mb-4">
+							{selectedParagraphId ? "Paragraph Completed!" : "Excellent!"}
+						</h2>
+						<p className="mb-4">
+							{selectedParagraphId
+								? "All controls for this paragraph have been evaluated."
+								: "All controls and paragraphs have been successfully evaluated."}
+						</p>
+						{selectedParagraphId && (
+							<button
+								type="button"
+								onClick={() => setSelectedParagraphId(null)}
+								className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg transition-colors"
+							>
+								Show all paragraphs
+							</button>
+						)}
 					</div>
 				) : task.type === "CONTROL" ? (
 					<div className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1 min-h-0">
