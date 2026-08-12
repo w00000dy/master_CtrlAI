@@ -75,9 +75,26 @@ export async function generateResponse({
 			console.log(`[${msg.role.toUpperCase()}]:\n${msg.content}\n`);
 		});
 	}
+	let openAiSchema: z.ZodType | undefined;
+	let ollamaFormat: Record<string, unknown> | undefined;
+	let isWrappedArray = false;
+
 	if (schema) {
-		console.log("Schema:");
-		console.log(JSON.stringify(z.toJSONSchema(schema), null, 2));
+		const jsonSchema = z.toJSONSchema(schema);
+		ollamaFormat = jsonSchema as Record<string, unknown>;
+		if (jsonSchema.type !== "object") {
+			openAiSchema = z.object({
+				items: schema,
+			});
+			isWrappedArray = true;
+		} else {
+			openAiSchema = schema;
+		}
+
+		console.log("Ollama formatted schema:");
+		console.log(JSON.stringify(jsonSchema, null, 2));
+		console.log("OpenAI formatted schema:");
+		console.log(zodTextFormat(openAiSchema, "output_schema"));
 	}
 
 	let result: {
@@ -96,12 +113,12 @@ export async function generateResponse({
 		}
 		messages.push({ role: "user", content: prompt });
 
-		const response = schema
+		const response = openAiSchema
 			? await openai.responses.parse({
 					model: model,
 					input: messages,
 					text: {
-						format: zodTextFormat(schema, "output_schema"),
+						format: zodTextFormat(openAiSchema, "output_schema"),
 					},
 					temperature: temperature,
 				})
@@ -111,16 +128,20 @@ export async function generateResponse({
 					temperature: temperature,
 				});
 
+		let content = response.output_text;
+		if (isWrappedArray && content) {
+			const parsed = JSON.parse(content);
+			if (parsed && typeof parsed === "object" && "items" in parsed) {
+				content = JSON.stringify(parsed.items);
+			}
+		}
+
 		result = {
-			content: response.output_text || "",
+			content: content,
 			promptTokens: response.usage?.input_tokens || 0,
 			completionTokens: response.usage?.output_tokens || 0,
 		};
 	} else {
-		const ollamaFormat = schema
-			? (z.toJSONSchema(schema) as Record<string, unknown>)
-			: undefined;
-
 		if (chatHistory && chatHistory.length > 0) {
 			const messages: ChatMessage[] = [];
 			messages.push(...chatHistory);
