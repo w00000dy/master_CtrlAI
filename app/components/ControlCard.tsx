@@ -56,26 +56,29 @@ export function ControlCard({
 							: "border-b"
 				}`}
 			>
-				<div className="flex items-start justify-between">
-					<div className="flex items-center gap-4">
+				<div className="flex items-start justify-between gap-4">
+					<div className="flex flex-col gap-2">
 						<h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
-							<span className="w-1.5 h-5 bg-blue-500 rounded-full inline-block"></span>
-							{control.title}
+							<span className="w-1.5 h-5 bg-blue-500 rounded-full inline-block shrink-0"></span>
+							<span>{control.title}</span>
+							<span className="text-xs font-mono font-normal text-zinc-400 dark:text-zinc-500 bg-zinc-100 dark:bg-zinc-800/80 px-1.5 py-0.5 rounded border border-zinc-200 dark:border-zinc-700/60 ml-1 shrink-0">
+								#{control.id}
+							</span>
 						</h2>
 						{!hideBadges && (
-							<>
+							<div className="flex flex-wrap items-center gap-2">
 								{isMapped ? (
-									<span className="px-2 py-1 bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-400 text-xs font-semibold rounded-md border border-green-200 dark:border-green-800/50">
+									<span className="px-2 py-0.5 bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-400 text-xs font-semibold rounded-md border border-green-200 dark:border-green-800/50">
 										Mapped
 									</span>
 								) : (
-									<span className="px-2 py-1 bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400 text-xs font-semibold rounded-md border border-amber-200 dark:border-amber-800/50">
+									<span className="px-2 py-0.5 bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400 text-xs font-semibold rounded-md border border-amber-200 dark:border-amber-800/50">
 										Unmapped
 									</span>
 								)}
 								{control.guidelineId ? (
 									<span
-										className="px-2 py-1 bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400 text-xs font-semibold rounded-md border border-blue-200 dark:border-blue-800/50"
+										className="px-2 py-0.5 bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400 text-xs font-semibold rounded-md border border-blue-200 dark:border-blue-800/50"
 										title={control.guideline?.title || "Guideline"}
 									>
 										{control.guideline?.title
@@ -83,21 +86,21 @@ export function ControlCard({
 											: "Guideline"}
 									</span>
 								) : (
-									<span className="px-2 py-1 bg-purple-50 text-purple-700 dark:bg-purple-900/20 dark:text-purple-400 text-xs font-semibold rounded-md border border-purple-200 dark:border-purple-800/50">
+									<span className="px-2 py-0.5 bg-purple-50 text-purple-700 dark:bg-purple-900/20 dark:text-purple-400 text-xs font-semibold rounded-md border border-purple-200 dark:border-purple-800/50">
 										LLM Generated
 									</span>
 								)}
 								{isFewShotExample && (
-									<span className="px-2 py-1 bg-fuchsia-50 text-fuchsia-700 dark:bg-fuchsia-900/20 dark:text-fuchsia-400 text-xs font-semibold rounded-md border border-fuchsia-200 dark:border-fuchsia-800/50">
+									<span className="px-2 py-0.5 bg-fuchsia-50 text-fuchsia-700 dark:bg-fuchsia-900/20 dark:text-fuchsia-400 text-xs font-semibold rounded-md border border-fuchsia-200 dark:border-fuchsia-800/50">
 										Few-Shot Example
 									</span>
 								)}
-							</>
+							</div>
 						)}
 					</div>
 
 					{(onEdit || onDelete) && (
-						<div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+						<div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
 							{onEdit && (
 								<button
 									type="button"

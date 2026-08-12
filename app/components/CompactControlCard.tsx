@@ -47,13 +47,16 @@ export function CompactControlCard({
 					</div>
 				)}
 				<h4
-					className={`font-bold text-sm mb-2 ${
+					className={`font-bold text-sm mb-2 flex items-center gap-2 ${
 						isDirectlyMapped
 							? "text-zinc-900 dark:text-zinc-100"
 							: "text-zinc-700 dark:text-zinc-300"
 					}`}
 				>
-					{ctrl.title}
+					<span>{ctrl.title}</span>
+					<span className="text-[10px] font-mono font-normal text-zinc-400 dark:text-zinc-500 bg-zinc-100 dark:bg-zinc-800/80 px-1.5 py-0.5 rounded border border-zinc-200 dark:border-zinc-700/60">
+						#{ctrl.id}
+					</span>
 				</h4>
 				<p className="text-sm text-zinc-600 dark:text-zinc-400 whitespace-pre-wrap mb-3">
 					{ctrl.statement}
