@@ -13,10 +13,7 @@ export async function getNextBenchmarkTask(
 			where: {
 				guidelineId: null,
 				controlBenchmark: null,
-				OR: [
-					{ generatedForId: null },
-					{ generatedFor: { isFewShotExample: false } },
-				],
+				generatedFor: { isFewShotExample: false },
 			},
 			include: {
 				paragraphs: {
@@ -63,10 +60,7 @@ export async function getNextBenchmarkTask(
 				controls: {
 					some: {
 						guidelineId: null,
-						OR: [
-							{ generatedForId: null },
-							{ generatedFor: { isFewShotExample: false } },
-						],
+						generatedFor: { isFewShotExample: false },
 					},
 				},
 				benchmarkResult: null,
@@ -76,10 +70,7 @@ export async function getNextBenchmarkTask(
 				controls: {
 					where: {
 						guidelineId: null,
-						OR: [
-							{ generatedForId: null },
-							{ generatedFor: { isFewShotExample: false } },
-						],
+						generatedFor: { isFewShotExample: false },
 					},
 					include: {
 						controlBenchmark: true,
@@ -123,16 +114,16 @@ export async function getNextBenchmarkTask(
 	}
 }
 
-export async function getTechnicalControls(paragraphIds?: number[]) {
+export async function getTechnicalControls(paragraphIds: number[]) {
+	if (paragraphIds.length === 0) return [];
+
 	const controls = await prisma.control.findMany({
 		where: {
 			guidelineId: { not: null },
 			paragraphs: {
 				none: { isFewShotExample: true },
+				some: { id: { in: paragraphIds } },
 			},
-			...(paragraphIds && paragraphIds.length > 0
-				? { paragraphs: { some: { id: { in: paragraphIds } } } }
-				: {}),
 		},
 		include: {
 			guideline: true,
