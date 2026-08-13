@@ -74,6 +74,37 @@ export async function getBenchmarkParagraphs() {
 	});
 }
 
+const controlInclude = {
+	paragraphs: {
+		include: {
+			section: { include: { document: true } },
+		},
+	},
+	controlBenchmark: {
+		include: {
+			relevantParagraphs: { select: { id: true } },
+			coveredControls: { select: { id: true } },
+		},
+	},
+} as const satisfies Prisma.ControlInclude;
+
+const paragraphInclude = {
+	controls: {
+		where: {
+			guidelineId: null,
+			generatedFor: { isFewShotExample: false },
+		},
+		include: {
+			controlBenchmark: true,
+		},
+		orderBy: { id: "asc" },
+	},
+	section: {
+		include: { document: true },
+	},
+	benchmarkResult: true,
+} as const satisfies Prisma.ParagraphInclude;
+
 export async function getNextBenchmarkTask(
 	mode: "CONTROL" | "PARAGRAPH" = "CONTROL",
 	paragraphId?: number | null,
@@ -84,58 +115,20 @@ export async function getNextBenchmarkTask(
 	const paraMap = new Map(allParagraphs.map((p) => [p.id, p]));
 
 	if (mode === "CONTROL") {
-		let targetControl = null;
-
-		if (targetControlId) {
-			targetControl = await prisma.control.findFirst({
-				where: { id: targetControlId },
-				include: {
-					paragraphs: {
-						include: {
-							section: { include: { document: true } },
-						},
-					},
-					controlBenchmark: {
-						include: {
-							relevantParagraphs: { select: { id: true } },
-							coveredControls: { select: { id: true } },
-						},
-					},
-				},
-			});
-		}
-
-		if (!targetControl) {
-			const whereClause: Prisma.ControlWhereInput = {
-				guidelineId: null,
-				controlBenchmark: null,
-				generatedFor: { isFewShotExample: false },
-			};
-
-			if (paragraphId) {
-				whereClause.paragraphs = {
-					some: { id: paragraphId },
+		const whereClause: Prisma.ControlWhereInput = targetControlId
+			? { id: targetControlId }
+			: {
+					guidelineId: null,
+					controlBenchmark: null,
+					generatedFor: { isFewShotExample: false },
+					...(paragraphId ? { paragraphs: { some: { id: paragraphId } } } : {}),
 				};
-			}
 
-			targetControl = await prisma.control.findFirst({
-				where: whereClause,
-				include: {
-					paragraphs: {
-						include: {
-							section: { include: { document: true } },
-						},
-					},
-					controlBenchmark: {
-						include: {
-							relevantParagraphs: { select: { id: true } },
-							coveredControls: { select: { id: true } },
-						},
-					},
-				},
-				orderBy: { id: "asc" },
-			});
-		}
+		const targetControl = await prisma.control.findFirst({
+			where: whereClause,
+			include: controlInclude,
+			orderBy: { id: "asc" },
+		});
 
 		if (!targetControl) {
 			return { type: "DONE" as const };
@@ -172,71 +165,29 @@ export async function getNextBenchmarkTask(
 			},
 		};
 	} else {
-		let targetParagraph = null;
-
-		if (targetParagraphId) {
-			targetParagraph = await prisma.paragraph.findFirst({
-				where: { id: targetParagraphId },
-				include: {
+		const whereClause: Prisma.ParagraphWhereInput = targetParagraphId
+			? { id: targetParagraphId }
+			: {
 					controls: {
-						where: {
+						some: {
 							guidelineId: null,
 							generatedFor: { isFewShotExample: false },
 						},
-						include: {
-							controlBenchmark: true,
-						},
-						orderBy: { id: "asc" },
 					},
-					section: {
-						include: { document: true },
-					},
-					benchmarkResult: true,
-				},
-			});
-		}
+					benchmarkResult: null,
+					isFewShotExample: false,
+					...(paragraphId ? { id: paragraphId } : {}),
+				};
 
-		if (!targetParagraph) {
-			const whereClause: Prisma.ParagraphWhereInput = {
-				controls: {
-					some: {
-						guidelineId: null,
-						generatedFor: { isFewShotExample: false },
-					},
-				},
-				benchmarkResult: null,
-				isFewShotExample: false,
-			};
-
-			if (paragraphId) {
-				whereClause.id = paragraphId;
-			}
-
-			targetParagraph = await prisma.paragraph.findFirst({
-				where: whereClause,
-				include: {
-					controls: {
-						where: {
-							guidelineId: null,
-							generatedFor: { isFewShotExample: false },
-						},
-						include: {
-							controlBenchmark: true,
-						},
-						orderBy: { id: "asc" },
-					},
-					section: {
-						include: { document: true },
-					},
-					benchmarkResult: true,
-				},
-				orderBy: [
-					{ section: { document: { title: "asc" } } },
-					{ section: { marker: "asc" } },
-					{ marker: "asc" },
-				],
-			});
-		}
+		const targetParagraph = await prisma.paragraph.findFirst({
+			where: whereClause,
+			include: paragraphInclude,
+			orderBy: [
+				{ section: { document: { title: "asc" } } },
+				{ section: { marker: "asc" } },
+				{ marker: "asc" },
+			],
+		});
 
 		if (!targetParagraph) {
 			return { type: "DONE" as const };
