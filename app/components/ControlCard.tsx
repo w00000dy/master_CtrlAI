@@ -20,6 +20,7 @@ export function ControlCard({
 	hideMappedParagraphs = false,
 	hideBadges = false,
 	variant = "default",
+	highlighted = false,
 }: {
 	control: ControlData;
 	onEdit?: (control: ControlData) => void;
@@ -28,7 +29,8 @@ export function ControlCard({
 	layout?: "vertical" | "horizontal";
 	hideMappedParagraphs?: boolean;
 	hideBadges?: boolean;
-	variant?: "default" | "blue";
+	variant?: "default" | "blue" | "purple";
+	highlighted?: boolean;
 }) {
 	const isMapped = control.paragraphs && control.paragraphs.length > 0;
 	const isFewShotExample = control.paragraphs?.some((p) => p.isFewShotExample);
@@ -38,16 +40,20 @@ export function ControlCard({
 			className={`group rounded-xl flex shadow-sm overflow-hidden ${
 				layout === "horizontal" ? "flex-col md:flex-row" : "flex-col"
 			} ${
-				variant === "blue"
-					? "bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800"
-					: "bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800"
+				highlighted
+					? "bg-purple-50/40 dark:bg-purple-950/20 border border-purple-400 dark:border-purple-600 ring-1 ring-purple-500/30"
+					: variant === "blue"
+						? "bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800"
+						: "bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800"
 			}`}
 		>
 			<div
 				className={`p-6 w-full ${
-					variant === "blue"
-						? "border-blue-100 dark:border-blue-800/50 bg-transparent"
-						: "border-zinc-100 dark:border-zinc-800/50 bg-zinc-50/50 dark:bg-zinc-900/30"
+					highlighted
+						? "border-purple-100 dark:border-purple-800/50 bg-transparent"
+						: variant === "blue"
+							? "border-blue-100 dark:border-blue-800/50 bg-transparent"
+							: "border-zinc-100 dark:border-zinc-800/50 bg-zinc-50/50 dark:bg-zinc-900/30"
 				} ${
 					layout === "horizontal" && !hideMappedParagraphs
 						? "md:w-2/3 border-b md:border-b-0 md:border-r"
@@ -59,7 +65,11 @@ export function ControlCard({
 				<div className="flex items-start justify-between gap-4">
 					<div className="flex flex-col gap-2">
 						<h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
-							<span className="w-1.5 h-5 bg-blue-500 rounded-full inline-block shrink-0"></span>
+							<span
+								className={`w-1.5 h-5 ${
+									highlighted ? "bg-purple-500" : "bg-blue-500"
+								} rounded-full inline-block shrink-0`}
+							/>
 							<span>{control.title}</span>
 							<span className="text-xs font-mono font-normal text-zinc-400 dark:text-zinc-500 bg-zinc-100 dark:bg-zinc-800/80 px-1.5 py-0.5 rounded border border-zinc-200 dark:border-zinc-700/60 ml-1 shrink-0">
 								#{control.id}

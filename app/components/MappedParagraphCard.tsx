@@ -15,13 +15,23 @@ export type ParagraphWithContext = Prisma.ParagraphGetPayload<{
 export function MappedParagraphCard({
 	p,
 	compact = false,
+	highlighted = false,
 }: {
 	p: ParagraphWithContext;
 	compact?: boolean;
+	highlighted?: boolean;
 }) {
 	return (
 		<div
-			className={`bg-zinc-50 ${compact ? "dark:bg-zinc-800/30 p-2.5 border-zinc-200/80 dark:border-zinc-700/50 rounded-lg" : "dark:bg-zinc-900/80 p-4 border-zinc-100 dark:border-zinc-800/80 rounded-lg group hover:border-blue-200 dark:hover:border-blue-900/50"} border transition-colors`}
+			className={`bg-zinc-50 ${
+				compact
+					? "dark:bg-zinc-800/30 p-2.5 border-zinc-200/80 dark:border-zinc-700/50 rounded-lg"
+					: "dark:bg-zinc-900/80 p-4 rounded-lg group transition-all"
+			} border ${
+				highlighted
+					? "border-purple-400 dark:border-purple-600 bg-purple-50/40 dark:bg-purple-950/20 shadow-sm ring-1 ring-purple-500/30"
+					: "border-zinc-100 dark:border-zinc-800/80 hover:border-blue-200 dark:hover:border-blue-900/50"
+			}`}
 		>
 			<div
 				className={`flex flex-wrap items-center gap-${compact ? "1.5" : "2"} mb-${compact ? "2" : "3"}`}

@@ -506,9 +506,19 @@ function BenchmarkContent() {
 									Context
 								</h3>
 								<div className="space-y-4 flex-1 overflow-y-auto min-h-0 pr-2 pb-2">
-									{task.control.paragraphs.map((p) => (
-										<MappedParagraphCard key={p.id} p={p} />
-									))}
+									{[...task.control.paragraphs]
+										.sort((a, b) => {
+											if (a.id === task.control.generatedForId) return -1;
+											if (b.id === task.control.generatedForId) return 1;
+											return 0;
+										})
+										.map((p) => (
+											<MappedParagraphCard
+												key={p.id}
+												p={p}
+												highlighted={p.id === task.control.generatedForId}
+											/>
+										))}
 								</div>
 							</div>
 						</div>
@@ -649,22 +659,32 @@ function BenchmarkContent() {
 											/>
 										</CriteriaDetails>
 										<div className="flex flex-col gap-2">
-											{task.control.paragraphs.map((p) => (
-												<label key={p.id} className="flex items-start">
-													<input
-														type="checkbox"
-														checked={relevantParagraphs.has(p.id)}
-														onChange={() => toggleRelevantParagraph(p.id)}
-														className="mt-1 mr-2 shrink-0"
-													/>
-													<span className="text-sm">
-														{p.marker && (
-															<strong className="mr-1">{p.marker}</strong>
-														)}
-														{p.text}
-													</span>
-												</label>
-											))}
+											{task.control.paragraphs.map((p) => {
+												const isGenFor = p.id === task.control.generatedForId;
+												return (
+													<label
+														key={p.id}
+														className={`flex items-start p-2 rounded-lg transition-colors ${
+															isGenFor
+																? "bg-purple-50/70 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800/60"
+																: "hover:bg-zinc-100 dark:hover:bg-zinc-800/40"
+														}`}
+													>
+														<input
+															type="checkbox"
+															checked={relevantParagraphs.has(p.id)}
+															onChange={() => toggleRelevantParagraph(p.id)}
+															className="mt-1 mr-2 shrink-0"
+														/>
+														<span className="text-sm">
+															{p.marker && (
+																<strong className="mr-1">{p.marker}</strong>
+															)}
+															{p.text}
+														</span>
+													</label>
+												);
+											})}
 										</div>
 									</div>
 
@@ -821,14 +841,21 @@ function BenchmarkContent() {
 									Evaluated controls for this paragraph:
 								</h3>
 								<div className="space-y-4 mb-6 flex-1 overflow-y-auto min-h-0 pr-2 pb-2">
-									{task.evaluatedControls.map((ctrl) => (
-										<ControlCard
-											key={ctrl.id}
-											control={{ ...ctrl, paragraphs: [] } as ControlData}
-											hideMappedParagraphs
-											hideBadges
-										/>
-									))}
+									{[...task.evaluatedControls]
+										.sort((a, b) => {
+											if (a.generatedForId === task.paragraph.id) return -1;
+											if (b.generatedForId === task.paragraph.id) return 1;
+											return 0;
+										})
+										.map((ctrl) => (
+											<ControlCard
+												key={ctrl.id}
+												control={{ ...ctrl, paragraphs: [] } as ControlData}
+												hideMappedParagraphs
+												hideBadges
+												highlighted={ctrl.generatedForId === task.paragraph.id}
+											/>
+										))}
 								</div>
 							</div>
 						</div>
