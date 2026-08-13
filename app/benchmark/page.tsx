@@ -1,7 +1,15 @@
 "use client";
 
-import { ChevronDownIcon } from "lucide-animated";
-import { type ReactNode, useCallback, useEffect, useState } from "react";
+import { ArrowLeftIcon, ChevronDownIcon } from "lucide-animated";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import {
+	type ReactNode,
+	Suspense,
+	useCallback,
+	useEffect,
+	useState,
+} from "react";
 import type { Control, Guideline } from "../../generated/prisma/client";
 import { CompactControlCard } from "../components/CompactControlCard";
 import { BENCHMARK_TITLES } from "./constants";
@@ -56,10 +64,7 @@ function CriteriaGuidelines({
 }
 
 import { ControlCard, type ControlData } from "../components/ControlCard";
-import {
-	MappedParagraphCard,
-	type ParagraphWithContext,
-} from "../components/MappedParagraphCard";
+import { MappedParagraphCard } from "../components/MappedParagraphCard";
 import {
 	getBenchmarkParagraphs,
 	getBenchmarkProgress,
@@ -81,18 +86,7 @@ type BenchmarkParagraph = {
 	evaluatedControls: number;
 };
 
-type Task =
-	| { type: "DONE" }
-	| {
-			type: "CONTROL";
-			paragraph: ParagraphWithContext;
-			control: Control & { paragraphs: ParagraphWithContext[] };
-	  }
-	| {
-			type: "PARAGRAPH";
-			paragraph: ParagraphWithContext;
-			evaluatedControls: Control[];
-	  };
+type Task = Awaited<ReturnType<typeof getNextBenchmarkTask>>;
 
 type TechnicalControl = Control & { guideline: Guideline | null };
 
@@ -151,18 +145,37 @@ function BenchmarkQuestion({
 	);
 }
 
-export default function BenchmarkPage() {
+function BenchmarkContent() {
+	const searchParams = useSearchParams();
+	const router = useRouter();
+
+	const paramMode = searchParams.get("mode");
+	const paramControlId = searchParams.get("controlId");
+	const paramParagraphId = searchParams.get("paragraphId");
+
+	const initialMode = paramMode === "PARAGRAPH" ? "PARAGRAPH" : "CONTROL";
+
 	const [task, setTask] = useState<Task | null>(null);
 	const [technicalControls, setTechnicalControls] = useState<
 		TechnicalControl[]
 	>([]);
 	const [loading, setLoading] = useState(true);
-	const [mode, setMode] = useState<"CONTROL" | "PARAGRAPH">("CONTROL");
+	const [mode, setMode] = useState<"CONTROL" | "PARAGRAPH">(initialMode);
+	const [targetControlId, setTargetControlId] = useState<number | null>(
+		paramControlId ? Number(paramControlId) : null,
+	);
+	const [targetParagraphId, setTargetParagraphId] = useState<number | null>(
+		paramParagraphId && initialMode === "PARAGRAPH"
+			? Number(paramParagraphId)
+			: null,
+	);
 	const [paragraphsList, setParagraphsList] = useState<BenchmarkParagraph[]>(
 		[],
 	);
 	const [selectedParagraphId, setSelectedParagraphId] = useState<number | null>(
-		null,
+		paramParagraphId && initialMode === "CONTROL"
+			? Number(paramParagraphId)
+			: null,
 	);
 	const [progress, setProgress] = useState<{
 		total: number;
@@ -196,7 +209,12 @@ export default function BenchmarkPage() {
 		setLoading(true);
 		try {
 			const [nextTask, progRes, paras] = await Promise.all([
-				getNextBenchmarkTask(mode, selectedParagraphId),
+				getNextBenchmarkTask(
+					mode,
+					selectedParagraphId,
+					targetControlId,
+					targetParagraphId,
+				),
 				getBenchmarkProgress(mode, selectedParagraphId),
 				getBenchmarkParagraphs(),
 			]);
@@ -214,25 +232,44 @@ export default function BenchmarkPage() {
 				);
 				setTechnicalControls(techControls);
 
-				// Reset control form
-				setRelevantParagraphs(new Set());
-				setIsActionable(null);
-				setIsTechnicallyCorrect(null);
-				setIsMeasurable(null);
-				setHasNormativeLanguage(null);
-				setSelectedCoveredControls(new Set());
+				const bm = nextTask.control.controlBenchmark;
+				if (bm) {
+					setRelevantParagraphs(
+						new Set(bm.relevantParagraphs.map((p) => p.id)),
+					);
+					setSelectedCoveredControls(
+						new Set(bm.coveredControls.map((c) => c.id)),
+					);
+					setIsActionable(bm.isActionable);
+					setIsTechnicallyCorrect(bm.isTechnicallyCorrect);
+					setIsMeasurable(bm.isMeasurable);
+					setHasNormativeLanguage(bm.hasNormativeLanguage);
+				} else {
+					setRelevantParagraphs(new Set());
+					setIsActionable(null);
+					setIsTechnicallyCorrect(null);
+					setIsMeasurable(null);
+					setHasNormativeLanguage(null);
+					setSelectedCoveredControls(new Set());
+				}
 			} else if (nextTask.type === "PARAGRAPH") {
-				// Reset paragraph form
-				setIsComplete(null);
-				setHasRedundancy(null);
-				setHasHallucinations(null);
+				const bm = nextTask.paragraph.benchmarkResult;
+				if (bm) {
+					setIsComplete(bm.isComplete);
+					setHasRedundancy(bm.hasRedundancy);
+					setHasHallucinations(bm.hasHallucinations);
+				} else {
+					setIsComplete(null);
+					setHasRedundancy(null);
+					setHasHallucinations(null);
+				}
 			}
 		} catch (error) {
 			console.error(error);
 		} finally {
 			setLoading(false);
 		}
-	}, [mode, selectedParagraphId]);
+	}, [mode, selectedParagraphId, targetControlId, targetParagraphId]);
 
 	useEffect(() => {
 		const init = async () => {
@@ -282,7 +319,12 @@ export default function BenchmarkPage() {
 				isMeasurable,
 				hasNormativeLanguage,
 			});
-			await loadTask();
+			if (targetControlId) {
+				setTargetControlId(null);
+				router.replace("/benchmark?mode=CONTROL");
+			} else {
+				await loadTask();
+			}
 		} catch (error) {
 			console.error("Error saving benchmark:", error);
 			alert("Failed to save benchmark result");
@@ -306,12 +348,23 @@ export default function BenchmarkPage() {
 				hasRedundancy,
 				hasHallucinations,
 			});
-			await loadTask();
+			if (targetParagraphId) {
+				setTargetParagraphId(null);
+				router.replace("/benchmark?mode=PARAGRAPH");
+			} else {
+				await loadTask();
+			}
 		} catch (error) {
 			console.error("Error saving benchmark:", error);
 			alert("Failed to save benchmark result");
 		}
 	};
+
+	const isEditingControl =
+		task?.type === "CONTROL" && Boolean(task.control.controlBenchmark);
+	const isEditingParagraph =
+		task?.type === "PARAGRAPH" && Boolean(task.paragraph.benchmarkResult);
+	const isEditing = isEditingControl || isEditingParagraph;
 
 	return (
 		<div className="flex-1 min-h-0 bg-zinc-50 dark:bg-zinc-950 flex flex-col">
@@ -355,14 +408,24 @@ export default function BenchmarkPage() {
 				<div className="flex bg-zinc-100 dark:bg-zinc-800 p-1 rounded-lg shrink-0">
 					<button
 						type="button"
-						onClick={() => setMode("CONTROL")}
+						onClick={() => {
+							setMode("CONTROL");
+							setTargetControlId(null);
+							setTargetParagraphId(null);
+							router.replace("/benchmark?mode=CONTROL");
+						}}
 						className={`px-4 py-1 text-sm font-medium rounded-md transition-colors ${mode === "CONTROL" ? "bg-white dark:bg-zinc-900 shadow-sm text-blue-600 dark:text-blue-400" : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100"}`}
 					>
 						Control Benchmark
 					</button>
 					<button
 						type="button"
-						onClick={() => setMode("PARAGRAPH")}
+						onClick={() => {
+							setMode("PARAGRAPH");
+							setTargetControlId(null);
+							setTargetParagraphId(null);
+							router.replace("/benchmark?mode=PARAGRAPH");
+						}}
 						className={`px-4 py-1 text-sm font-medium rounded-md transition-colors ${mode === "PARAGRAPH" ? "bg-white dark:bg-zinc-900 shadow-sm text-blue-600 dark:text-blue-400" : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100"}`}
 					>
 						Paragraph Benchmark
@@ -385,6 +448,29 @@ export default function BenchmarkPage() {
 				</div>
 			</div>
 			<main className="w-full px-4 md:px-8 lg:px-12 py-8 flex-1 min-h-0 flex flex-col">
+				{isEditing && (
+					<div className="mb-6 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-amber-900 dark:text-amber-200 px-4 py-3 rounded-xl flex items-center justify-between shadow-sm">
+						<div className="flex items-center gap-2 text-sm font-medium">
+							<span className="inline-block w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse" />
+							<span>
+								Editing benchmark evaluation for{" "}
+								<strong>
+									{task?.type === "CONTROL"
+										? task.control.title
+										: `${task?.paragraph.section.document.title} - ${task?.paragraph.section.title}`}
+								</strong>
+							</span>
+						</div>
+						<Link
+							href="/benchmark/results"
+							className="text-xs bg-white dark:bg-zinc-800 border border-amber-300 dark:border-amber-700 hover:bg-amber-100 dark:hover:bg-zinc-700 text-amber-900 dark:text-amber-100 px-3 py-1.5 rounded-lg font-semibold transition-colors flex items-center gap-1.5 shrink-0"
+						>
+							<ArrowLeftIcon size={14} />
+							Back to Results
+						</Link>
+					</div>
+				)}
+
 				{loading ? (
 					<div className="flex justify-center p-12">
 						<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
@@ -711,7 +797,7 @@ export default function BenchmarkPage() {
 									}
 									className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
 								>
-									Save & Next
+									{isEditingControl ? "Update Benchmark" : "Save & Next"}
 								</button>
 							</div>
 						</div>
@@ -866,7 +952,9 @@ export default function BenchmarkPage() {
 										}
 										className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
 									>
-										Save & Next Paragraph
+										{isEditingParagraph
+											? "Update Benchmark"
+											: "Save & Next Paragraph"}
 									</button>
 								</div>
 							</div>
@@ -875,5 +963,19 @@ export default function BenchmarkPage() {
 				)}
 			</main>
 		</div>
+	);
+}
+
+export default function BenchmarkPage() {
+	return (
+		<Suspense
+			fallback={
+				<div className="flex justify-center p-12">
+					<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+				</div>
+			}
+		>
+			<BenchmarkContent />
+		</Suspense>
 	);
 }

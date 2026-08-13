@@ -1,6 +1,7 @@
 "use client";
 
-import { LoaderIcon } from "lucide-animated";
+import { ArrowUpRightIcon, LoaderIcon } from "lucide-animated";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { PageLayout } from "@/app/components/PageLayout";
 import { BENCHMARK_TITLES } from "../constants";
@@ -169,56 +170,65 @@ export default function BenchmarkResultsPage() {
 							</h3>
 							<div className="space-y-4 max-h-[600px] overflow-y-auto pr-2">
 								{controlResults.map((result) => (
-									<div
+									<Link
 										key={result.id}
-										className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-5 rounded-xl shadow-sm"
+										href={`/benchmark?mode=CONTROL&controlId=${result.llmControlId}`}
+										className="block group"
 									>
-										<div className="font-bold text-zinc-900 dark:text-zinc-100 mb-2">
-											{result.llmControl.title}
-										</div>
-										<p className="text-sm text-zinc-600 dark:text-zinc-400 mb-4 line-clamp-2">
-											{result.llmControl.statement}
-										</p>
+										<div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 group-hover:border-blue-500 group-hover:shadow-md transition-all p-5 rounded-xl shadow-sm relative">
+											<div className="flex items-start justify-between gap-2 mb-2">
+												<div className="font-bold text-zinc-900 dark:text-zinc-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+													{result.llmControl.title}
+												</div>
+												<ArrowUpRightIcon
+													size={16}
+													className="text-zinc-400 group-hover:text-blue-500 opacity-0 group-hover:opacity-100 transition-all shrink-0 mt-0.5"
+												/>
+											</div>
+											<p className="text-sm text-zinc-600 dark:text-zinc-400 mb-4 line-clamp-2">
+												{result.llmControl.statement}
+											</p>
 
-										<div className="flex gap-2 text-xs font-semibold mb-4">
-											<span
-												className={`px-2 py-1 rounded-full ${result.isActionable ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"}`}
-											>
-												{result.isActionable ? "✓ Actionable" : "✗ Vague"}
-											</span>
-											<span
-												className={`px-2 py-1 rounded-full ${result.isTechnicallyCorrect ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"}`}
-											>
-												{result.isTechnicallyCorrect
-													? "✓ Correct"
-													: "✗ Incorrect"}
-											</span>
-											<span
-												className={`px-2 py-1 rounded-full ${result.isMeasurable ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"}`}
-											>
-												{result.isMeasurable
-													? "✓ Measurable"
-													: "✗ Not Measurable"}
-											</span>
-											<span
-												className={`px-2 py-1 rounded-full ${result.hasNormativeLanguage ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"}`}
-											>
-												{result.hasNormativeLanguage
-													? "✓ Normative"
-													: "✗ Non-Normative"}
-											</span>
-										</div>
+											<div className="flex gap-2 text-xs font-semibold mb-4">
+												<span
+													className={`px-2 py-1 rounded-full ${result.isActionable ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"}`}
+												>
+													{result.isActionable ? "✓ Actionable" : "✗ Vague"}
+												</span>
+												<span
+													className={`px-2 py-1 rounded-full ${result.isTechnicallyCorrect ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"}`}
+												>
+													{result.isTechnicallyCorrect
+														? "✓ Correct"
+														: "✗ Incorrect"}
+												</span>
+												<span
+													className={`px-2 py-1 rounded-full ${result.isMeasurable ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"}`}
+												>
+													{result.isMeasurable
+														? "✓ Measurable"
+														: "✗ Not Measurable"}
+												</span>
+												<span
+													className={`px-2 py-1 rounded-full ${result.hasNormativeLanguage ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"}`}
+												>
+													{result.hasNormativeLanguage
+														? "✓ Normative"
+														: "✗ Non-Normative"}
+												</span>
+											</div>
 
-										<div className="text-xs text-zinc-500">
-											<strong>Relevant for:</strong>{" "}
-											{result.relevantParagraphs.length} of{" "}
-											{result.llmControl.paragraphs.length} paragraphs
+											<div className="text-xs text-zinc-500">
+												<strong>Relevant for:</strong>{" "}
+												{result.relevantParagraphs.length} of{" "}
+												{result.llmControl.paragraphs.length} paragraphs
+											</div>
+											<div className="text-xs text-zinc-500 mt-1">
+												<strong>Covers:</strong> {result.coveredControls.length}{" "}
+												technical controls
+											</div>
 										</div>
-										<div className="text-xs text-zinc-500 mt-1">
-											<strong>Covers:</strong> {result.coveredControls.length}{" "}
-											technical controls
-										</div>
-									</div>
+									</Link>
 								))}
 								{totalControls === 0 && (
 									<div className="text-center p-8 border border-dashed border-zinc-300 dark:border-zinc-700 rounded-xl text-zinc-500">
@@ -235,47 +245,56 @@ export default function BenchmarkResultsPage() {
 							</h3>
 							<div className="space-y-4 max-h-[600px] overflow-y-auto pr-2">
 								{paragraphResults.map((result) => (
-									<div
+									<Link
 										key={result.id}
-										className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-5 rounded-xl shadow-sm"
+										href={`/benchmark?mode=PARAGRAPH&paragraphId=${result.paragraphId}`}
+										className="block group"
 									>
-										<div className="text-xs font-semibold text-blue-500 mb-1">
-											{result.paragraph.section.document.title} -{" "}
-											{result.paragraph.section.title}
-										</div>
-										<p className="text-sm text-zinc-600 dark:text-zinc-400 mb-4 line-clamp-3">
-											{result.paragraph.marker && (
-												<strong className="mr-1">
-													{result.paragraph.marker}
-												</strong>
-											)}
-											{result.paragraph.text}
-										</p>
+										<div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 group-hover:border-blue-500 group-hover:shadow-md transition-all p-5 rounded-xl shadow-sm relative">
+											<div className="flex items-start justify-between gap-2 mb-1">
+												<div className="text-xs font-semibold text-blue-500 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+													{result.paragraph.section.document.title} -{" "}
+													{result.paragraph.section.title}
+												</div>
+												<ArrowUpRightIcon
+													size={16}
+													className="text-zinc-400 group-hover:text-blue-500 opacity-0 group-hover:opacity-100 transition-all shrink-0"
+												/>
+											</div>
+											<p className="text-sm text-zinc-600 dark:text-zinc-400 mb-4 line-clamp-3">
+												{result.paragraph.marker && (
+													<strong className="mr-1">
+														{result.paragraph.marker}
+													</strong>
+												)}
+												{result.paragraph.text}
+											</p>
 
-										<div className="flex gap-2 text-xs font-semibold">
-											<span
-												className={`px-2 py-1 rounded-full ${result.isComplete ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" : "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"}`}
-											>
-												{result.isComplete
-													? "✓ Complete Coverage"
-													: "⚠ Incomplete"}
-											</span>
-											<span
-												className={`px-2 py-1 rounded-full ${!result.hasRedundancy ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" : "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"}`}
-											>
-												{!result.hasRedundancy
-													? "✓ Efficient"
-													: "⚠ Redundant Controls"}
-											</span>
-											<span
-												className={`px-2 py-1 rounded-full ${!result.hasHallucinations ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"}`}
-											>
-												{!result.hasHallucinations
-													? "✓ No Hallucinations"
-													: "✗ Over-Compliant"}
-											</span>
+											<div className="flex gap-2 text-xs font-semibold">
+												<span
+													className={`px-2 py-1 rounded-full ${result.isComplete ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" : "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"}`}
+												>
+													{result.isComplete
+														? "✓ Complete Coverage"
+														: "⚠ Incomplete"}
+												</span>
+												<span
+													className={`px-2 py-1 rounded-full ${!result.hasRedundancy ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" : "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"}`}
+												>
+													{!result.hasRedundancy
+														? "✓ Efficient"
+														: "⚠ Redundant Controls"}
+												</span>
+												<span
+													className={`px-2 py-1 rounded-full ${!result.hasHallucinations ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"}`}
+												>
+													{!result.hasHallucinations
+														? "✓ No Hallucinations"
+														: "✗ Over-Compliant"}
+												</span>
+											</div>
 										</div>
-									</div>
+									</Link>
 								))}
 								{totalParagraphs === 0 && (
 									<div className="text-center p-8 border border-dashed border-zinc-300 dark:border-zinc-700 rounded-xl text-zinc-500">
