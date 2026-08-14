@@ -242,6 +242,7 @@ export async function saveControlBenchmark(data: {
 	isTechnicallyCorrect: boolean;
 	isMeasurable: boolean;
 	hasNormativeLanguage: boolean;
+	hasHallucinations: boolean;
 }) {
 	return await prisma.controlBenchmark.upsert({
 		where: {
@@ -253,6 +254,7 @@ export async function saveControlBenchmark(data: {
 			isTechnicallyCorrect: data.isTechnicallyCorrect,
 			isMeasurable: data.isMeasurable,
 			hasNormativeLanguage: data.hasNormativeLanguage,
+			hasHallucinations: data.hasHallucinations,
 			relevantParagraphs: {
 				connect: data.relevantParagraphIds.map((id) => ({ id })),
 			},
@@ -265,6 +267,7 @@ export async function saveControlBenchmark(data: {
 			isTechnicallyCorrect: data.isTechnicallyCorrect,
 			isMeasurable: data.isMeasurable,
 			hasNormativeLanguage: data.hasNormativeLanguage,
+			hasHallucinations: data.hasHallucinations,
 			relevantParagraphs: {
 				set: data.relevantParagraphIds.map((id) => ({ id })),
 			},
@@ -279,7 +282,6 @@ export async function saveParagraphBenchmark(data: {
 	paragraphId: number;
 	isComplete: boolean;
 	hasRedundancy: boolean;
-	hasHallucinations: boolean;
 }) {
 	return await prisma.paragraphBenchmark.upsert({
 		where: {
@@ -289,12 +291,10 @@ export async function saveParagraphBenchmark(data: {
 			paragraphId: data.paragraphId,
 			isComplete: data.isComplete,
 			hasRedundancy: data.hasRedundancy,
-			hasHallucinations: data.hasHallucinations,
 		},
 		update: {
 			isComplete: data.isComplete,
 			hasRedundancy: data.hasRedundancy,
-			hasHallucinations: data.hasHallucinations,
 		},
 	});
 }

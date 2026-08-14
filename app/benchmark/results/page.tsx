@@ -87,6 +87,9 @@ export default function BenchmarkResultsPage() {
 	const normativeControls = controlResults.filter(
 		(r) => r.hasNormativeLanguage,
 	).length;
+	const noHallucinationsControls = controlResults.filter(
+		(r) => !r.hasHallucinations,
+	).length;
 
 	const actionabilityScore =
 		totalControls > 0 ? (actionableControls / totalControls) * 100 : 0;
@@ -96,6 +99,10 @@ export default function BenchmarkResultsPage() {
 		totalControls > 0 ? (measurableControls / totalControls) * 100 : 0;
 	const normativeScore =
 		totalControls > 0 ? (normativeControls / totalControls) * 100 : 0;
+	const precisionScore =
+		totalControls > 0
+			? (noHallucinationsControls / totalControls) * 100
+			: 0;
 
 	const relevanceScores = controlResults.map((r) => {
 		const totalMapped = r.llmControl.paragraphs.length;
@@ -115,18 +122,11 @@ export default function BenchmarkResultsPage() {
 	const noRedundancyParagraphs = paragraphResults.filter(
 		(r) => !r.hasRedundancy,
 	).length;
-	const noHallucinationsParagraphs = paragraphResults.filter(
-		(r) => !r.hasHallucinations,
-	).length;
 
 	const completenessScore =
 		totalParagraphs > 0 ? (completeParagraphs / totalParagraphs) * 100 : 0;
 	const efficiencyScore =
 		totalParagraphs > 0 ? (noRedundancyParagraphs / totalParagraphs) * 100 : 0;
-	const precisionScore =
-		totalParagraphs > 0
-			? (noHallucinationsParagraphs / totalParagraphs) * 100
-			: 0;
 
 	const benchmarkMetrics = [
 		{ value: avgRelevanceScore, label: BENCHMARK_TITLES.RELEVANCE },
@@ -216,6 +216,13 @@ export default function BenchmarkResultsPage() {
 														? "✓ Normative"
 														: "✗ Non-Normative"}
 												</span>
+												<span
+													className={`px-2 py-1 rounded-full ${!result.hasHallucinations ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"}`}
+												>
+													{!result.hasHallucinations
+														? "✓ Precise"
+														: "✗ Hallucinated"}
+												</span>
 											</div>
 
 											<div className="text-xs text-zinc-500">
@@ -284,13 +291,6 @@ export default function BenchmarkResultsPage() {
 													{!result.hasRedundancy
 														? "✓ Efficient"
 														: "⚠ Redundant Controls"}
-												</span>
-												<span
-													className={`px-2 py-1 rounded-full ${!result.hasHallucinations ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"}`}
-												>
-													{!result.hasHallucinations
-														? "✓ No Hallucinations"
-														: "✗ Over-Compliant"}
 												</span>
 											</div>
 										</div>

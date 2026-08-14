@@ -244,12 +244,14 @@ function BenchmarkContent() {
 					setIsTechnicallyCorrect(bm.isTechnicallyCorrect);
 					setIsMeasurable(bm.isMeasurable);
 					setHasNormativeLanguage(bm.hasNormativeLanguage);
+					setHasHallucinations(bm.hasHallucinations);
 				} else {
 					setRelevantParagraphs(new Set());
 					setIsActionable(null);
 					setIsTechnicallyCorrect(null);
 					setIsMeasurable(null);
 					setHasNormativeLanguage(null);
+					setHasHallucinations(null);
 					setSelectedCoveredControls(new Set());
 				}
 			} else if (nextTask.type === "PARAGRAPH") {
@@ -257,11 +259,9 @@ function BenchmarkContent() {
 				if (bm) {
 					setIsComplete(bm.isComplete);
 					setHasRedundancy(bm.hasRedundancy);
-					setHasHallucinations(bm.hasHallucinations);
 				} else {
 					setIsComplete(null);
 					setHasRedundancy(null);
-					setHasHallucinations(null);
 				}
 			}
 		} catch (error) {
@@ -304,7 +304,8 @@ function BenchmarkContent() {
 			isActionable === null ||
 			isTechnicallyCorrect === null ||
 			isMeasurable === null ||
-			hasNormativeLanguage === null
+			hasNormativeLanguage === null ||
+			hasHallucinations === null
 		) {
 			return;
 		}
@@ -318,6 +319,7 @@ function BenchmarkContent() {
 				isTechnicallyCorrect,
 				isMeasurable,
 				hasNormativeLanguage,
+				hasHallucinations,
 			});
 			if (targetControlId) {
 				setTargetControlId(null);
@@ -335,8 +337,7 @@ function BenchmarkContent() {
 		if (
 			task?.type !== "PARAGRAPH" ||
 			isComplete === null ||
-			hasRedundancy === null ||
-			hasHallucinations === null
+			hasRedundancy === null
 		) {
 			return;
 		}
@@ -346,7 +347,6 @@ function BenchmarkContent() {
 				paragraphId: task.paragraph.id,
 				isComplete,
 				hasRedundancy,
-				hasHallucinations,
 			});
 			if (targetParagraphId) {
 				setTargetParagraphId(null);
@@ -802,6 +802,49 @@ function BenchmarkContent() {
 											</>
 										}
 									/>
+
+									<BenchmarkQuestion
+										title={BENCHMARK_TITLES.PRECISION}
+										question="Does this control invent technical requirements that are not supported by the original text?"
+										name="hallucinations"
+										value={hasHallucinations}
+										onChange={setHasHallucinations}
+										className="mt-4"
+										doItems={
+											<>
+												<li>
+													The control adds{" "}
+													<strong>new topics or obligations</strong> that have
+													no basis in the provided text (e.g., demanding a
+													password policy when the paragraph is only about data
+													backups).
+												</li>
+												<li>
+													It invents requirements that are clearly{" "}
+													<strong>outside the scope</strong> of the legal
+													paragraph.
+												</li>
+											</>
+										}
+										doNotItems={
+											<>
+												<li>
+													The control translates a broad legal requirement into{" "}
+													<strong>
+														concrete, state-of-the-art technical implementations
+													</strong>{" "}
+													(e.g., specifying &quot;Use AES-256&quot; for a
+													general &quot;encryption&quot; requirement). This is
+													expected and desired!
+												</li>
+												<li>
+													All technical constraints are logically derived from the
+													core intention of the text without adding unrelated
+													obligations.
+												</li>
+											</>
+										}
+									/>
 								</div>
 							</div>
 
@@ -813,7 +856,8 @@ function BenchmarkContent() {
 										isActionable === null ||
 										isTechnicallyCorrect === null ||
 										isMeasurable === null ||
-										hasNormativeLanguage === null
+										hasNormativeLanguage === null ||
+										hasHallucinations === null
 									}
 									className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
 								>
@@ -895,48 +939,6 @@ function BenchmarkContent() {
 									/>
 
 									<BenchmarkQuestion
-										title={BENCHMARK_TITLES.PRECISION}
-										question="Do the generated controls invent technical requirements that are not supported by the original text?"
-										name="hallucinations"
-										value={hasHallucinations}
-										onChange={setHasHallucinations}
-										doItems={
-											<>
-												<li>
-													The controls add{" "}
-													<strong>new topics or obligations</strong> that have
-													no basis in the provided text (e.g., demanding a
-													password policy when the paragraph is only about data
-													backups).
-												</li>
-												<li>
-													They invent requirements that are clearly{" "}
-													<strong>outside the scope</strong> of the legal
-													paragraph.
-												</li>
-											</>
-										}
-										doNotItems={
-											<>
-												<li>
-													The controls translate a broad legal requirement into{" "}
-													<strong>
-														concrete, state-of-the-art technical implementations
-													</strong>{" "}
-													(e.g., specifying &quot;Use AES-256&quot; for a
-													general &quot;encryption&quot; requirement). This is
-													expected and desired!
-												</li>
-												<li>
-													All technical controls are logically derived from the
-													core intention of the text without adding unrelated
-													constraints.
-												</li>
-											</>
-										}
-									/>
-
-									<BenchmarkQuestion
 										title={BENCHMARK_TITLES.EFFICIENCY}
 										question="Are there unnecessary overlaps or content repetitions among the generated controls for this paragraph?"
 										name="redundancy"
@@ -974,8 +976,7 @@ function BenchmarkContent() {
 										onClick={submitParagraph}
 										disabled={
 											isComplete === null ||
-											hasRedundancy === null ||
-											hasHallucinations === null
+											hasRedundancy === null
 										}
 										className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
 									>
