@@ -10,7 +10,15 @@ import { getControlBenchmarks, getParagraphBenchmarks } from "./actions";
 type ControlBenchmark = Awaited<ReturnType<typeof getControlBenchmarks>>[0];
 type ParagraphBenchmark = Awaited<ReturnType<typeof getParagraphBenchmarks>>[0];
 
-function Gauge({ value, label }: { value: number; label: string }) {
+function Gauge({
+	value,
+	label,
+	subtext,
+}: {
+	value: number;
+	label: string;
+	subtext?: string;
+}) {
 	const percentage = Math.round(value);
 	let colorClass = "text-green-500";
 	if (percentage < 50) colorClass = "text-red-500";
@@ -49,6 +57,11 @@ function Gauge({ value, label }: { value: number; label: string }) {
 			<span className="mt-4 text-sm font-semibold text-zinc-600 dark:text-zinc-400 text-center">
 				{label}
 			</span>
+			{subtext && (
+				<span className="mt-1 text-xs text-zinc-500 dark:text-zinc-400 text-center font-medium">
+					{subtext}
+				</span>
+			)}
 		</div>
 	);
 }
@@ -113,6 +126,24 @@ export default function BenchmarkResultsPage() {
 			? relevanceScores.reduce((a, b) => a + b, 0) / totalControls
 			: 0;
 
+	// Detailed Relevance Metrics
+	const totalParagraphMappings = controlResults.reduce(
+		(acc, r) => acc + r.llmControl.paragraphs.length,
+		0,
+	);
+	const totalRelevantMappings = controlResults.reduce(
+		(acc, r) => acc + r.relevantParagraphs.length,
+		0,
+	);
+
+	const controlsWithCorrectMappingCount = controlResults.filter(
+		(r) => r.relevantParagraphs.length === r.llmControl.paragraphs.length,
+	).length;
+	const controlsWithCorrectMappingRate =
+		totalControls > 0
+			? (controlsWithCorrectMappingCount / totalControls) * 100
+			: 0;
+
 	const totalParagraphs = paragraphResults.length;
 	const completeParagraphs = paragraphResults.filter(
 		(r) => r.isComplete,
@@ -126,8 +157,21 @@ export default function BenchmarkResultsPage() {
 	const efficiencyScore =
 		totalParagraphs > 0 ? (noRedundancyParagraphs / totalParagraphs) * 100 : 0;
 
-	const benchmarkMetrics = [
-		{ value: avgRelevanceScore, label: BENCHMARK_TITLES.RELEVANCE },
+	const benchmarkMetrics: {
+		value: number;
+		label: string;
+		subtext?: string;
+	}[] = [
+		{
+			value: avgRelevanceScore,
+			label: BENCHMARK_TITLES.RELEVANCE,
+			subtext: `${totalRelevantMappings} of ${totalParagraphMappings} mappings`,
+		},
+		{
+			value: controlsWithCorrectMappingRate,
+			label: "Mapping Accuracy",
+			subtext: `${controlsWithCorrectMappingCount} of ${totalControls} controls`,
+		},
 		{ value: actionabilityScore, label: BENCHMARK_TITLES.ACTIONABILITY },
 		{ value: correctnessScore, label: BENCHMARK_TITLES.TECHNICAL_CORRECTNESS },
 		{ value: measurabilityScore, label: BENCHMARK_TITLES.MEASURABILITY },
@@ -150,12 +194,13 @@ export default function BenchmarkResultsPage() {
 			) : (
 				<div className="space-y-12">
 					{/* Dashboard */}
-					<div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+					<div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-6">
 						{benchmarkMetrics.map((metric) => (
 							<Gauge
 								key={metric.label}
 								value={metric.value}
 								label={metric.label}
+								subtext={metric.subtext}
 							/>
 						))}
 					</div>
