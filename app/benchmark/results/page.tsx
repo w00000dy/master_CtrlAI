@@ -233,13 +233,13 @@ export default function BenchmarkResultsPage() {
 						))}
 					</div>
 
-					<div className="grid lg:grid-cols-2 gap-8">
+					<div className="grid lg:grid-cols-2 gap-8 items-start">
 						{/* Evaluated Controls List */}
 						<div className="space-y-4">
 							<h3 className="text-xl font-bold text-zinc-900 dark:text-zinc-100 flex items-center justify-between">
 								<span>Evaluated Controls ({totalControls})</span>
 							</h3>
-							<div className="space-y-4 max-h-[600px] overflow-y-auto pr-2">
+							<div className="space-y-4">
 								{controlResults.map((result) => (
 									<Link
 										key={result.id}
@@ -321,7 +321,7 @@ export default function BenchmarkResultsPage() {
 							<h3 className="text-xl font-bold text-zinc-900 dark:text-zinc-100 flex items-center justify-between">
 								<span>Evaluated Paragraphs ({totalParagraphs})</span>
 							</h3>
-							<div className="space-y-4 max-h-[600px] overflow-y-auto pr-2">
+							<div className="space-y-4">
 								{paragraphResults.map((result) => (
 									<Link
 										key={result.id}
