@@ -100,9 +100,7 @@ export default function BenchmarkResultsPage() {
 	const normativeScore =
 		totalControls > 0 ? (normativeControls / totalControls) * 100 : 0;
 	const precisionScore =
-		totalControls > 0
-			? (noHallucinationsControls / totalControls) * 100
-			: 0;
+		totalControls > 0 ? (noHallucinationsControls / totalControls) * 100 : 0;
 
 	const relevanceScores = controlResults.map((r) => {
 		const totalMapped = r.llmControl.paragraphs.length;

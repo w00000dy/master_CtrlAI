@@ -838,9 +838,9 @@ function BenchmarkContent() {
 													expected and desired!
 												</li>
 												<li>
-													All technical constraints are logically derived from the
-													core intention of the text without adding unrelated
-													obligations.
+													All technical constraints are logically derived from
+													the core intention of the text without adding
+													unrelated obligations.
 												</li>
 											</>
 										}
@@ -974,10 +974,7 @@ function BenchmarkContent() {
 									<button
 										type="button"
 										onClick={submitParagraph}
-										disabled={
-											isComplete === null ||
-											hasRedundancy === null
-										}
+										disabled={isComplete === null || hasRedundancy === null}
 										className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
 									>
 										{isEditingParagraph
