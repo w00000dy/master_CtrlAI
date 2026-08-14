@@ -7,4 +7,5 @@ export const BENCHMARK_TITLES = {
 	COMPLETENESS: "Completeness",
 	EFFICIENCY: "Efficiency",
 	PRECISION: "Precision",
+	GUIDELINE_COVERAGE: "TR Coverage",
 } as const;

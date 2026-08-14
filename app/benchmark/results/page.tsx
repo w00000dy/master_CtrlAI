@@ -1,14 +1,19 @@
 "use client";
 
-import { ArrowUpRightIcon, LoaderIcon } from "lucide-animated";
+import { ArrowUpRightIcon, FileTextIcon, LoaderIcon } from "lucide-animated";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { PageLayout } from "@/app/components/PageLayout";
 import { BENCHMARK_TITLES } from "../constants";
-import { getControlBenchmarks, getParagraphBenchmarks } from "./actions";
+import {
+	getControlBenchmarks,
+	getGuidelineBenchmarkStats,
+	getParagraphBenchmarks,
+} from "./actions";
 
 type ControlBenchmark = Awaited<ReturnType<typeof getControlBenchmarks>>[0];
 type ParagraphBenchmark = Awaited<ReturnType<typeof getParagraphBenchmarks>>[0];
+type GuidelineStats = Awaited<ReturnType<typeof getGuidelineBenchmarkStats>>;
 
 function Gauge({
 	value,
@@ -71,17 +76,22 @@ export default function BenchmarkResultsPage() {
 	const [paragraphResults, setParagraphResults] = useState<
 		ParagraphBenchmark[]
 	>([]);
+	const [guidelineStats, setGuidelineStats] = useState<GuidelineStats | null>(
+		null,
+	);
 	const [loading, setLoading] = useState(true);
 
 	useEffect(() => {
 		async function loadData() {
 			setLoading(true);
-			const [ctrlRes, paraRes] = await Promise.all([
+			const [ctrlRes, paraRes, glStats] = await Promise.all([
 				getControlBenchmarks(),
 				getParagraphBenchmarks(),
+				getGuidelineBenchmarkStats(),
 			]);
 			setControlResults(ctrlRes);
 			setParagraphResults(paraRes);
+			setGuidelineStats(glStats);
 			setLoading(false);
 		}
 		loadData();
@@ -207,6 +217,11 @@ export default function BenchmarkResultsPage() {
 			label: BENCHMARK_TITLES.PRECISION,
 			subtext: `${noHallucinationsControls} of ${totalControls} controls`,
 		},
+		{
+			value: guidelineStats?.coverageScore ?? 0,
+			label: BENCHMARK_TITLES.GUIDELINE_COVERAGE,
+			subtext: `${guidelineStats?.coveredTechnicalControlsCount ?? 0} of ${guidelineStats?.totalEvaluatedTechnicalControls ?? 0} evaluated TR controls`,
+		},
 	];
 
 	return (
@@ -222,7 +237,7 @@ export default function BenchmarkResultsPage() {
 			) : (
 				<div className="space-y-12">
 					{/* Dashboard */}
-					<div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-6">
+					<div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
 						{benchmarkMetrics.map((metric) => (
 							<Gauge
 								key={metric.label}
@@ -232,6 +247,76 @@ export default function BenchmarkResultsPage() {
 							/>
 						))}
 					</div>
+
+					{/* Technical Guidelines Coverage */}
+					{guidelineStats && guidelineStats.guidelines.length > 0 && (
+						<div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-6 shadow-sm space-y-6">
+							<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-100 dark:border-zinc-800/80 pb-4">
+								<div>
+									<h3 className="text-xl font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
+										<FileTextIcon className="w-5 h-5 text-blue-500" />
+										<span>Technical Guideline Coverage</span>
+									</h3>
+									<p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
+										Percentage of evaluated ground-truth Technical Guideline
+										Controls covered by LLM-generated controls.
+									</p>
+								</div>
+								<div className="flex items-center gap-3 bg-zinc-50 dark:bg-zinc-800/50 px-4 py-2 rounded-xl border border-zinc-200/60 dark:border-zinc-700/50 shrink-0">
+									<div className="text-right">
+										<div className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">
+											Overall Evaluated Coverage
+										</div>
+										<div className="text-lg font-bold text-blue-600 dark:text-blue-400">
+											{Math.round(guidelineStats.coverageScore)}%
+										</div>
+									</div>
+									<div className="text-xs text-zinc-500 dark:text-zinc-400 font-medium border-l border-zinc-300 dark:border-zinc-700 pl-3">
+										{guidelineStats.coveredTechnicalControlsCount} /{" "}
+										{guidelineStats.totalEvaluatedTechnicalControls} evaluated
+										controls
+									</div>
+								</div>
+							</div>
+
+							<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-2">
+								{guidelineStats.guidelines.map((gl) => (
+									<Link
+										key={gl.id}
+										href={`/guidelines/${gl.id}`}
+										className="block p-4 rounded-xl border border-zinc-200 dark:border-zinc-800 hover:border-blue-500 dark:hover:border-blue-500 transition-all bg-zinc-50/50 dark:bg-zinc-900/50 group"
+									>
+										<div className="flex items-center justify-between gap-2 mb-2">
+											<span className="font-semibold text-sm text-zinc-900 dark:text-zinc-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-1">
+												{gl.title}
+											</span>
+											<span className="text-xs font-bold px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 shrink-0">
+												{Math.round(gl.percentage)}%
+											</span>
+										</div>
+										<div className="w-full bg-zinc-200 dark:bg-zinc-800 rounded-full h-2 overflow-hidden mb-2">
+											<div
+												className="bg-blue-600 dark:bg-blue-500 h-2 rounded-full transition-all duration-500"
+												style={{
+													width: `${Math.min(100, Math.max(0, gl.percentage))}%`,
+												}}
+											/>
+										</div>
+										<div className="text-xs text-zinc-500 dark:text-zinc-400">
+											<strong>{gl.coveredControls}</strong> of{" "}
+											{gl.evaluatedControls} evaluated technical controls
+											covered
+											{gl.totalGuidelineControls > gl.evaluatedControls && (
+												<span className="text-zinc-400 dark:text-zinc-500 ml-1">
+													({gl.totalGuidelineControls} total in guideline)
+												</span>
+											)}
+										</div>
+									</Link>
+								))}
+							</div>
+						</div>
+					)}
 
 					<div className="grid lg:grid-cols-2 gap-8 items-start">
 						{/* Evaluated Controls List */}
