@@ -280,40 +280,72 @@ export default function BenchmarkResultsPage() {
 							</div>
 
 							<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-2">
-								{guidelineStats.guidelines.map((gl) => (
-									<Link
-										key={gl.id}
-										href={`/guidelines/${gl.id}`}
-										className="block p-4 rounded-xl border border-zinc-200 dark:border-zinc-800 hover:border-blue-500 dark:hover:border-blue-500 transition-all bg-zinc-50/50 dark:bg-zinc-900/50 group"
-									>
-										<div className="flex items-center justify-between gap-2 mb-2">
-											<span className="font-semibold text-sm text-zinc-900 dark:text-zinc-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-1">
-												{gl.title}
-											</span>
-											<span className="text-xs font-bold px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 shrink-0">
-												{Math.round(gl.percentage)}%
-											</span>
-										</div>
-										<div className="w-full bg-zinc-200 dark:bg-zinc-800 rounded-full h-2 overflow-hidden mb-2">
-											<div
-												className="bg-blue-600 dark:bg-blue-500 h-2 rounded-full transition-all duration-500"
-												style={{
-													width: `${Math.min(100, Math.max(0, gl.percentage))}%`,
-												}}
-											/>
-										</div>
-										<div className="text-xs text-zinc-500 dark:text-zinc-400">
-											<strong>{gl.coveredControls}</strong> of{" "}
-											{gl.evaluatedControls} evaluated technical controls
-											covered
-											{gl.totalGuidelineControls > gl.evaluatedControls && (
-												<span className="text-zinc-400 dark:text-zinc-500 ml-1">
-													({gl.totalGuidelineControls} total in guideline)
+								{guidelineStats.guidelines.map((gl) => {
+									const hasControls = gl.totalGuidelineControls > 0;
+									const hasEvaluatedControls = gl.evaluatedControls > 0;
+									return (
+										<Link
+											key={gl.id}
+											href={`/guidelines/${gl.id}`}
+											className="block p-4 rounded-xl border border-zinc-200 dark:border-zinc-800 hover:border-blue-500 dark:hover:border-blue-500 transition-all bg-zinc-50/50 dark:bg-zinc-900/50 group"
+										>
+											<div className="flex items-center justify-between gap-2 mb-2">
+												<span className="font-semibold text-sm text-zinc-900 dark:text-zinc-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-1">
+													{gl.title}
 												</span>
-											)}
-										</div>
-									</Link>
-								))}
+												{hasControls ? (
+													<span className="text-xs font-bold px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 shrink-0">
+														{Math.round(gl.percentage)}%
+													</span>
+												) : (
+													<span className="text-xs font-medium px-2 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 shrink-0">
+														N/A
+													</span>
+												)}
+											</div>
+											<div className="w-full bg-zinc-200/80 dark:bg-zinc-800 rounded-full h-2 overflow-hidden mb-2">
+												{hasControls ? (
+													<div
+														className="bg-blue-600 dark:bg-blue-500 h-2 rounded-full transition-all duration-500"
+														style={{
+															width: `${Math.min(100, Math.max(0, gl.percentage))}%`,
+														}}
+													/>
+												) : (
+													<div className="bg-transparent h-2 rounded-full" />
+												)}
+											</div>
+											<div className="text-xs text-zinc-500 dark:text-zinc-400">
+												{hasControls ? (
+													hasEvaluatedControls ? (
+														<>
+															<strong>{gl.coveredControls}</strong> of{" "}
+															{gl.evaluatedControls} evaluated technical
+															controls covered
+															{gl.totalGuidelineControls >
+																gl.evaluatedControls && (
+																<span className="text-zinc-400 dark:text-zinc-500 ml-1">
+																	({gl.totalGuidelineControls} total in
+																	guideline)
+																</span>
+															)}
+														</>
+													) : (
+														<>
+															<strong>{gl.coveredControls}</strong> of{" "}
+															{gl.totalGuidelineControls} technical controls
+															covered
+														</>
+													)
+												) : (
+													<span className="text-zinc-400 dark:text-zinc-500">
+														No technical controls in guideline
+													</span>
+												)}
+											</div>
+										</Link>
+									);
+								})}
 							</div>
 						</div>
 					)}
