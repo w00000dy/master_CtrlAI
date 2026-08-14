@@ -132,11 +132,6 @@ export async function getGuidelineBenchmarkStats() {
 	const guidelines = await prisma.guideline.findMany({
 		include: {
 			controls: {
-				where: {
-					paragraphs: {
-						none: { isFewShotExample: true },
-					},
-				},
 				select: {
 					id: true,
 				},

@@ -281,7 +281,6 @@ export default function BenchmarkResultsPage() {
 
 							<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-2">
 								{guidelineStats.guidelines.map((gl) => {
-									const hasControls = gl.totalGuidelineControls > 0;
 									const hasEvaluatedControls = gl.evaluatedControls > 0;
 									return (
 										<Link
@@ -293,7 +292,7 @@ export default function BenchmarkResultsPage() {
 												<span className="font-semibold text-sm text-zinc-900 dark:text-zinc-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-1">
 													{gl.title}
 												</span>
-												{hasControls ? (
+												{hasEvaluatedControls ? (
 													<span className="text-xs font-bold px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 shrink-0">
 														{Math.round(gl.percentage)}%
 													</span>
@@ -304,7 +303,7 @@ export default function BenchmarkResultsPage() {
 												)}
 											</div>
 											<div className="w-full bg-zinc-200/80 dark:bg-zinc-800 rounded-full h-2 overflow-hidden mb-2">
-												{hasControls ? (
+												{hasEvaluatedControls ? (
 													<div
 														className="bg-blue-600 dark:bg-blue-500 h-2 rounded-full transition-all duration-500"
 														style={{
@@ -316,27 +315,23 @@ export default function BenchmarkResultsPage() {
 												)}
 											</div>
 											<div className="text-xs text-zinc-500 dark:text-zinc-400">
-												{hasControls ? (
-													hasEvaluatedControls ? (
-														<>
-															<strong>{gl.coveredControls}</strong> of{" "}
-															{gl.evaluatedControls} evaluated technical
-															controls covered
-															{gl.totalGuidelineControls >
-																gl.evaluatedControls && (
-																<span className="text-zinc-400 dark:text-zinc-500 ml-1">
-																	({gl.totalGuidelineControls} total in
-																	guideline)
-																</span>
-															)}
-														</>
-													) : (
-														<>
-															<strong>{gl.coveredControls}</strong> of{" "}
-															{gl.totalGuidelineControls} technical controls
-															covered
-														</>
-													)
+												{hasEvaluatedControls ? (
+													<>
+														<strong>{gl.coveredControls}</strong> of{" "}
+														{gl.evaluatedControls} evaluated technical controls
+														covered
+														{gl.totalGuidelineControls >
+															gl.evaluatedControls && (
+															<span className="text-zinc-400 dark:text-zinc-500 ml-1">
+																({gl.totalGuidelineControls} total in guideline)
+															</span>
+														)}
+													</>
+												) : gl.totalGuidelineControls > 0 ? (
+													<span className="text-zinc-400 dark:text-zinc-500">
+														No controls evaluated yet (
+														{gl.totalGuidelineControls} total in guideline)
+													</span>
 												) : (
 													<span className="text-zinc-400 dark:text-zinc-500">
 														No technical controls in guideline

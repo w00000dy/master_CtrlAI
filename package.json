@@ -16,7 +16,9 @@
 		"migrate:deploy": "prisma migrate deploy",
 		"migrate:reset": "prisma migrate reset",
 		"studio": "prisma studio",
-		"test": "node --experimental-strip-types --experimental-test-coverage --test-coverage-exclude='**/tests/**' --test"
+		"test": "node --experimental-strip-types --experimental-test-coverage --test-coverage-exclude='**/tests/**' --test",
+		"tsc": "tsc",
+		"tsc:noEmit": "tsc --noEmit"
 	},
 	"dependencies": {
 		"@prisma/adapter-mariadb": "^7.8.0",
