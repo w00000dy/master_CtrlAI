@@ -172,13 +172,41 @@ export default function BenchmarkResultsPage() {
 			label: "Mapping Accuracy",
 			subtext: `${controlsWithCorrectMappingCount} of ${totalControls} controls`,
 		},
-		{ value: actionabilityScore, label: BENCHMARK_TITLES.ACTIONABILITY },
-		{ value: correctnessScore, label: BENCHMARK_TITLES.TECHNICAL_CORRECTNESS },
-		{ value: measurabilityScore, label: BENCHMARK_TITLES.MEASURABILITY },
-		{ value: normativeScore, label: BENCHMARK_TITLES.NORMATIVE_LANGUAGE },
-		{ value: completenessScore, label: BENCHMARK_TITLES.COMPLETENESS },
-		{ value: efficiencyScore, label: BENCHMARK_TITLES.EFFICIENCY },
-		{ value: precisionScore, label: BENCHMARK_TITLES.PRECISION },
+		{
+			value: actionabilityScore,
+			label: BENCHMARK_TITLES.ACTIONABILITY,
+			subtext: `${actionableControls} of ${totalControls} controls`,
+		},
+		{
+			value: correctnessScore,
+			label: BENCHMARK_TITLES.TECHNICAL_CORRECTNESS,
+			subtext: `${correctControls} of ${totalControls} controls`,
+		},
+		{
+			value: measurabilityScore,
+			label: BENCHMARK_TITLES.MEASURABILITY,
+			subtext: `${measurableControls} of ${totalControls} controls`,
+		},
+		{
+			value: normativeScore,
+			label: BENCHMARK_TITLES.NORMATIVE_LANGUAGE,
+			subtext: `${normativeControls} of ${totalControls} controls`,
+		},
+		{
+			value: completenessScore,
+			label: BENCHMARK_TITLES.COMPLETENESS,
+			subtext: `${completeParagraphs} of ${totalParagraphs} paragraphs`,
+		},
+		{
+			value: efficiencyScore,
+			label: BENCHMARK_TITLES.EFFICIENCY,
+			subtext: `${noRedundancyParagraphs} of ${totalParagraphs} paragraphs`,
+		},
+		{
+			value: precisionScore,
+			label: BENCHMARK_TITLES.PRECISION,
+			subtext: `${noHallucinationsControls} of ${totalControls} controls`,
+		},
 	];
 
 	return (
