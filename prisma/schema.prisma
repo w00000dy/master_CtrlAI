@@ -83,7 +83,7 @@ model ControlBenchmark {
   isTechnicallyCorrect Boolean
   isMeasurable         Boolean
   hasNormativeLanguage Boolean
-  hasHallucinations    Boolean @default(false)
+  hasHallucinations    Boolean
 
   createdAt DateTime @default(now())
 }
