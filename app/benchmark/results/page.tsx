@@ -188,14 +188,19 @@ export default function BenchmarkResultsPage() {
 			subtext: `${actionableControls} of ${totalControls} controls`,
 		},
 		{
-			value: correctnessScore,
-			label: BENCHMARK_TITLES.TECHNICAL_CORRECTNESS,
-			subtext: `${correctControls} of ${totalControls} controls`,
-		},
-		{
 			value: measurabilityScore,
 			label: BENCHMARK_TITLES.MEASURABILITY,
 			subtext: `${measurableControls} of ${totalControls} controls`,
+		},
+		{
+			value: precisionScore,
+			label: BENCHMARK_TITLES.PRECISION,
+			subtext: `${noHallucinationsControls} of ${totalControls} controls`,
+		},
+		{
+			value: correctnessScore,
+			label: BENCHMARK_TITLES.TECHNICAL_CORRECTNESS,
+			subtext: `${correctControls} of ${totalControls} controls`,
 		},
 		{
 			value: normativeScore,
@@ -211,11 +216,6 @@ export default function BenchmarkResultsPage() {
 			value: efficiencyScore,
 			label: BENCHMARK_TITLES.EFFICIENCY,
 			subtext: `${noRedundancyParagraphs} of ${totalParagraphs} paragraphs`,
-		},
-		{
-			value: precisionScore,
-			label: BENCHMARK_TITLES.PRECISION,
-			subtext: `${noHallucinationsControls} of ${totalControls} controls`,
 		},
 		{
 			value: guidelineStats?.coverageScore ?? 0,
