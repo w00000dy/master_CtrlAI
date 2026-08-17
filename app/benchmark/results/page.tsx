@@ -179,7 +179,7 @@ export default function BenchmarkResultsPage() {
 		},
 		{
 			value: controlsWithCorrectMappingRate,
-			label: "Mapping Accuracy",
+			label: BENCHMARK_TITLES.ACCURACY,
 			subtext: `${controlsWithCorrectMappingCount} of ${totalControls} controls`,
 		},
 		{

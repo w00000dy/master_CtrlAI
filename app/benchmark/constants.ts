@@ -1,11 +1,12 @@
 export const BENCHMARK_TITLES = {
-	RELEVANCE: "Relevance",
+	RELEVANCE: "Mapping Relevance",
+	ACCURACY: "Strict Mapping Relevance",
 	ACTIONABILITY: "Actionability",
-	TECHNICAL_CORRECTNESS: "Technical Correctness",
 	MEASURABILITY: "Measurability",
-	NORMATIVE_LANGUAGE: "Normative Language",
-	COMPLETENESS: "Completeness",
-	EFFICIENCY: "Efficiency",
-	PRECISION: "Precision",
+	PRECISION: "Scope Adherence",
+	TECHNICAL_CORRECTNESS: "Technical Correctness",
+	NORMATIVE_LANGUAGE: "Normative Phrasing",
 	GUIDELINE_COVERAGE: "TR Coverage",
+	COMPLETENESS: "Completeness",
+	EFFICIENCY: "Non-Redundancy",
 } as const;
