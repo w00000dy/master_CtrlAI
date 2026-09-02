@@ -36,7 +36,7 @@
 		"zod": "^4.4.3"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "2.5.8",
+		"@biomejs/biome": "2.5.11",
 		"@mermaid-js/mermaid-cli": "^11.16.0",
 		"@tailwindcss/postcss": "^4",
 		"@types/node": "^26.1.1",
@@ -48,12 +48,17 @@
 		"eslint-config-prettier": "^10.1.8",
 		"prettier": "^3.9.4",
 		"prisma": "^7.8.0",
-		"prisma-erd-generator": "^2.4.4",
-		"puppeteer": "^25.5.0",
+		"prisma-erd-generator": "^3.2.1",
+		"puppeteer": "^25.9.0",
 		"stylelint": "^17.13.0",
 		"stylelint-config-standard": "^40.0.0",
 		"stylelint-config-tailwindcss": "^1.0.1",
 		"tailwindcss": "^4",
 		"typescript": "^6"
+	},
+	"overrides": {
+		"deepmerge-ts": "^8.0.2",
+		"mysql2": "^3.24.3",
+		"mariadb": "^3.5.4"
 	}
 }
