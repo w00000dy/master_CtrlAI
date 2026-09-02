@@ -72,10 +72,7 @@ export async function getGuidelineBenchmarkStats() {
 		include: {
 			llmControl: {
 				include: {
-					paragraphs: {
-						where: {
-							isFewShotExample: false,
-						},
+					generatedFor: {
 						include: {
 							controls: {
 								where: {
@@ -112,13 +109,15 @@ export async function getGuidelineBenchmarkStats() {
 	const coveredTRControlIds = new Set<number>();
 
 	for (const bm of benchmarks) {
-		for (const p of bm.llmControl.paragraphs) {
-			for (const c of p.controls) {
+		const genFor = bm.llmControl.generatedFor;
+		if (genFor) {
+			for (const c of genFor.controls) {
 				if (c.guidelineId !== null) {
 					evaluatedTRControlMap.set(c.id, c.guidelineId);
 				}
 			}
 		}
+
 		for (const c of bm.coveredControls) {
 			if (c.guidelineId !== null) {
 				coveredTRControlIds.add(c.id);
